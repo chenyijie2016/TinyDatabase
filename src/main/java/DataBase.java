@@ -6,5 +6,8 @@ public class DataBase {
         this.id = id;
         this.databaseName = name;
     }
+    public String getName(){
+        return this.databaseName;
+    }
     
 }
