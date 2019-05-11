@@ -18,7 +18,7 @@ public class typeString implements Type {
     }
 
     @Override
-    public long getDataSize() {
+    public int getDataSize() {
         return size;
     }
 

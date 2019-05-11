@@ -15,7 +15,7 @@ public class typeFloat implements Type {
     }
 
     @Override
-    public long getDataSize() {
+    public int getDataSize() {
         return 4;
     }
 

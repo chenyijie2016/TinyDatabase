@@ -8,7 +8,7 @@ public interface Type {
 
     String getTypeName();
 
-    long getDataSize();
+    int getDataSize();
 
     void setSize(int size);
 

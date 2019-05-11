@@ -6,7 +6,7 @@ public class typeInt implements Type {
     }
 
     @Override
-    public long getDataSize() {
+    public int getDataSize() {
         return 4;
     }
 
