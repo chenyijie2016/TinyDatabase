@@ -7,7 +7,7 @@ public class typeLong implements Type {
     }
 
     @Override
-    public int getType() {
+    public int type() {
         return Types.LONG;
     }
 

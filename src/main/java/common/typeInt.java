@@ -16,7 +16,7 @@ public class typeInt implements Type {
     }
 
     @Override
-    public int getType() {
+    public int type() {
         return Types.INT;
     }
 

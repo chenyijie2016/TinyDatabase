@@ -5,7 +5,13 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 public class floatData extends typedData {
-    private float data;
+    private Float data;
+
+    public floatData(){}
+
+    public floatData(float data) {
+        this.data = data;
+    }
 
     @Override
     public int getType() {
@@ -13,8 +19,18 @@ public class floatData extends typedData {
     }
 
     @Override
+    public int compareTo(typedData o) {
+        return data.compareTo((Float) o.getData());
+    }
+
+    @Override
     public Object getData() {
         return data;
+    }
+
+    @Override
+    public typedData getTypedData() {
+        return this;
     }
 
     @Override
@@ -31,7 +47,8 @@ public class floatData extends typedData {
     }
 
     @Override
-    public void readFromFile(RandomAccessFile raf) throws IOException {
+    public typedData readFromFile(RandomAccessFile raf) throws IOException {
         data = raf.readFloat();
+        return this;
     }
 }

@@ -8,12 +8,18 @@ public class RowDisk {
         table = t;
     }
 
+    public RowDisk(Table t, int position) {
+        this.table = t;
+        this.position = position;
+    }
+
     public long position;
     private Table table;
     public typedData[] data;
 
-    public void setPosition(long position) {
+    public RowDisk setPosition(long position) {
         this.position = position;
+        return this;
     }
 
 
@@ -22,6 +28,9 @@ public class RowDisk {
         for (Column c : table.getColumns()) {
             totalSize += c.getType().getDataSize();
         }
+        if (totalSize < 8) {
+            totalSize = 8;
+        } // 为了确保能够存下保存freelist指针
         byte[] bytes = new byte[totalSize];
         Arrays.fill(bytes, (byte) 0);
         ByteBuffer buf = ByteBuffer.wrap(bytes);
@@ -32,14 +41,22 @@ public class RowDisk {
         return bytes;
     }
 
-    public final void debugDump() {
+    public void setDataByColumn(Column c, typedData d) {
+        int index = table.getColumns().indexOf(c);
+        if (data == null) {
+            data = new typedData[table.getColumns().size()];
+        }
+        data[index] = d;
+    }
 
+    public typedData getDataByColumn(Column c) {
+        return data[table.getColumns().indexOf(c)];
     }
 
     public void setData(Object[] d) {
         data = new typedData[d.length];
         for (int i = 0; i < d.length; i++) {
-            switch (table.getColumns()[i].getType().getType()) {
+            switch (table.getColumns().get(i).getType().type()) {
                 case Types.INT:
                     data[i] = new intData();
                     break;
@@ -53,7 +70,7 @@ public class RowDisk {
                     data[i] = new longData();
                     break;
                 case Types.STRING:
-                    data[i] = new stringData().setSize(table.getColumns()[i].getType().getDataSize());
+                    data[i] = new stringData().setSize(table.getColumns().get(i).getType().getDataSize());
                     break;
             }
             data[i].setData(d[i]);

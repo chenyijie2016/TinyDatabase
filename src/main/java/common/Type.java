@@ -4,7 +4,8 @@ import java.lang.*;
 
 public interface Type {
 
-    int getType();
+    int type();
+
 
     String getTypeName();
 

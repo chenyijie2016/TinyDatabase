@@ -8,7 +8,7 @@ public class typeString implements Type {
     }
 
     @Override
-    public int getType() {
+    public int type() {
         return Types.STRING;
     }
 

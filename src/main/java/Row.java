@@ -1,7 +1,25 @@
 public class Row extends RowDisk {
-    public boolean isOnlyInMemory = true; // 是否只存在于内存中
+
+    public static enum STATUS {
+        OnlyInMemory, // 数据只存在于内存中
+        OnlyInDisk, // 数据只存在于磁盘中，具有指向数据位置的指针
+        MemoryDisk // 数据在磁盘和内存中均存在
+    }
+
+
+    public STATUS cachedStatus; // 数据的缓存状态
 
     public Row(Table t) {
         super(t);
     }
+
+    public Row(Table t, int pos) {
+        super(t, pos);
+    }
+
+    public Row setStatus(STATUS s) {
+        this.cachedStatus = s;
+        return this;
+    }
+
 }

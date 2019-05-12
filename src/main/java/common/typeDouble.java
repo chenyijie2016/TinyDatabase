@@ -6,7 +6,7 @@ public class typeDouble implements Type {
     }
 
     @Override
-    public int getType() {
+    public int type() {
         return Types.DOUBLE;
     }
 

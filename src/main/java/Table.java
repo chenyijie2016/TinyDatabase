@@ -4,27 +4,29 @@ import java.io.*;
 import java.util.*;
 
 public class Table {
-    private DataBase database;
-    private String tableName;
+    private DataBase database; // 所属的数据库
+    private String tableName; // 表名
 
-    private int nRows;
-    private List<Row> Rows;
+
+    private List<Row> Rows; // 元组列表
     private List<Row> toInsertRows;
     private List<Row> toDeleteRows;
-    private List<Column> indexColumns;
-    private RandomAccessFile dataFile;
-    private RandomAccessFile[] indexFile;
-    private Constraint[] constraints;
-    private Column[] columns;
-    private boolean hasPrimaryKey = false;
-    private Object[] indexs;
-    private Object[] indexs_hashmap;
-    private int uniqueID;
+    private List<Column> indexColumns; // 索引属性列表
+    private RandomAccessFile dataFile; // 数据源文件
+    private RandomAccessFile[] indexFile; //索引源文件
+    private Constraint[] constraints; // 约束
+    private List<Column> columns; // 属性列表
+    private boolean hasPrimaryKey = false; // 是否指定了主键
+    private List<BxTree<typedData, Row>> indexs; // B+树索引列表
+    private List<HashMap<typedData, Row>> indexs_hashmap;
+    private int uniqueID; // 自增主键当前值
+    private long freeListPointer = -1;
 
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) {
         this.database = database;
         this.tableName = tableName;
-        this.columns = columns;
+        this.columns = Arrays.asList(columns);
+
         this.constraints = constraints;
 
         Rows = new ArrayList<Row>();
@@ -42,38 +44,45 @@ public class Table {
 
 
         if (!hasPrimaryKey) { // 没有主键约束就自己创建一个 默认INT
-            Column c = new Column(new typeInt(), "IDX").setAuto(true);
+            Column c = new Column(new typeInt(), "IDX");
 
             uniqueID = 1;
             createPrimaryKey(c);
 
         }
-        this.indexs = new Object[indexColumns.size()];
-        this.indexs_hashmap = new Object[indexColumns.size()];
+        this.indexs = new ArrayList<BxTree<typedData, Row>>();
+        this.indexs_hashmap = new ArrayList<HashMap<typedData, Row>>();
         String dataFileName = database.getName() + "_" + this.tableName + ".data";
         try {
             dataFile = new RandomAccessFile(dataFileName, "rw");
+            if (dataFile.length() > 8) {
+                freeListPointer = dataFile.readLong();
+            } else {
+                dataFile.writeLong(freeListPointer);
+            }
             indexFile = new RandomAccessFile[this.indexColumns.size()];
             for (int i = 0; i < indexColumns.size(); i++) {
                 String indexFileName = database.getName() + "_" + this.tableName + "_" + indexColumns.get(i).getName() + ".index";
                 indexFile[i] = new RandomAccessFile(indexFileName, "rw");
             }
-//            indexFile = new RandomAccessFile(indexFileName, "rw");
-//            if (dataFile.length() == 0) {
-//                dataFile.writeInt(-1);
-//            }
             readIndex();
         } catch (IOException e) {
             System.out.println(e);
         }
-
-
     }
 
 
+    public List<Row> getRows() {
+        return Rows;
+    }
+
+    public int getRowsNumber() {
+        return Rows.size();
+    }
+
     private Column getColumnByName(String name) {
         for (Column c : columns) {
-            if (name == c.getName()) {
+            if (name.equals(c.getName())) {
                 return c;
             }
         }
@@ -84,79 +93,37 @@ public class Table {
         this.indexColumns.add(column);
     }
 
-    // 索引文件结构
-    /*
-    对于只有默认主键的表来说，还会在索引文件的前4个字节存放自增的ID数据(int)
-    key (n byte)主键值 : position(4 byte) 对应行的文件位置(int)
-*/
+
+    /*   索引文件结构
+     *   对于只有默认主键的表来说，还会在索引文件的前4个字节存放自增的ID数据(int)
+     *   key (n byte)主键值 : position(4 byte) 对应行的文件位置(int)
+     */
 
     private void readIndex() throws IOException {
         // 应该首先被调用
         for (int i = 0; i < indexColumns.size(); i++) {
-            switch (indexColumns.get(i).getType().getType()) {
-                case Types.INT:
-                    indexs[i] = new BxTree<Integer, Row>(10);
-                    indexs_hashmap[i] = new HashMap<Integer, Row>();
-                    break;
-                case Types.LONG:
-                    indexs[i] = new BxTree<Long, Row>(10);
-                    indexs_hashmap[i] = new HashMap<Long, Row>();
-                    break;
-                case Types.DOUBLE:
-                    indexs[i] = new BxTree<Double, Row>(10);
-                    indexs_hashmap[i] = new HashMap<Double, Row>();
-                    break;
-                case Types.FLOAT:
-                    indexs[i] = new BxTree<Float, Row>(10);
-                    indexs_hashmap[i] = new HashMap<Float, Row>();
-                    break;
-                case Types.STRING:
-                    indexs[i] = new BxTree<String, Row>(10);
-                    indexs_hashmap[i] = new HashMap<String, Row>();
-                    break;
-
-            }
+            indexs.add(new BxTree<>(4, 4));
+            indexs_hashmap.add(new HashMap<>());
 
             long keySize = indexColumns.get(i).getType().getDataSize();
             if (!hasPrimaryKey) { // 读取自增ID
                 uniqueID = indexFile[i].readInt();
             }
             for (int j = 0; j < indexFile[i].length(); ) {
-                //Object[] objs = new Object[columns.length];
                 j += keySize + 4;
                 int pos;
-                switch (indexColumns.get(i).getType().getType()) {
-                    case Types.INT:
-                        int integer = indexFile[i].readInt();
-                        pos = indexFile[i].readInt();
-                        ((BxTree) indexs[i]).insert(integer, pos);
-                        ((HashMap) indexs_hashmap[i]).put(integer, pos);
-                        break;
-                    case Types.LONG:
-                        long l = indexFile[i].readLong();
-                        pos = indexFile[i].readInt();
-                        ((BxTree) indexs[i]).insert(l, pos);
-                        ((HashMap) indexs_hashmap[i]).put(l, pos);
-                        break;
-                    case Types.DOUBLE:
-                        double d = indexFile[i].readDouble();
-                        pos = indexFile[i].readInt();
-                        ((BxTree) indexs[i]).insert(d, pos);
-                        ((HashMap) indexs_hashmap[i]).put(d, pos);
-                        break;
-                    case Types.FLOAT:
-                        float f = indexFile[i].readFloat();
-                        pos = indexFile[i].readInt();
-                        ((BxTree) indexs[i]).insert(f, pos);
-                        ((HashMap) indexs_hashmap[i]).put(f, pos);
-                        break;
-                    case Types.STRING:
-                        pos = indexFile[i].readInt();
-                        byte[] bytes = new byte[(int) indexColumns.get(i).getType().getDataSize()];
-                        dataFile.read(bytes, 0, (int) indexColumns.get(i).getType().getDataSize());
-                        ((BxTree) indexs[i]).insert(new String(bytes), pos);
-                        ((HashMap) indexs_hashmap[i]).put(new String(bytes), pos);
-                        break;
+                try {
+                    typedData t = typedDataFactor.getTypedData(indexColumns.get(i).getType().type()).readFromFile(indexFile[i]);
+                    pos = indexFile[i].readInt();
+                    Row row = new Row(this, pos).setStatus(Row.STATUS.OnlyInDisk);
+                    if (i == 0) {
+                        this.Rows.add(row);
+                    }
+                    indexs.get(i).insert(t, row);
+                    indexs_hashmap.get(i).put(t, row);
+                    row.setDataByColumn(indexColumns.get(i), t);
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
             }
         }
@@ -171,162 +138,106 @@ public class Table {
                 if (!hasPrimaryKey) {
                     outputStream.writeInt(uniqueID);
                 }
-                Iterator iter = ((HashMap) indexs_hashmap[i]).keySet().iterator();
+                Iterator iter = indexs_hashmap.get(i).keySet().iterator();
                 while (iter.hasNext()) {
-                    switch (indexColumns.get(i).getType().getType()) {
-                        case Types.INT:
-                            int key = (Integer) iter.next();
-                            outputStream.writeInt(key);
-                            outputStream.writeInt((int)((Row)((HashMap) indexs_hashmap[i]).get(key)).position);
-                            break;
-                        case Types.LONG:
-                            long key2 = (long) iter.next();
-                            outputStream.writeLong(key2);
-                            outputStream.writeInt((int)((Row)((HashMap) indexs_hashmap[i]).get(key2)).position);
-                            break;
-//                        case Types.DOUBLE:
-//                            outputStream.writeDouble((double) key);
-//                            break;
-//                        case Types.FLOAT:
-//                            outputStream.writeFloat((float) key);
-//                            break;
-//                        case Types.STRING:
-//                            outputStream.writeBytes((String) key);
-//                            break;
-                    }
-//                    ;
-//                    System.out.println(key + "=" + ((HashMap) indexs_hashmap[i]).get(key));
-//                    //
-//                    switch (indexColumns.get(i).getType().getType()) {
-//                        case Types.INT:
-//                            // System.out.println("KEY: "+key);
-//                            outputStream.writeInt((int) key);
-//                            break;
-//                        case Types.LONG:
-//                            outputStream.writeLong((long) key);
-//                            break;
-//                        case Types.DOUBLE:
-//                            outputStream.writeDouble((double) key);
-//                            break;
-//                        case Types.FLOAT:
-//                            outputStream.writeFloat((float) key);
-//                            break;
-//                        case Types.STRING:
-//                            outputStream.writeBytes((String) key);
-//                            break;
-//                    }
+                    Object key = iter.next();
+                    outputStream.write(((typedData) key).toBytes());
+                    outputStream.writeInt((int) ((Row) ((HashMap) indexs_hashmap.get(i)).get(key)).position);
                 }
             }
-
-
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
             System.out.println(e);
         }
 
     }
 
     // 读取单行数据
-    public void readRow(Row row) throws IOException {
-        dataFile.seek(row.position);
-        row.isOnlyInMemory = false;
-
-
-        // TODO
+    public Row readRow(Row row) throws IOException, Exception {
+        if (row.cachedStatus == Row.STATUS.OnlyInDisk) {
+            dataFile.seek(row.position);
+            for (Column c : columns) {
+                typedData d = typedDataFactor.getTypedData(c.getType().type());
+                d.readFromFile(dataFile);
+                row.setDataByColumn(c, d);
+            }
+            row.cachedStatus = Row.STATUS.MemoryDisk;
+        }
+        return row;
     }
 
-//    public void readAllRows() {
-//        try {
-//            // dataFile.seek(4); // For free list
-//            long length = dataFile.length();
-//            long rowSize = getRowSize();
-//            for (long i = 0; i < length; i += rowSize) {
-//                Object[] objs = new Object[columns.length];
-//                for (int j = 0; j < columns.length; j++) {
-//                    switch (columns[j].getType().getType()) {
-//                        case Types.INT:
-//                            objs[j] = dataFile.readInt();
-//                            break;
-//                        case Types.LONG:
-//                            objs[j] = dataFile.readLong();
-//                            break;
-//                        case Types.DOUBLE:
-//                            objs[j] = dataFile.readDouble();
-//                            break;
-//                        case Types.FLOAT:
-//                            objs[j] = dataFile.readFloat();
-//                            break;
-//                        case Types.STRING:
-//                            byte[] bytes = new byte[(int) columns[j].getType().getDataSize()];
-//                            dataFile.read(bytes, 0, (int) columns[j].getType().getDataSize());
-//                            objs[j] = new String(bytes);
-//                            break;
-//                    }
-//                }
-//                Row row = new Row(this);
-//                row.isOnlyInMemory = false;
-//                insertRow(row);
-//            }
-//        } catch (IOException e) {
-//            System.out.println(e);
-//        }
-//    }
+
+    public void deleteRow(Row row) throws IOException {
+        Rows.remove(row);
+        for (BxTree bxTree : indexs) {
+            //TODO remove index from BxTree
+        }
+        for (Column c : indexColumns) {
+            boolean removed = indexs_hashmap.get(indexColumns.indexOf(c)).remove(row.getDataByColumn(c), row);
+            System.out.println("Removed=" + removed);
+        }
+        // 如果删除的元组存在于磁盘上，则需要改写freeListPointer
+        if (row.cachedStatus == Row.STATUS.OnlyInDisk || row.cachedStatus == Row.STATUS.MemoryDisk) {
+            dataFile.seek(row.position);
+            dataFile.writeLong(freeListPointer);
+            freeListPointer = row.position;
+        }
+    }
 
     public void writeRows() {
         for (Row row : Rows) {
-            if (row.isOnlyInMemory) {
+            if (row.cachedStatus == Row.STATUS.OnlyInMemory) {
                 writeSingleRow(row);
+                row.cachedStatus = Row.STATUS.MemoryDisk;
             }
         }
-//        try {
-//            //dataFile.seek(0);
-//
-//        } catch (IOException e) {
-//            System.out.println(e);
-//        }
     }
 
 
     private void writeSingleRow(Row row) {
         try {
-            dataFile.seek(dataFile.length());
+            if (freeListPointer == -1) {
+                dataFile.seek(dataFile.length());
+            } else {
+                dataFile.seek(freeListPointer);
+                long nextFreeListPoint = dataFile.readLong();
+                dataFile.seek(freeListPointer);
+                freeListPointer = nextFreeListPoint;
+            }
             row.setPosition(dataFile.getFilePointer());
-            dataFile.writeBytes(new String(row.getRawData()));
-
+            dataFile.write(row.getRawData());
         } catch (IOException e) {
             System.out.println(e);
         }
     }
 
-    public Column[] getColumns() {
+    public List<Column> getColumns() {
         return columns;
     }
 
-    public void updateRow(Row oldref, Row newref) {
-        // TODO
+    public void updateRow(Row oldRow, Row newRow) throws Exception {
+        deleteRow(oldRow);
+        insertRow(newRow);
     }
 
     public void insertRow(Row row) {
         // 先检查约束
-
+        // TODO
         // 插入索引
 
         if (!hasPrimaryKey) {
-            ((BxTree) indexs[0]).insert(uniqueID, row);
-            ((HashMap) indexs_hashmap[0]).put(uniqueID, row);
+            indexs.get(0).insert(new intData(uniqueID), row);
+            indexs_hashmap.get(0).put(new intData(uniqueID), row);
             uniqueID++;
         } else {
-            for (int i = 0; i < indexColumns.size(); i++) {
-                for (int j = 0; j < columns.length; j++) {
-                    if (columns[j].getName().equals(indexColumns.get(i).getName())) {
-                        ((BxTree) indexs[i]).insert((Integer) row.data[j].getData(), row);
-                        ((HashMap) indexs_hashmap[0]).put(row.data[j].getData(), row);
-                    }
-                }
+            for (Column c : indexColumns) {
+                indexs.get(indexColumns.indexOf(c)).insert(row.getDataByColumn(c), row);
+                indexs_hashmap.get(indexColumns.indexOf(c)).put(row.getDataByColumn(c), row);
             }
         }
         // 插入数据
         Rows.add(row);
-        nRows++;
+        row.setStatus(Row.STATUS.OnlyInMemory);
     }
 
     public final int getRowSize() {
@@ -340,39 +251,12 @@ public class Table {
     public void commit() {
         writeRows();
         writeIndex();
+        try {
+            dataFile.seek(0);
+            dataFile.writeLong(freeListPointer);
+        } catch (IOException e) {
+            System.out.println("Write freelist pointer failed");
+        }
     }
 
-
-    public static void main(String[] args) {
-        DataBase testDB = new DataBase(1, "database");
-        Table table = new Table(
-                testDB,
-                "testTable",
-                new Column[]{
-                        new Column(new typeInt(), "id"),
-                        new Column(new typeLong(), "zzz"),
-                        new Column(new typeFloat(), "fff"),
-                        new Column(new typeDouble(), "id_long"),
-                        new Column(new typeString(15), "name"),
-                },
-                new Constraint[]{new Constraint(Constraint.Type.PRIMARY_KEY,"id")});
-
-//        table.readAllRows();
-        Row[] rows = new Row[10];
-        Integer i = 1231;
-        Long l = 1231L;
-        Float f = 41.266f;
-        Double d = 451.1244;
-        String s = "zzaaaaa";
-        rows[0] = new Row(table);
-        rows[1] = new Row(table);
-        rows[0].setData(new Object[]{i, l, f, d, s});
-        rows[1].setData(new Object[]{i+1, l, f, d, s});
-        // System.out.println(rows[0].getRawData());
-        System.out.println("Row size = " + table.getRowSize());
-        table.insertRow(rows[0]);
-        table.insertRow(rows[1]);
-        table.commit();
-        System.out.println(table.nRows);
-    }
 }

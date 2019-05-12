@@ -5,7 +5,7 @@ public class typeFloat implements Type {
     }
 
     @Override
-    public int getType() {
+    public int type() {
         return Types.FLOAT;
     }
 

@@ -3,10 +3,11 @@ import common.Type;
 public class Column {
     private Type type;
     private String name;
-    private boolean auto;
-    Column(Type type, String name){
-        this.type=type;
-        this.name=name;
+    //private boolean auto;
+
+    Column(Type type, String name) {
+        this.type = type;
+        this.name = name;
     }
 
     public Type getType() {
@@ -17,8 +18,8 @@ public class Column {
         return name;
     }
 
-    public Column setAuto(boolean auto) {
-        this.auto = auto;
-        return this;
-    }
+//    public Column setAuto(boolean auto) {
+//        this.auto = auto;
+//        return this;
+//    }
 }
