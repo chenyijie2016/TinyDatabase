@@ -54,7 +54,26 @@ public class floatData extends typedData {
     }
 
     @Override
+    public typedData fromBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocate(Float.BYTES);
+        buffer.put(data);
+        buffer.flip();
+        this.data = buffer.getFloat();
+        return this;
+    }
+
+    @Override
     public int getDataSize() {
         return 4;
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
+    @Override
+    boolean equals(typedData t) {
+        return t.equals(t.getData());
     }
 }

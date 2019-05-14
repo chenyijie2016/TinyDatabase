@@ -36,8 +36,8 @@ public class Type {
         return this.type;
     }
 
-    public long size() {
-        return this.size;
+    public int size() {
+        return (int) this.size;
     }
 
     public static Type intType() {

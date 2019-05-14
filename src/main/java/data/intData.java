@@ -54,7 +54,26 @@ public class intData extends typedData {
     }
 
     @Override
+    public typedData fromBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.put(data);
+        buffer.flip();
+        this.data = buffer.getInt();
+        return this;
+    }
+
+    @Override
     public int getDataSize() {
         return 4;
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
+    @Override
+    boolean equals(typedData t) {
+        return data.equals(t.getData());
     }
 }

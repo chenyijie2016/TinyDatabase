@@ -3,7 +3,6 @@ import data.Type;
 public class Column {
     private Type type;
     private String name;
-    //private boolean auto;
 
     Column(Type type, String name) {
         this.type = type;
@@ -18,8 +17,4 @@ public class Column {
         return name;
     }
 
-//    public Column setAuto(boolean auto) {
-//        this.auto = auto;
-//        return this;
-//    }
 }

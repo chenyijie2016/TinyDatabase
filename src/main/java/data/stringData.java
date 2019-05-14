@@ -58,7 +58,23 @@ public class stringData extends typedData {
     }
 
     @Override
+    public typedData fromBytes(byte[] data) {
+        this.data = new String(data);
+        return this;
+    }
+
+    @Override
     public int getDataSize() {
         return (int) size;
+    }
+
+    @Override
+    public String toString() {
+        return data;
+    }
+
+    @Override
+    boolean equals(typedData t) {
+        return data.equals(t.getData());
     }
 }

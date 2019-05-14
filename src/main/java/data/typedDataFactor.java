@@ -2,8 +2,6 @@ package data;
 
 import java.io.IOException;
 
-
-
 public class typedDataFactor {
     public static typedData getTypedData(Type type) throws IOException {
         switch (type.type()) {

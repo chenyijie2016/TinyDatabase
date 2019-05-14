@@ -54,8 +54,28 @@ public class doubleData extends typedData {
     }
 
     @Override
+    public typedData fromBytes(byte[] data) {
+        ByteBuffer buffer = ByteBuffer.allocate(Double.BYTES);
+        buffer.put(data);
+        buffer.flip();
+        this.data = buffer.getDouble();
+        return this;
+    }
+
+
+    @Override
     public int getDataSize() {
         return 8;
+    }
+
+    @Override
+    public String toString() {
+        return data.toString();
+    }
+
+    @Override
+    boolean equals(typedData t) {
+        return data.equals(t.getData());
     }
 
 }

@@ -19,5 +19,11 @@ public abstract class typedData implements Comparable<typedData> {
 
     abstract public typedData readFromFile(RandomAccessFile raf) throws IOException;
 
+    abstract public typedData fromBytes(byte[] data);
+
     abstract public int getDataSize();
+
+    abstract public String toString();
+
+    abstract boolean equals(typedData t);
 }
