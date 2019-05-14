@@ -1,4 +1,4 @@
-package common;
+package data;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -15,8 +15,8 @@ public class intData extends typedData {
     }
 
     @Override
-    public int getType() {
-        return Types.INT;
+    public Type getType() {
+        return Type.intType();
     }
 
     @Override
@@ -51,5 +51,10 @@ public class intData extends typedData {
     public typedData readFromFile(RandomAccessFile raf) throws IOException {
         data = raf.readInt();
         return this;
+    }
+
+    @Override
+    public int getDataSize() {
+        return 4;
     }
 }

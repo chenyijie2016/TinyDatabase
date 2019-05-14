@@ -1,4 +1,10 @@
-import common.*;
+
+import data.typedData;
+import data.intData;
+import data.stringData;
+import data.longData;
+import data.floatData;
+import data.doubleData;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -26,7 +32,7 @@ public class RowDisk {
     public final byte[] getRawData() {
         int totalSize = 0;
         for (Column c : table.getColumns()) {
-            totalSize += c.getType().getDataSize();
+            totalSize += c.getColumnType().size();
         }
         if (totalSize < 8) {
             totalSize = 8;
@@ -56,22 +62,24 @@ public class RowDisk {
     public void setData(Object[] d) {
         data = new typedData[d.length];
         for (int i = 0; i < d.length; i++) {
-            switch (table.getColumns().get(i).getType().type()) {
-                case Types.INT:
+            switch (table.getColumns().get(i).getColumnType().type()) {
+                case INT:
                     data[i] = new intData();
                     break;
-                case Types.DOUBLE:
+                case DOUBLE:
                     data[i] = new doubleData();
                     break;
-                case Types.FLOAT:
+                case FLOAT:
                     data[i] = new floatData();
                     break;
-                case Types.LONG:
+                case LONG:
                     data[i] = new longData();
                     break;
-                case Types.STRING:
-                    data[i] = new stringData().setSize(table.getColumns().get(i).getType().getDataSize());
+                case STRING:
+                    data[i] = new stringData().setSize(table.getColumns().get(i).getColumnType().size());
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + table.getColumns().get(i).getColumnType().type());
             }
             data[i].setData(d[i]);
         }

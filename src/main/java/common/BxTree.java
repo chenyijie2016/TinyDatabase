@@ -14,6 +14,19 @@
  * edited by Spoon! 2008
  * edited by Mistro 2010
  */
+
+
+
+/*
+ * B+树节点在文件中的存储格式说明
+ * 最先存储 freeList 的指针信息 偏移量(long 类型 8 byte) // 是否需要？
+ * 存储节点信息如下:
+ * 父节点偏移量(8 byte)
+ * 前一个节点偏移量 (8 byte)
+ * 后一个节点偏移量 (8 byte)
+ *
+ */
+
 package common;
 
 public class BxTree<Key extends Comparable<? super Key>, Value> {
@@ -29,6 +42,8 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
      * the maximum number of keys in inner node, the number of pointer is N+1, N must be > 2
      */
     private final int N;
+
+    private Node leafStart;
 
     /**
      * Create a new empty tree.
@@ -49,6 +64,10 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
         if (result != null) {
             // The old root was split into two parts.
             // We have to create a new root pointing to them
+            if (root instanceof BxTree.LNode) {
+                leafStart = result.left;
+            }
+
             INode _root = new INode();
             _root.num = 1;
             _root.keys[0] = result.key;
@@ -85,6 +104,9 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
     }
 
     abstract class Node {
+        protected long offset; // 该节点在文件中的保存位置
+        protected Node prev = null;
+        protected Node next = null;
         protected int num; //number of keys
         protected Key[] keys;
 
@@ -97,6 +119,7 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
     }
 
     class LNode extends Node {
+
         // In some sense, the following casts are almost always illegal
         // (if Value was replaced with a real type other than Object,
         // the cast would fail); but they make our code simpler
@@ -133,6 +156,8 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
                 sibling.num = sNum;
                 System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
                 System.arraycopy(this.values, mid, sibling.values, 0, sNum);
+                sibling.prev = this;
+                this.next = sibling;
                 this.num = mid;
                 if (i < mid) {
                     // Inserted element goes to left sibling
@@ -296,6 +321,11 @@ public class BxTree<Key extends Comparable<? super Key>, Value> {
         st.insert("assd", 123);
         st.insert("aqwssd", 123);
         st.insert("aqwssd", 123);
+        st.insert("aqssd", 123);
+        st.insert("alsd", 123);
+        st.insert("aqllsd", 123);
+        st.insert("aqwsllsd", 123);
+        st.dump();
         System.out.println(st.find("asd"));
         //st.dump();
     }

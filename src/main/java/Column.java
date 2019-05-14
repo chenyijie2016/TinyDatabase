@@ -1,4 +1,4 @@
-import common.Type;
+import data.Type;
 
 public class Column {
     private Type type;
@@ -10,7 +10,7 @@ public class Column {
         this.name = name;
     }
 
-    public Type getType() {
+    public Type getColumnType() {
         return type;
     }
 

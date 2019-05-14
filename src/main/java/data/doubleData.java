@@ -1,26 +1,27 @@
-package common;
+package data;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
-public class floatData extends typedData {
-    private Float data;
+public class doubleData extends typedData {
+    private Double data;
 
-    public floatData(){}
+    public doubleData() {
+    }
 
-    public floatData(float data) {
+    public doubleData(double data) {
         this.data = data;
     }
 
     @Override
-    public int getType() {
-        return Types.FLOAT;
+    public Type getType() {
+        return Type.doubleType();
     }
 
     @Override
     public int compareTo(typedData o) {
-        return data.compareTo((Float) o.getData());
+        return data.compareTo((Double) o.getData());
     }
 
     @Override
@@ -35,20 +36,26 @@ public class floatData extends typedData {
 
     @Override
     public void setData(Object data) {
-        this.data = (float) data;
+        this.data = (double) data;
     }
 
     @Override
     public byte[] toBytes() {
-        byte[] bytes = new byte[4];
+        byte[] bytes = new byte[8];
         ByteBuffer buf = ByteBuffer.wrap(bytes);
-        buf.putFloat(data);
+        buf.putDouble(data);
         return bytes;
     }
 
     @Override
     public typedData readFromFile(RandomAccessFile raf) throws IOException {
-        data = raf.readFloat();
+        data = raf.readDouble();
         return this;
     }
+
+    @Override
+    public int getDataSize() {
+        return 8;
+    }
+
 }

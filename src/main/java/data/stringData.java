@@ -1,11 +1,11 @@
-package common;
+package data;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class stringData extends typedData {
     private String data;
-    private int size;
+    private long size;
 
     public stringData() {
     }
@@ -14,14 +14,14 @@ public class stringData extends typedData {
         this.data = data;
     }
 
-    public stringData setSize(int size) {
+    public stringData setSize(long size) {
         this.size = size;
         return this;
     }
 
     @Override
-    public int getType() {
-        return Types.STRING;
+    public Type getType() {
+        return Type.stringType(size);
     }
 
     @Override
@@ -51,9 +51,14 @@ public class stringData extends typedData {
 
     @Override
     public typedData readFromFile(RandomAccessFile raf) throws IOException {
-        byte[] bytes = new byte[size];
-        raf.read(bytes, 0, size);
+        byte[] bytes = new byte[(int) size];
+        raf.read(bytes, 0, (int) size);
         data = new String(bytes);
         return this;
+    }
+
+    @Override
+    public int getDataSize() {
+        return (int) size;
     }
 }

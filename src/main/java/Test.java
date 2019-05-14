@@ -1,19 +1,20 @@
-import common.*;
+import data.Type;
+
 
 public class Test {
     static Table table;
 
-    public static void createTableWuthMetaData() {
+    public static void createTableWithMetaData() {
         DataBase testDB = new DataBase(1, "database");
         table = new Table(
                 testDB,
                 "testTable",
                 new Column[]{
-                        new Column(new typeInt(), "id"),
-                        new Column(new typeLong(), "zzz"),
-                        new Column(new typeFloat(), "fff"),
-                        new Column(new typeDouble(), "id_long"),
-                        new Column(new typeString(20), "name"),
+                        new Column(Type.intType(), "id"),
+                        new Column(Type.longType(), "zzz"),
+                        new Column(Type.floatType(), "fff_"),
+                        new Column(Type.doubleType(), "id_double"),
+                        new Column(Type.stringType(20), "name"),
                 },
                 new Constraint[]{new Constraint(Constraint.Type.PRIMARY_KEY, "id")});
     }
@@ -50,8 +51,8 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        createTableWuthMetaData();
-        //insetTestData();
+        createTableWithMetaData();
+        insetTestData();
         table.commit();
         //testDelete();
         table.commit();
