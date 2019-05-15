@@ -95,6 +95,14 @@ public class RowDisk {
 
     }
 
+    public String toString() {
+        StringBuilder str = new StringBuilder(new String());
+        for (typedData d : data) {
+            str.append(d.toString()).append(" | ");
+        }
+        return str.toString();
+    }
+
     public static void main(String[] args) {
 
     }

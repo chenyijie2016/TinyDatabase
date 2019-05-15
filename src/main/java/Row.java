@@ -1,3 +1,4 @@
+import data.typedData;
 public class Row extends RowDisk {
 
     public static enum STATUS {
@@ -21,5 +22,7 @@ public class Row extends RowDisk {
         this.cachedStatus = s;
         return this;
     }
+
+
 
 }

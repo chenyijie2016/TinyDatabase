@@ -14,7 +14,7 @@ public class typedDataFactor {
             case LONG:
                 return new longData();
             case STRING:
-                return new stringData();
+                return new stringData().setSize(type.size());
         }
         throw new IOException("No matched type");
     }
