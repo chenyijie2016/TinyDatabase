@@ -124,14 +124,14 @@ public class Table {
         }
     }
 
-    public void writeRows() {
-        for (Row row : Rows) {
-            if (row.cachedStatus == Row.STATUS.OnlyInMemory) {
-                writeSingleRow(row);
-                row.cachedStatus = Row.STATUS.MemoryDisk;
-            }
-        }
-    }
+//    public void writeRows() {
+//        for (Row row : Rows) {
+//            if (row.cachedStatus == Row.STATUS.OnlyInMemory) {
+//                writeSingleRow(row);
+//                row.cachedStatus = Row.STATUS.MemoryDisk;
+//            }
+//        }
+//    }
 
 
     private void writeSingleRow(Row row) {

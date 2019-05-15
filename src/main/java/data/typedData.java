@@ -25,5 +25,5 @@ public abstract class typedData implements Comparable<typedData> {
 
     abstract public String toString();
 
-    abstract boolean equals(typedData t);
+    abstract public boolean equals(Object t);
 }

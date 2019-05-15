@@ -73,7 +73,12 @@ public class intData extends typedData {
     }
 
     @Override
-    boolean equals(typedData t) {
-        return data.equals(t.getData());
+    public boolean equals(Object t) {
+        if (!(t instanceof intData))
+            return false;
+        intData z = (intData)t;
+        return data.equals(z.getData());
     }
+
+
 }

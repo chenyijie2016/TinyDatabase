@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
 
 public class BPlusTree {
     /**
@@ -169,8 +170,8 @@ public class BPlusTree {
 
 
     public class BPlusTreeIterator implements Iterator<Long> {
-        private LNode leaf;
-        private Iterator<Long> iter;
+        protected LNode leaf;
+        protected Iterator<Long> iter;
 
         public BPlusTreeIterator(LNode leaf, Iterator<Long> iter) throws IOException {
             this.leaf = leaf;
@@ -215,6 +216,47 @@ public class BPlusTree {
             return data;
         }
     }
+
+//    public interface Condition {
+//        boolean check(typedData a, typedData b);
+//    }
+//
+//    public class BPlusTreeConditionIterator extends BPlusTreeIterator {
+//        private Condition condition;
+//        boolean nextCheck = true;
+//        typedData key;
+//        BPlusTreeConditionIterator(LNode leaf, Iterator<Long> iter, Condition condition, typedData key) throws IOException {
+//            super(leaf, iter);
+//            this.condition = condition;
+//            this.key = key;
+//        }
+//
+//        @Override
+//        public boolean hasNext() {
+//            return iter.hasNext() && nextCheck;
+//        }
+//
+//        @Override
+//        public Long next() {
+//            if (iter == null) {
+//                return null;
+//            }
+//
+//            Long data = iter.next();
+//            if (!iter.hasNext()) {
+//                try {
+//                    advance();
+//                } catch (IOException e) {
+//                    System.out.println("BPlusTree Scan Error");
+//                    System.exit(0);
+//                }
+//            }
+//            return data;
+//            Long nextValue = iter.next();
+//            if(condition.check(key,));
+//        }
+//
+//    }
 
 
     abstract class Node {
@@ -434,6 +476,11 @@ public class BPlusTree {
         }
 
         private Iterator<Long> scanGreaterEqual(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx, num).iterator();
+        }
+
+        private Iterator<Long> scanEqual(typedData key) {
             int idx = getLoc(key);
             return values.subList(idx, num).iterator();
         }

@@ -6,7 +6,10 @@ import java.nio.ByteBuffer;
 
 public class longData extends typedData {
     private Long data;
-    public longData(){}
+
+    public longData() {
+    }
+
     public longData(long data) {
         this.data = data;
     }
@@ -70,7 +73,11 @@ public class longData extends typedData {
     }
 
     @Override
-    boolean equals(typedData t) {
-        return data.equals(t.getData());
+    public boolean equals(Object t) {
+        if (!(t instanceof longData)) {
+            return false;
+        }
+        longData z = (longData) t;
+        return data.equals(z.getData());
     }
 }
