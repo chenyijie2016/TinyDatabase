@@ -21,8 +21,6 @@ public class Table {
     private Constraint[] constraints; // 约束
     private List<Column> columns; // 属性列表
     private boolean hasPrimaryKey = false; // 是否指定了主键
-    //    private List<BxTree<typedData, Row>> indexs; // B+树索引列表
-//    private List<HashMap<typedData, Row>> indexs_hashmap;
     private int uniqueID; // 自增主键当前值
     private long freeListPointer = -1;
 //    private List<BPlusTree> indexBPlusTreeList; // 用来作索引的

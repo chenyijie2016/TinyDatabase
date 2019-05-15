@@ -16,26 +16,17 @@
  */
 
 
-
-/*
- * B+树节点在文件中的存储格式说明
- * 最先存储 freeList 的指针信息 偏移量(long 类型 8 byte) // 是否需要？
- * 存储节点信息如下:
- * 父节点偏移量(8 byte)
- * 前一个节点偏移量 (8 byte)
- * 后一个节点偏移量 (8 byte)
- *
- */
-
 package index;
 
 import data.*;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class BPlusTree {
     /**
@@ -55,12 +46,15 @@ public class BPlusTree {
 
     private RandomAccessFile treeFile;
     private final NodeFactor nodeFactor = new NodeFactor();
-    /**
-     * Create a new empty tree.
-     */
+
     public static short INNER = 0;
     public static short LEAF = 1;
 
+    public HashMap<Long, Node> cacheNode; // TODO：用来在内存中缓存读取出来的节点信息，要求可以限制内存占用大小
+
+    /**
+     * Create a new empty tree.
+     */
     public BPlusTree(int m, int n, Type type, String filename) throws IOException {
         M = m;
         N = n;
@@ -77,9 +71,6 @@ public class BPlusTree {
             writeHeader();
         }
 
-
-//        System.out.println(treeFile.length());
-
     }
 
     public void insert(typedData key, long value) throws IOException {
@@ -88,7 +79,8 @@ public class BPlusTree {
         Node __root = nodeFactor.getNode();
         Split result = __root.insert(key, value);
         System.out.println("root Node has keys：" + __root.num);
-        if (result != null) {// root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
+        if (result != null) {
+            // root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
             // The old root was split into two parts.
             // We have to create a new root pointing to them
 
@@ -104,6 +96,18 @@ public class BPlusTree {
         __root.update();
         System.out.println("------------------");
     }
+
+    public LNode getLeftMostLeaf() throws IOException {
+        treeFile.seek(root);
+        Node node = nodeFactor.getNode();
+        while (node instanceof BPlusTree.INode) {
+            INode inner = (INode) node;
+            treeFile.seek(inner.children[0]);
+            node = nodeFactor.getNode();
+        }
+        return (LNode) node;
+    }
+
 
     public void writeHeader() throws IOException {
         treeFile.seek(0);
@@ -132,13 +136,18 @@ public class BPlusTree {
         //We are @ leaf after while loop
         LNode leaf = (LNode) node;
         int idx = leaf.getLoc(key);
-        if (idx < leaf.num && leaf.keys[idx].compareTo(key)==0) {
+        if (idx < leaf.num && leaf.keys[idx].compareTo(key) == 0) {
             return leaf.values[idx];
         } else {
             return null;
         }
     }
 
+    public Node remove(typedData key) throws IOException {
+        treeFile.seek(root);
+        Node root = nodeFactor.getNode();
+        return root.remove(key);
+    }
 //    public void dump() {
 //        root.dump();
 //    }
@@ -148,7 +157,7 @@ public class BPlusTree {
 
         protected long offset; // 该节点在文件中的保存位置
         //protected long prev;
-        protected long next = -1L;
+
         protected short type;
         protected int num; //number of keys
         protected typedData[] keys;
@@ -157,6 +166,9 @@ public class BPlusTree {
 
         // returns null if no split, otherwise returns split info
         abstract public Split insert(typedData key, long value) throws IOException;
+
+        // 删除指定的键，注意此项操作不会对树结构进行再平衡，也不会删除在内部节点的键
+        abstract public Node remove(typedData key) throws IOException;
 
         abstract public void dump();
 
@@ -189,11 +201,25 @@ public class BPlusTree {
         // by allowing us to pretend we have arrays of certain types.
         // They work because type erasure will erase the type variables.
         // It will break if we return it and other people try to use it.
+        private long next = -1L;
         final Long[] values = new Long[M];
 
         {
             keys = new typedData[M];
             type = LEAF;
+        }
+
+
+        /*
+         * 返回LNode的下一个节点，相当于迭代器，当到达末尾时返回null
+         */
+
+        public LNode next() throws IOException {
+            if (next != -1L) {
+                treeFile.seek(next);
+                return (LNode) nodeFactor.getNode();
+            }
+            return null;
         }
 
         /**
@@ -246,6 +272,19 @@ public class BPlusTree {
                 this.insertNonfull(key, value, i);
                 return null;
             }
+        }
+
+        @Override
+        public Node remove(typedData key) throws IOException {
+            int loc = getLoc(key);
+            if (loc < num && keys[loc].compareTo(key) == 0) {
+                System.arraycopy(keys, loc + 1, keys, loc, num - loc - 1);
+                System.arraycopy(values, loc + 1, values, loc, num - loc - 1);
+                num--;
+                update();
+                return this;
+            }
+            return null;
         }
 
         private void insertNonfull(typedData key, long value, int idx) throws IOException {
@@ -398,6 +437,14 @@ public class BPlusTree {
             }
         }
 
+        @Override
+        public Node remove(typedData key) throws IOException {
+            int idx = getLoc(key);
+            treeFile.seek(children[idx]);
+            Node child = nodeFactor.getNode();
+            return child.remove(key);
+        }
+
         private void insertNonfull(typedData key, long value) throws IOException {
             // Simple linear search
 
@@ -527,6 +574,15 @@ public class BPlusTree {
         st.insert(new intData(12), 12);
 
         System.out.println(st.find(new intData(7)));
+        st.remove(new intData(11));
+        LNode l = st.getLeftMostLeaf();
+        while (l != null) {
+            for (int i = 0; i < l.num; i++) {
+                System.out.println("key=" + l.keys[i] + "value=" + l.values[i]);
+            }
+            l = l.next();
+        }
+
 //        st.dump();
 //        System.out.println(st.find("asd"));
 //        //st.dump();
