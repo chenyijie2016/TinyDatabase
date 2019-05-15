@@ -16,6 +16,7 @@
  */
 
 
+
 package index;
 
 import data.*;
@@ -25,8 +26,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class BPlusTree {
     /**
@@ -46,15 +51,16 @@ public class BPlusTree {
 
     private RandomAccessFile treeFile;
     private final NodeFactor nodeFactor = new NodeFactor();
-
-    public static short INNER = 0;
-    public static short LEAF = 1;
-
-    public HashMap<Long, Node> cacheNode; // TODO：用来在内存中缓存读取出来的节点信息，要求可以限制内存占用大小
-
     /**
      * Create a new empty tree.
      */
+    public static short INNER = 0;
+    public static short LEAF = 1;
+
+    public BPlusTree(Type type, String filename) throws IOException {
+        this(32, 16, type, filename);
+    }
+
     public BPlusTree(int m, int n, Type type, String filename) throws IOException {
         M = m;
         N = n;
@@ -79,14 +85,13 @@ public class BPlusTree {
         Node __root = nodeFactor.getNode();
         Split result = __root.insert(key, value);
         System.out.println("root Node has keys：" + __root.num);
-        if (result != null) {
-            // root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
+        if (result != null) {// root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
             // The old root was split into two parts.
             // We have to create a new root pointing to them
 
             INode _root = new INode();
             _root.num = 1;
-            _root.keys[0] = result.key;
+            _root.keys.add(result.key);
             _root.children[0] = result.left;
             _root.children[1] = result.right;
             _root.saveToFile();
@@ -97,7 +102,7 @@ public class BPlusTree {
         System.out.println("------------------");
     }
 
-    public LNode getLeftMostLeaf() throws IOException {
+    private LNode getLeftMostLeaf() throws IOException {
         treeFile.seek(root);
         Node node = nodeFactor.getNode();
         while (node instanceof BPlusTree.INode) {
@@ -108,13 +113,21 @@ public class BPlusTree {
         return (LNode) node;
     }
 
+    public BPlusTreeIterator scanAll() throws IOException {
+        LNode node = getLeftMostLeaf();
+        return new BPlusTreeIterator(node, node.scanAll());
+    }
 
-    public void writeHeader() throws IOException {
+    public BPlusTreeIterator scanGreaterEqual() throws IOException {
+        return new BPlusTreeIterator(null, null);
+    }
+
+    private void writeHeader() throws IOException {
         treeFile.seek(0);
         treeFile.writeLong(root);
     }
 
-    public void readHeader() throws IOException {
+    private void readHeader() throws IOException {
         treeFile.seek(0);
         root = treeFile.readLong();
     }
@@ -136,46 +149,84 @@ public class BPlusTree {
         //We are @ leaf after while loop
         LNode leaf = (LNode) node;
         int idx = leaf.getLoc(key);
-        if (idx < leaf.num && leaf.keys[idx].compareTo(key) == 0) {
-            return leaf.values[idx];
+        if (idx < leaf.num && leaf.keys.get(idx).compareTo(key) == 0) {
+            return leaf.values.get(idx);
         } else {
             return null;
         }
     }
 
-    public Node remove(typedData key) throws IOException {
-        treeFile.seek(root);
-        Node root = nodeFactor.getNode();
-        return root.remove(key);
+
+    class BPlusTreeIterator implements Iterator<Long> {
+        private LNode leaf;
+        private Iterator<Long> iter;
+
+        public BPlusTreeIterator(LNode leaf, Iterator<Long> iter) throws IOException {
+            this.leaf = leaf;
+            this.iter = iter;
+
+            if (!this.iter.hasNext()) {
+                advance();
+            }
+        }
+
+        public void advance() throws IOException {
+            if (this.leaf.next != -1L) {
+                treeFile.seek(this.leaf.next);
+                this.leaf = (LNode) nodeFactor.getNode();
+                this.iter = this.leaf.scanAll();
+            } else {
+                leaf = null;
+                iter = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.iter != null;
+        }
+
+        @Override
+        public Long next() {
+            if (iter == null) {
+                return null;
+            }
+
+            Long data = iter.next();
+            if (!iter.hasNext()) {
+                try {
+                    advance();
+                } catch (IOException e) {
+                    System.out.println("BPlusTree Scan Error");
+                    System.exit(0);
+                }
+            }
+            return data;
+        }
     }
-//    public void dump() {
-//        root.dump();
-//    }
 
 
     abstract class Node {
 
         protected long offset; // 该节点在文件中的保存位置
         //protected long prev;
-
+        protected long next = -1L;
         protected short type;
         protected int num; //number of keys
-        protected typedData[] keys;
+        public List<typedData> keys;
 
+        @SuppressWarnings("unused")
         abstract public int getLoc(typedData key);
 
         // returns null if no split, otherwise returns split info
         abstract public Split insert(typedData key, long value) throws IOException;
 
-        // 删除指定的键，注意此项操作不会对树结构进行再平衡，也不会删除在内部节点的键
-        abstract public Node remove(typedData key) throws IOException;
-
-        abstract public void dump();
-
+        @SuppressWarnings("unused")
         abstract public Node fromFile() throws IOException;
 
         abstract public void saveToFile() throws IOException;
 
+        @SuppressWarnings("unused")
         abstract void writeData() throws IOException;
 
         abstract public Node update() throws IOException;
@@ -201,25 +252,11 @@ public class BPlusTree {
         // by allowing us to pretend we have arrays of certain types.
         // They work because type erasure will erase the type variables.
         // It will break if we return it and other people try to use it.
-        private long next = -1L;
-        final Long[] values = new Long[M];
+        private List<Long> values = new ArrayList<>();
 
         {
-            keys = new typedData[M];
+            keys = new ArrayList<>();
             type = LEAF;
-        }
-
-
-        /*
-         * 返回LNode的下一个节点，相当于迭代器，当到达末尾时返回null
-         */
-
-        public LNode next() throws IOException {
-            if (next != -1L) {
-                treeFile.seek(next);
-                return (LNode) nodeFactor.getNode();
-            }
-            return null;
         }
 
         /**
@@ -229,7 +266,7 @@ public class BPlusTree {
         public int getLoc(typedData key) {
             // Simple linear search. Faster for small values of N or M, binary search would be faster for larger M / N
             for (int i = 0; i < num; i++) {
-                if (keys[i].compareTo(key) >= 0) {
+                if (keys.get(i).compareTo(key) >= 0) {
                     return i;
                 }
             }
@@ -246,8 +283,11 @@ public class BPlusTree {
                 LNode sibling = new LNode();
 
                 sibling.num = sNum;
-                System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
-                System.arraycopy(this.values, mid, sibling.values, 0, sNum);// 相当于把后半部分保存到新建的叶子节点上
+                //System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
+                sibling.keys = keys.subList(mid, mid + sNum);
+                //System.arraycopy(this.values, mid, sibling.values, 0, sNum);
+                sibling.values = values.subList(mid, mid + sNum);
+                // 相当于把后半部分保存到新建的叶子节点上
                 this.num = mid;
 
                 sibling.next = this.next;
@@ -263,7 +303,7 @@ public class BPlusTree {
                     this.update();
                 }
                 // Notify the parent about the split
-                Split result = new Split(sibling.keys[0], //make the right's key >= result.key
+                Split result = new Split(sibling.keys.get(0), //make the right's key >= result.key
                         this.offset,
                         sibling.offset);
                 return result;
@@ -274,31 +314,19 @@ public class BPlusTree {
             }
         }
 
-        @Override
-        public Node remove(typedData key) throws IOException {
-            int loc = getLoc(key);
-            if (loc < num && keys[loc].compareTo(key) == 0) {
-                System.arraycopy(keys, loc + 1, keys, loc, num - loc - 1);
-                System.arraycopy(values, loc + 1, values, loc, num - loc - 1);
-                num--;
-                update();
-                return this;
-            }
-            return null;
-        }
-
         private void insertNonfull(typedData key, long value, int idx) throws IOException {
             //if (idx < M && keys[idx].equals(key)) {
-            if (idx < num && keys[idx].equals(key)) {
+            if (idx < num && keys.get(idx).equals(key)) {
                 // We are inserting a duplicate value, simply overwrite the old one
-                values[idx] = value;
+                values.set(idx, value);
             } else {
                 // The key we are inserting is unique
-                System.arraycopy(keys, idx, keys, idx + 1, num - idx);
-                System.arraycopy(values, idx, values, idx + 1, num - idx);
+                //System.arraycopy(keys, idx, keys, idx + 1, num - idx);
+                //keys.remove(idx);
+                //System.arraycopy(values, idx, values, idx + 1, num - idx);
 
-                keys[idx] = key;
-                values[idx] = value;
+                keys.add(idx, key);
+                values.add(idx, value);
                 num++;
             }
             this.update();
@@ -307,10 +335,17 @@ public class BPlusTree {
         public void dump() {
             System.out.println("lNode h==0");
             for (int i = 0; i < num; i++) {
-                System.out.println(keys[i]);
+                System.out.println(keys.get(i));
             }
         }
 
+        public LNode next() throws IOException {
+            if (next != -1L) {
+                treeFile.seek(next);
+                return (LNode) nodeFactor.getNode();
+            }
+            return null;
+        }
 
         /*
          * 从文件读取 Node
@@ -323,8 +358,8 @@ public class BPlusTree {
             num = treeFile.readInt();
             next = treeFile.readLong();
             for (int i = 0; i < num; i++) {
-                keys[i] = typedDataFactor.getTypedData(keyType).readFromFile(treeFile);
-                values[i] = treeFile.readLong();
+                keys.add(i, typedDataFactor.getTypedData(keyType).readFromFile(treeFile));
+                values.add(i, treeFile.readLong());
             }
             return this;
         }
@@ -351,8 +386,8 @@ public class BPlusTree {
 
 
             for (int i = 0; i < num; i++) {
-                buffer.put(keys[i].toBytes());
-                buffer.putLong(values[i]);
+                buffer.put(keys.get(i).toBytes());
+                buffer.putLong(values.get(i));
             }
             for (int i = num; i < M; i++) {
                 byte[] bytes = new byte[keyType.size()];
@@ -370,6 +405,10 @@ public class BPlusTree {
             writeData();
             return this;
         }
+
+        private Iterator<Long> scanAll() {
+            return values.iterator();
+        }
     }
 
     class INode extends Node {
@@ -378,7 +417,7 @@ public class BPlusTree {
         final Long[] children = new Long[N + 1];
 
         INode() {
-            keys = new typedData[N];
+            keys = new ArrayList<>();
             type = INNER;
         }
 
@@ -389,7 +428,7 @@ public class BPlusTree {
         public int getLoc(typedData key) {
             // Simple linear search. Faster for small values of N or M
             for (int i = 0; i < num; i++) {
-                if (keys[i].compareTo(key) > 0) {
+                if (keys.get(i).compareTo(key) > 0) {
                     return i;
                 }
             }
@@ -411,7 +450,8 @@ public class BPlusTree {
                 int sNum = this.num - mid;
                 INode sibling = new INode();
                 sibling.num = sNum;
-                System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
+                //System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
+                sibling.keys = this.keys.subList(mid, mid + sNum);
                 System.arraycopy(this.children, mid, sibling.children, 0, sNum + 1);
 
                 this.num = mid - 1;//this is important, so the middle one elevate to next depth(height), inner node's key don't repeat itself
@@ -419,7 +459,7 @@ public class BPlusTree {
                 sibling.saveToFile();
                 this.update();
                 // Set up the return variable
-                Split result = new Split(this.keys[mid - 1],
+                Split result = new Split(this.keys.get(mid - 1),
                         this.offset,
                         sibling.offset);
 
@@ -437,14 +477,6 @@ public class BPlusTree {
             }
         }
 
-        @Override
-        public Node remove(typedData key) throws IOException {
-            int idx = getLoc(key);
-            treeFile.seek(children[idx]);
-            Node child = nodeFactor.getNode();
-            return child.remove(key);
-        }
-
         private void insertNonfull(typedData key, long value) throws IOException {
             // Simple linear search
 
@@ -456,19 +488,20 @@ public class BPlusTree {
             if (result != null) {
                 if (idx == num) {
                     // Insertion at the rightmost key
-                    keys[idx] = result.key;
+                    keys.add(idx, result.key);
                     children[idx] = result.left;
                     children[idx + 1] = result.right;
                     num++;
                 } else {
                     // Insertion not at the rightmost key
                     //shift i>idx to the right
-                    System.arraycopy(keys, idx, keys, idx + 1, num - idx);
+                    //System.arraycopy(keys, idx, keys, idx + 1, num - idx);
+
                     System.arraycopy(children, idx, children, idx + 1, num - idx + 1);
 
                     children[idx] = result.left;
                     children[idx + 1] = result.right;
-                    keys[idx] = result.key;
+                    keys.add(idx, result.key);
                     num++;
                 }
                 this.update();
@@ -476,28 +509,24 @@ public class BPlusTree {
 
         }
 
-        /**
-         * This one only dump integer key
-         */
-        public void dump() {
-//            System.out.println("iNode h==?");
-//            for (int i = 0; i < num; i++) {
-//                children[i].dump();
-//                System.out.print('>');
-//                System.out.println(keys[i]);
-//            }
-//            children[num].dump();
-        }
 
         @Override
         public Node fromFile() throws IOException {
             offset = treeFile.getFilePointer() - Short.BYTES;
             num = treeFile.readInt();
             for (int i = 0; i < N; i++) {
-                keys[i] = typedDataFactor.getTypedData(keyType).readFromFile(treeFile);
+                if (i < num)
+                    keys.add(i, typedDataFactor.getTypedData(keyType).readFromFile(treeFile));
+                else {
+                    typedDataFactor.getTypedData(keyType).readFromFile(treeFile);
+                }
             }
             for (int i = 0; i < N + 1; i++) {
-                children[i] = treeFile.readLong();
+                if (i < num + 1)
+                    children[i] = treeFile.readLong();
+                else {
+                    treeFile.readLong();
+                }
             }
             return this;
         }
@@ -520,7 +549,7 @@ public class BPlusTree {
             buffer.putInt(num);
             for (int i = 0; i < N; i++) {
                 if (i < num) {
-                    buffer.put(keys[i].toBytes());
+                    buffer.put(keys.get(i).toBytes());
                 } else {
                     buffer.put(new byte[keyType.size()]);
                 }
@@ -544,11 +573,11 @@ public class BPlusTree {
     }
 
     class Split {
-        public final typedData key;
-        public final Long left;
-        public final Long right;
+        private final typedData key;
+        private final Long left;
+        private final Long right;
 
-        public Split(typedData k, Long l, Long r) {
+        Split(typedData k, Long l, Long r) {
             key = k;
             left = l;
             right = r;
@@ -562,7 +591,7 @@ public class BPlusTree {
         } else {
             System.out.println("文件删除失败！");
         }
-        BPlusTree st = new BPlusTree(3, 3, Type.intType(), "test.bin");
+        BPlusTree st = new BPlusTree(4, 3, Type.intType(), "test.bin");
         st.insert(new intData(4), 4);
         st.insert(new intData(5), 5);
         st.insert(new intData(6), 6);
@@ -572,19 +601,24 @@ public class BPlusTree {
         st.insert(new intData(10), 10);
         st.insert(new intData(11), 11);
         st.insert(new intData(12), 12);
-
+        st.insert(new intData(13), 13);
+        st.insert(new intData(14), 14);
+        st.insert(new intData(15), 15);
+        st.insert(new intData(16), 16);
         System.out.println(st.find(new intData(7)));
-        st.remove(new intData(11));
-        LNode l = st.getLeftMostLeaf();
-        while (l != null) {
-            for (int i = 0; i < l.num; i++) {
-                System.out.println("key=" + l.keys[i] + "value=" + l.values[i]);
-            }
-            l = l.next();
+        BPlusTreeIterator l = st.scanAll();
+        Long d = l.next();
+        while (d != null) {
+            System.out.println("value=" + d);
+            d = l.next();
         }
-
-//        st.dump();
-//        System.out.println(st.find("asd"));
-//        //st.dump();
+        LNode n = st.getLeftMostLeaf();
+        while (n != null) {
+            for (int i = 0; i < n.num; i++) {
+                System.out.println("key=" + n.keys.get(i) + " value=" + n.values.get(i));
+            }
+            System.out.println("---------------");
+            n = n.next();
+        }
     }
 }
