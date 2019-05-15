@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class BPlusTree {
     /**
@@ -40,11 +38,11 @@ public class BPlusTree {
     /**
      * the maximum number of keys in the leaf node, M must be > 0
      */
-    private final int M;
+    private int M;
     /**
      * the maximum number of keys in inner node, the number of pointer is N+1, N must be > 2
      */
-    private final int N;
+    private int N;
 
     private Type keyType;
 
@@ -79,11 +77,11 @@ public class BPlusTree {
     }
 
     public void insert(typedData key, long value) throws IOException {
-        System.out.println("insert key=" + key.toString());
+        //System.out.println("insert key=" + key.toString());
         treeFile.seek(root);
         Node __root = nodeFactor.getNode();
         Split result = __root.insert(key, value);
-        System.out.println("root Node has keys：" + __root.num);
+        //System.out.println("root Node has keys：" + __root.num);
         if (result != null) {// root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
             // The old root was split into two parts.
             // We have to create a new root pointing to them
@@ -97,8 +95,8 @@ public class BPlusTree {
             root = _root.offset;
             writeHeader();
         }
-        __root.update();
-        System.out.println("------------------");
+        __root.sync();
+        //System.out.println("------------------");
     }
 
     private LNode getLeftMostLeaf() throws IOException {
@@ -124,11 +122,15 @@ public class BPlusTree {
 
     private void writeHeader() throws IOException {
         treeFile.seek(0);
+        treeFile.writeInt(M);
+        treeFile.writeInt(N);
         treeFile.writeLong(root);
     }
 
     private void readHeader() throws IOException {
         treeFile.seek(0);
+        M = treeFile.readInt();
+        N = treeFile.readInt();
         root = treeFile.readLong();
     }
 
@@ -136,7 +138,7 @@ public class BPlusTree {
      * Looks for the given key. If it is not found, it returns null.
      * If it is found, it returns the associated value.
      */
-    public Long find(typedData key) throws IOException {
+    public Long scanEqual(typedData key) throws IOException {
 
         LNode leaf = getLNodeByKey(key);
         int idx = leaf.getLoc(key);
@@ -145,6 +147,11 @@ public class BPlusTree {
         } else {
             return null;
         }
+    }
+
+    public boolean remove(typedData key) throws IOException {
+        LNode leaf = getLNodeByKey(key);
+        return leaf.remove(key);
     }
 
     private LNode getLNodeByKey(typedData key) throws IOException {
@@ -161,7 +168,7 @@ public class BPlusTree {
     }
 
 
-    class BPlusTreeIterator implements Iterator<Long> {
+    public class BPlusTreeIterator implements Iterator<Long> {
         private LNode leaf;
         private Iterator<Long> iter;
 
@@ -233,12 +240,12 @@ public class BPlusTree {
         @SuppressWarnings("unused")
         abstract void writeData() throws IOException;
 
-        abstract public Node update() throws IOException;
+        abstract public Node sync() throws IOException;
     }
 
     class NodeFactor {
         public Node getNode() throws IOException {
-            System.out.println("==Read from file point:" + treeFile.getFilePointer() + "/" + treeFile.length());
+            //System.out.println("==Read from file point:" + treeFile.getFilePointer() + "/" + treeFile.length());
             short type = treeFile.readShort();
             if (type == INNER) {
                 return new INode().fromFile();
@@ -304,7 +311,7 @@ public class BPlusTree {
                 } else {
                     // Inserted element goes to right sibling
                     sibling.insertNonfull(key, value, i - mid);
-                    this.update();
+                    this.sync();
                 }
                 // Notify the parent about the split
                 Split result = new Split(sibling.keys.get(0), //make the right's key >= result.key
@@ -316,6 +323,18 @@ public class BPlusTree {
                 this.insertNonfull(key, value, i);
                 return null;
             }
+        }
+
+        public boolean remove(typedData key) throws IOException {
+            int loc = getLoc(key);
+            if (loc < num && keys.get(loc).compareTo(key) == 0) {
+                keys.remove(loc);
+                values.remove(loc);
+                num--;
+                sync();
+                return true;
+            }
+            return false;
         }
 
         private void insertNonfull(typedData key, long value, int idx) throws IOException {
@@ -333,7 +352,7 @@ public class BPlusTree {
                 values.add(idx, value);
                 num++;
             }
-            this.update();
+            this.sync();
         }
 
         public void dump() {
@@ -404,7 +423,7 @@ public class BPlusTree {
         }
 
         @Override
-        public Node update() throws IOException {
+        public Node sync() throws IOException {
             treeFile.seek(this.offset);
             writeData();
             return this;
@@ -466,7 +485,7 @@ public class BPlusTree {
                 this.num = mid - 1;//this is important, so the middle one elevate to next depth(height), inner node's key don't repeat itself
 
                 sibling.saveToFile();
-                this.update();
+                this.sync();
                 // Set up the return variable
                 Split result = new Split(this.keys.get(mid - 1),
                         this.offset,
@@ -513,7 +532,7 @@ public class BPlusTree {
                     keys.add(idx, result.key);
                     num++;
                 }
-                this.update();
+                this.sync();
             } // else the current node is not affected
 
         }
@@ -574,7 +593,7 @@ public class BPlusTree {
         }
 
         @Override
-        public Node update() throws IOException {
+        public Node sync() throws IOException {
             treeFile.seek(this.offset);
             writeData();
             return this;
@@ -614,7 +633,7 @@ public class BPlusTree {
         st.insert(new intData(14), 14);
         st.insert(new intData(15), 15);
         st.insert(new intData(16), 16);
-        System.out.println(st.find(new intData(7)));
+        System.out.println(st.scanEqual(new intData(7)));
         BPlusTreeIterator l = st.scanGreaterEqual(new intData(11));
         Long d = l.next();
         while (d != null) {

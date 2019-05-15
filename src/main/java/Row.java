@@ -10,10 +10,10 @@ public class Row extends RowDisk {
     public STATUS cachedStatus; // 数据的缓存状态
 
     public Row(Table t) {
-        super(t);
+        super(t, -1L);
     }
 
-    public Row(Table t, int pos) {
+    public Row(Table t, long pos) {
         super(t, pos);
     }
 

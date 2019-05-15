@@ -60,5 +60,7 @@ public class Type {
         return new Type(TYPE.STRING, s);
     }
 
-
+    public boolean equals(Type obj){
+        return this.size == obj.size && this.type == obj.type;
+    }
 }

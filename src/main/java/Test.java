@@ -1,14 +1,17 @@
 import data.Type;
+import data.intData;
+
+import java.io.IOException;
 
 
 public class Test {
     static Table table;
 
     public static void createTableWithMetaData() {
-        DataBase testDB = new DataBase(1, "database");
+        DataBase testDB = new DataBase(1, "test");
         table = new Table(
                 testDB,
-                "testTable",
+                "table",
                 new Column[]{
                         new Column(Type.intType(), "id"),
                         new Column(Type.longType(), "zzz"),
@@ -19,7 +22,7 @@ public class Test {
                 new Constraint[]{new Constraint(Constraint.Type.PRIMARY_KEY, "id")});
     }
 
-    public static void insetTestData() {
+    public static void insetTestData() throws IOException {
         Row[] rows = new Row[10];
         Integer i = 1;
         Long l = 1231L;
@@ -39,22 +42,25 @@ public class Test {
     }
 
     public static void testDelete() {
-        System.out.println("Table has " + table.getRowsNumber() + " rows");
         try {
-            Row a = table.getRows().get(0);
+            Row a = table.scanEqual(new Column(Type.intType(), "id"), new intData(2));
             // System.out.println("Row[0] data length = " + a.data.length);
-            table.deleteRow(a);
+            if (a != null) {
+                System.out.println("Found Row:" + a);
+                table.deleteRow(a);
+            }
+
         } catch (Exception e) {
             System.out.println("Can not read row 0 " + e);
         }
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         createTableWithMetaData();
-        insetTestData();
+        //insetTestData();
         table.commit();
-        //testDelete();
+        testDelete();
         table.commit();
     }
 }

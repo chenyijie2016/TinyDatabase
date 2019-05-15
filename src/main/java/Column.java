@@ -17,4 +17,8 @@ public class Column {
         return name;
     }
 
+
+    public boolean equals(Column obj) {
+        return type.equals(obj.type) && name.equals(obj.name);
+    }
 }

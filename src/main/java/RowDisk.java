@@ -10,11 +10,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class RowDisk {
-    public RowDisk(Table t) {
-        table = t;
-    }
 
-    public RowDisk(Table t, int position) {
+
+    public RowDisk(Table t, long position) {
         this.table = t;
         this.position = position;
     }
@@ -48,15 +46,26 @@ public class RowDisk {
     }
 
     public void setDataByColumn(Column c, typedData d) {
-        int index = table.getColumns().indexOf(c);
+        Integer index = null;
+        for (Column column : table.getColumns()) {
+            if (column.equals(c)) {
+                index = table.getColumns().indexOf(column);
+            }
+        }
         if (data == null) {
             data = new typedData[table.getColumns().size()];
         }
+        assert (index != null);
         data[index] = d;
     }
 
     public typedData getDataByColumn(Column c) {
-        return data[table.getColumns().indexOf(c)];
+        for (Column column : table.getColumns()) {
+            if (column.equals(c)) {
+                return data[table.getColumns().indexOf(column)];
+            }
+        }
+        return null;
     }
 
     public void setData(Object[] d) {
