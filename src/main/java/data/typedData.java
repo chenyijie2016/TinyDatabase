@@ -5,7 +5,7 @@ import java.io.RandomAccessFile;
 
 public abstract class typedData implements Comparable<typedData> {
 
-    abstract Type getType();
+    abstract public Type getType();
 
     public abstract int compareTo(typedData o);
 

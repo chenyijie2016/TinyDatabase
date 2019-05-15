@@ -206,50 +206,70 @@ public class Table {
         return new RowIndexIterator(this, indexTrees.get(0).scanAll());
     }
 
-    public Row scanEqual(Column column, typedData key) throws IOException {
-        // 查询指定属性的值等于key的元组， 暂时只返回一个
-        Long position = null;
-        for (Column c : indexColumns) {
-            if (c.equals(column)) { // 要查询在索引列
-                position = indexTrees.get(indexColumns.indexOf(c)).scanEqual(key);
-                if (position != null) {
-                    return readRow(new Row(this, position));
-                } else {
-                    return null;
-                }
+    public RowIterator scanEqual(Column column, typedData key) throws IOException {
+        // 查询指定属性的值等于key的元组， 如果查询在索引列的话暂时只返回一个
+        Long position;
+        if (indexColumns.indexOf(column) != -1) {
+            position = indexTrees.get(indexColumns.indexOf(column)).scanEqual(key);
+            if (position != null) {
+                List<Row> list = new ArrayList<>();
+                list.add(readRow(new Row(this, position)));
+                return new RowNormalIterator(list.iterator());
+            } else {
+                return new RowNormalIterator(new ArrayList<Row>().iterator());
             }
+
         }
+        RowCondition dataEqualCondition = (row) -> row.getDataByColumn(column).equals(key);
 
         RowIterator iter = scanAll();
-        while (iter.hasNext()) {
-            Row row = iter.next();
-            if (row.getDataByColumn(column).equals(key))
-                return row;
-        }
-
-        return null;
+        return new RowConditionIterator(iter, dataEqualCondition);
     }
+
+    /*
+     * 查询大于等于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanGreaterEqual(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterEqual(key));
+        }
+        RowCondition dataGreaterEqual = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
+        return new RowConditionIterator(scanAll(), dataGreaterEqual);
+    }
+
 
     RowIterator getIndexIterator(Table t, BPlusTree.BPlusTreeIterator iter) {
         return new RowIndexIterator(t, iter);
     }
 
-    abstract class RowIterator implements Iterator {
+    abstract class RowIterator implements Iterator<Row> {
         abstract public boolean hasNext();
 
         abstract public Row next();
     }
 
+    interface RowCondition {
+        boolean checkColumnData(Row row);
+    }
+
     // 用来作普通元组的迭代器
     class RowNormalIterator extends RowIterator {
+        Iterator<Row> iter;
+
+        RowNormalIterator(Iterator<Row> iter) {
+            this.iter = iter;
+        }
 
         @Override
         public boolean hasNext() {
-            return false;
+            return iter.hasNext();
         }
 
         @Override
         public Row next() {
+            if (iter.hasNext())
+                return iter.next();
             return null;
         }
     }
@@ -272,15 +292,48 @@ public class Table {
 
         @Override
         public Row next() {
-            try {
-                return readRow(new Row(table, iter.next()));
-            } catch (IOException e) {
-                System.out.println("Can not Iterator Row");
-                System.exit(0);
-            }
-            return null;
-
+            if (iter.hasNext()) {
+                try {
+                    return readRow(new Row(table, iter.next()));
+                } catch (IOException e) {
+                    System.out.println("Can not Iterator Row");
+                    System.exit(0);
+                }
+                return null;
+            } else
+                return null;
         }
     }
+
+    // 通常用作遍历中带条件判断
+    class RowConditionIterator extends RowIterator {
+        RowIterator iter;
+        RowCondition condition;
+
+
+        RowConditionIterator(RowIterator iter, RowCondition condition) {
+            this.iter = iter;
+            this.condition = condition;
+
+        }
+
+        // 在任何情况下不要调用此方法来判断接下来是不是能返回值
+        // 应该连续调用next()方法来判断返回的是不是null来判断结束
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public Row next() {
+            while (iter.hasNext()) {
+                Row row = iter.next();
+                if (condition.checkColumnData(row))
+                    return row;
+            }
+            return null;
+        }
+    }
+
 
 }

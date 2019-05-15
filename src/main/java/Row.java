@@ -1,4 +1,6 @@
+import data.Type;
 import data.typedData;
+
 public class Row extends RowDisk {
 
     public static enum STATUS {
@@ -14,6 +16,10 @@ public class Row extends RowDisk {
         super(t, -1L);
     }
 
+    public Row(Table t, Object[] objs) {
+        super(t, objs);
+    }
+
     public Row(Table t, long pos) {
         super(t, pos);
     }
@@ -22,7 +28,6 @@ public class Row extends RowDisk {
         this.cachedStatus = s;
         return this;
     }
-
 
 
 }

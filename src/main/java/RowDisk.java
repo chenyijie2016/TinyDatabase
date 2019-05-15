@@ -17,6 +17,12 @@ public class RowDisk {
         this.position = position;
     }
 
+    public RowDisk(Table t, Object[] objs) {
+        this.table = t;
+
+        setData(objs);
+    }
+
     public long position;
     private Table table;
     public typedData[] data;
@@ -26,6 +32,33 @@ public class RowDisk {
         return this;
     }
 
+    public boolean typecheck(Object[] objs) {
+        boolean SizeCheck = objs.length == table.getColumns().size();
+        assert (SizeCheck) : "设定的数据长度错误";
+        boolean TypeCheck = true;
+        for (int i = 0; i < table.getColumns().size(); i++) {
+            switch (table.getColumns().get(i).getColumnType().type()) {
+                case DOUBLE:
+                    TypeCheck &= objs[i] instanceof Double;
+                    break;
+                case FLOAT:
+                    TypeCheck &= objs[i] instanceof Float;
+                    break;
+                case INT:
+                    TypeCheck &= objs[i] instanceof Integer;
+                    break;
+                case LONG:
+                    TypeCheck &= objs[i] instanceof Long;
+                    break;
+                case STRING:
+                    TypeCheck &= objs[i] instanceof String;
+                    break;
+            }
+//            TypeCheck = TypeCheck && table.getColumns().get(i).getColumnType().equals(((typedData) objs[i]).getType());
+        }
+        assert (TypeCheck) : "类型检查失败";
+        return SizeCheck && TypeCheck;
+    }
 
     public final byte[] getRawData() {
         int totalSize = 0;
@@ -56,13 +89,18 @@ public class RowDisk {
 
     public typedData getDataByColumn(Column c) {
         int index = table.getColumns().indexOf(c);
-        assert (index != -1);
+        assert (index != -1) : "没有找到该属性";
         return data[index];
     }
 
-    public void setData(Object[] d) {
-        data = new typedData[d.length];
-        for (int i = 0; i < d.length; i++) {
+    public RowDisk setData(Object[] objs) {
+        if (!typecheck(objs)) {
+            System.out.println("Illegal Assignment!");
+            return this;
+        }
+        data = new typedData[objs.length];
+
+        for (int i = 0; i < objs.length; i++) {
             switch (table.getColumns().get(i).getColumnType().type()) {
                 case INT:
                     data[i] = new intData();
@@ -77,18 +115,18 @@ public class RowDisk {
                     data[i] = new longData();
                     break;
                 case STRING:
-                    data[i] = new stringData().setSize(table.getColumns().get(i).getColumnType().size());
+                    data[i] = new stringData().setMaxSize(table.getColumns().get(i).getColumnType().size());
                     break;
                 default:
                     throw new IllegalStateException("Unexpected value: " + table.getColumns().get(i).getColumnType().type());
             }
-            data[i].setData(d[i]);
+            data[i].setData(objs[i]);
         }
-
+        return this;
     }
 
     public String toString() {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder("| ");
         for (typedData d : data) {
             str.append(d.toString()).append(" | ");
         }

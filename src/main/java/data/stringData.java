@@ -1,27 +1,39 @@
 package data;
 
+
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 public class stringData extends typedData {
     private String data;
-    private long size;
+    private long maxSize;
+
 
     public stringData() {
     }
 
     public stringData(String data) {
         this.data = data;
+
     }
 
-    public stringData setSize(long size) {
-        this.size = size;
+    public stringData(String data, long size) {
+        this.data = data;
+        this.maxSize = size;
+
+    }
+
+    public stringData setMaxSize(long maxSize) {
+        this.maxSize = maxSize;
         return this;
     }
 
     @Override
     public Type getType() {
-        return Type.stringType(size);
+        return Type.stringType(maxSize);
     }
 
     @Override
@@ -42,18 +54,28 @@ public class stringData extends typedData {
     @Override
     public void setData(Object data) {
         this.data = (String) data;
+
     }
 
     @Override
     public byte[] toBytes() {
-        return data.getBytes();
+        byte[] bytes = new byte[(int) maxSize];
+        System.arraycopy(data.getBytes(), 0, bytes, 0, data.length());
+        return bytes;
     }
 
     @Override
     public typedData readFromFile(RandomAccessFile raf) throws IOException {
-        byte[] bytes = new byte[(int) size];
-        raf.read(bytes, 0, (int) size);
-        data = new String(bytes);
+        byte[] bytes = new byte[(int) maxSize];
+        raf.read(bytes, 0, (int) maxSize);
+        int i;
+        for (i = 0; i < maxSize; i++) {
+            if (bytes[i] == 0x0)
+                break;
+        }
+        byte[] valid = new byte[i];
+        System.arraycopy(bytes, 0, valid, 0, i);
+        data = new String(valid);
         return this;
     }
 
@@ -65,12 +87,16 @@ public class stringData extends typedData {
 
     @Override
     public int getDataSize() {
-        return (int) size;
+        return (int) maxSize;
     }
 
     @Override
     public String toString() {
-        return data;
+        StringBuilder builder = new StringBuilder();
+        builder.append(data);
+        for (int i = data.length(); i < maxSize; i++)
+            builder.append(" ");
+        return builder.toString();
     }
 
     @Override

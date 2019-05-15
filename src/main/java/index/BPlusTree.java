@@ -18,7 +18,10 @@
 
 package index;
 
-import data.*;
+import data.typedData;
+import data.typedDataFactor;
+import data.intData;
+import data.Type;
 
 
 import java.io.File;
@@ -29,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
 
 public class BPlusTree {
     /**
@@ -52,8 +54,8 @@ public class BPlusTree {
     /**
      * Create a new empty tree.
      */
-    public static short INNER = 0;
-    public static short LEAF = 1;
+    private static final short INNER = 0;
+    private static final short LEAF = 1;
 
     public BPlusTree(Type type, String filename) throws IOException {
         this(32, 16, type, filename);
@@ -144,7 +146,7 @@ public class BPlusTree {
 
         LNode leaf = getLNodeByKey(key);
         int idx = leaf.getLoc(key);
-        if (idx < leaf.num && leaf.keys.get(idx).compareTo(key) == 0) {
+        if (idx < leaf.num && leaf.keys.get(idx).equals(key)) {
             return leaf.values.get(idx);
         } else {
             return null;
