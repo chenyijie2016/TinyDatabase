@@ -83,7 +83,8 @@ public class BPlusTree {
         Node __root = nodeFactor.getNode();
         Split result = __root.insert(key, value);
         //System.out.println("root Node has keys：" + __root.num);
-        if (result != null) {// root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
+        if (result != null) {
+            // root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
             // The old root was split into two parts.
             // We have to create a new root pointing to them
 
@@ -431,8 +432,8 @@ public class BPlusTree {
 
 
         /* 叶子节点的填充情况
-         * | num (key数目)  | next  (下一个叶子节点) |      M 个 key 与 M 个value  交错排列        |
-         * |        4      |         8             |      M * sizeof(key) +  M * 8              |
+         *| type | num (number of keys)  | next (next leaf node offset) | [M]  key with [M]value staggered     |
+         *| 2    |        4              | 8                            | M * sizeof(key) +  M * 8             |
          */
         @Override
         public void saveToFile() throws IOException {

@@ -18,7 +18,10 @@ public class Column {
     }
 
 
-    public boolean equals(Column obj) {
-        return type.equals(obj.type) && name.equals(obj.name);
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Column))
+            return false;
+        Column c = (Column) obj;
+        return type.equals(c.type) && name.equals(c.name);
     }
 }

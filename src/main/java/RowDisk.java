@@ -46,26 +46,18 @@ public class RowDisk {
     }
 
     public void setDataByColumn(Column c, typedData d) {
-        Integer index = null;
-        for (Column column : table.getColumns()) {
-            if (column.equals(c)) {
-                index = table.getColumns().indexOf(column);
-            }
-        }
+        int index = table.getColumns().indexOf(c);
         if (data == null) {
             data = new typedData[table.getColumns().size()];
         }
-        assert (index != null);
+        assert (index != -1);
         data[index] = d;
     }
 
     public typedData getDataByColumn(Column c) {
-        for (Column column : table.getColumns()) {
-            if (column.equals(c)) {
-                return data[table.getColumns().indexOf(column)];
-            }
-        }
-        return null;
+        int index = table.getColumns().indexOf(c);
+        assert (index != -1);
+        return data[index];
     }
 
     public void setData(Object[] d) {
@@ -96,14 +88,11 @@ public class RowDisk {
     }
 
     public String toString() {
-        StringBuilder str = new StringBuilder(new String());
+        StringBuilder str = new StringBuilder();
         for (typedData d : data) {
             str.append(d.toString()).append(" | ");
         }
         return str.toString();
     }
 
-    public static void main(String[] args) {
-
-    }
 }

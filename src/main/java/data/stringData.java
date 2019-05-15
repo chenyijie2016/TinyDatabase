@@ -74,7 +74,12 @@ public class stringData extends typedData {
     }
 
     @Override
-    boolean equals(typedData t) {
-        return data.equals(t.getData());
+    public boolean equals(Object t) {
+        if (!(t instanceof stringData))
+            return false;
+        stringData z = (stringData) t;
+        return data.equals(z.getData());
     }
+
+
 }

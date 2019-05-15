@@ -4,7 +4,7 @@ import data.typedDataFactor;
 
 
 import index.BPlusTree;
-import index.BPlusTree;
+
 
 import java.io.RandomAccessFile;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class Table {
 
 
         for (Constraint constraint : constraints) {
-            if (constraint.getType() == Constraint.Type.PRIMARY_KEY) {
+            if (constraint.getType() == Constraint.ConstraintType.PRIMARY_KEY) {
                 hasPrimaryKey = true;
                 if (getColumnByName(constraint.getColumnName()) != null) {
                     this.indexColumns.add(getColumnByName(constraint.getColumnName()));
@@ -223,7 +223,7 @@ public class Table {
         RowIterator iter = scanAll();
         while (iter.hasNext()) {
             Row row = iter.next();
-            if (row.getDataByColumn(column).compareTo(key) == 0)
+            if (row.getDataByColumn(column).equals(key))
                 return row;
         }
 

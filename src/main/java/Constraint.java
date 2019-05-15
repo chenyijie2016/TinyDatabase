@@ -1,13 +1,13 @@
 public class Constraint {
-    public enum Type {
+    public enum ConstraintType {
         PRIMARY_KEY,
         NOT_NULL
     }
 
-    private Type type;
+    private ConstraintType type;
     private String columnName;
 
-    Constraint(Constraint.Type t, String s) {
+    Constraint(Constraint.ConstraintType t, String s) {
         type = t;
         columnName = s;
     }
@@ -16,7 +16,7 @@ public class Constraint {
         return columnName;
     }
 
-    public Type getType() {
+    public ConstraintType getType() {
         return type;
     }
 }

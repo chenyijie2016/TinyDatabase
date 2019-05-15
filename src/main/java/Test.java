@@ -19,7 +19,7 @@ public class Test {
                         new Column(Type.doubleType(), "id_double"),
                         new Column(Type.stringType(20), "name"),
                 },
-                new Constraint[]{new Constraint(Constraint.Type.PRIMARY_KEY, "id")});
+                new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")});
     }
 
     public static void insetTestData() throws IOException {
