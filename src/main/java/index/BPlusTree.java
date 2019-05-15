@@ -16,7 +16,6 @@
  */
 
 
-
 package index;
 
 import data.*;
@@ -118,8 +117,9 @@ public class BPlusTree {
         return new BPlusTreeIterator(node, node.scanAll());
     }
 
-    public BPlusTreeIterator scanGreaterEqual() throws IOException {
-        return new BPlusTreeIterator(null, null);
+    public BPlusTreeIterator scanGreaterEqual(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreeIterator(node, node.scanGreaterEqual(key));
     }
 
     private void writeHeader() throws IOException {
@@ -137,23 +137,27 @@ public class BPlusTree {
      * If it is found, it returns the associated value.
      */
     public Long find(typedData key) throws IOException {
-        treeFile.seek(root);
-        Node node = nodeFactor.getNode();
-        while (node instanceof BPlusTree.INode) { // need to traverse down to the leaf
-            INode inner = (INode) node;
-            int idx = inner.getLoc(key);
-            treeFile.seek(inner.children[idx]);
-            node = nodeFactor.getNode();
-        }
-        // 循环结束后到达叶子节点
-        //We are @ leaf after while loop
-        LNode leaf = (LNode) node;
+
+        LNode leaf = getLNodeByKey(key);
         int idx = leaf.getLoc(key);
         if (idx < leaf.num && leaf.keys.get(idx).compareTo(key) == 0) {
             return leaf.values.get(idx);
         } else {
             return null;
         }
+    }
+
+    private LNode getLNodeByKey(typedData key) throws IOException {
+        treeFile.seek(root);
+        // 循环结束后到达叶子节点
+        Node node = nodeFactor.getNode();
+        while (node instanceof BPlusTree.INode) {
+            INode inner = (INode) node;
+            int idx = inner.getLoc(key);
+            treeFile.seek(inner.children[idx]);
+            node = nodeFactor.getNode();
+        }
+        return (LNode) node;
     }
 
 
@@ -409,6 +413,11 @@ public class BPlusTree {
         private Iterator<Long> scanAll() {
             return values.iterator();
         }
+
+        private Iterator<Long> scanGreaterEqual(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx, num).iterator();
+        }
     }
 
     class INode extends Node {
@@ -606,19 +615,19 @@ public class BPlusTree {
         st.insert(new intData(15), 15);
         st.insert(new intData(16), 16);
         System.out.println(st.find(new intData(7)));
-        BPlusTreeIterator l = st.scanAll();
+        BPlusTreeIterator l = st.scanGreaterEqual(new intData(11));
         Long d = l.next();
         while (d != null) {
             System.out.println("value=" + d);
             d = l.next();
         }
-        LNode n = st.getLeftMostLeaf();
-        while (n != null) {
-            for (int i = 0; i < n.num; i++) {
-                System.out.println("key=" + n.keys.get(i) + " value=" + n.values.get(i));
-            }
-            System.out.println("---------------");
-            n = n.next();
-        }
+//        LNode n = st.getLeftMostLeaf();
+//        while (n != null) {
+//            for (int i = 0; i < n.num; i++) {
+//                System.out.println("key=" + n.keys.get(i) + " value=" + n.values.get(i));
+//            }
+//            System.out.println("---------------");
+//            n = n.next();
+//        }
     }
 }
