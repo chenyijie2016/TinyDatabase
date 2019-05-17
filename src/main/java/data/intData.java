@@ -8,6 +8,11 @@ public class intData extends typedData {
     private Integer data;
 
     public intData() {
+
+    }
+
+    public intData(intData another) {
+        data = another.data;
     }
 
     public intData(int data) {
@@ -76,7 +81,7 @@ public class intData extends typedData {
     public boolean equals(Object t) {
         if (!(t instanceof intData))
             return false;
-        intData z = (intData)t;
+        intData z = (intData) t;
         return data.equals(z.getData());
     }
 

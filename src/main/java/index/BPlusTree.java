@@ -2,7 +2,6 @@
  * B+ Tree
  * If you understand B+ or B Tree better, M & N don't need to be the same
  * Here is an example of M=N=4, with 12 keys
- * <p>
  * 5
  * /             \
  * 3                           7             9
@@ -13,6 +12,8 @@
  * @version 1.0.0 created on May 19, 2006
  * edited by Spoon! 2008
  * edited by Mistro 2010
+ * @version 2.0.0
+ * edited by cyj 2019
  */
 
 
@@ -28,10 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class BPlusTree {
     /**
@@ -51,19 +49,39 @@ public class BPlusTree {
 
     private RandomAccessFile treeFile;
     private final NodeFactor nodeFactor = new NodeFactor();
+
+    private static final short INNER = 0;
+    private static final short LEAF = 1;
+    private Map<Long, Node> NodeCache;
+
+
+    /**
+     * LRU策略的缓存
+     * from:https://stackoverflow.com/questions/11469045/how-to-limit-the-maximum-size-of-a-map-by-removing-oldest-entries-when-limit-rea
+     *
+     * @param maxEntries 最大缓存数量
+     */
+    public static <K, V> Map<K, V> createLRUMap(final int maxEntries) {
+        return new LinkedHashMap<K, V>(maxEntries * 10 / 7, 0.7f, true) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > maxEntries;
+            }
+        };
+    }
+
     /**
      * Create a new empty tree.
      */
-    private static final short INNER = 0;
-    private static final short LEAF = 1;
-
     public BPlusTree(Type type, String filename) throws IOException {
-        this(32, 16, type, filename);
+        this(4, 4, type, filename, 1024);
     }
 
-    public BPlusTree(int m, int n, Type type, String filename) throws IOException {
+    public BPlusTree(int m, int n, Type type, String filename, int MAX_CACHE_SIZE) throws IOException {
         M = m;
         N = n;
+        NodeCache = createLRUMap(MAX_CACHE_SIZE);
+
         treeFile = new RandomAccessFile(filename, "rw");
         this.keyType = type;
         if (treeFile.length() > 0) {
@@ -79,12 +97,16 @@ public class BPlusTree {
 
     }
 
+    /**
+     * 插入key
+     *
+     * @param key   插入的key
+     * @param value 存储值
+     */
     public void insert(typedData key, long value) throws IOException {
-        //System.out.println("insert key=" + key.toString());
-        treeFile.seek(root);
-        Node __root = nodeFactor.getNode();
+
+        Node __root = nodeFactor.getNode(root);
         Split result = __root.insert(key, value);
-        //System.out.println("root Node has keys：" + __root.num);
         if (result != null) {
             // root节点出现分裂，需要新插入一个InnerNode,并且更新root节点位置为新的InnerNode
             // The old root was split into two parts.
@@ -100,30 +122,45 @@ public class BPlusTree {
             writeHeader();
         }
         __root.sync();
-        //System.out.println("------------------");
     }
 
+    /**
+     * @return 获取最左侧的叶子节点
+     * @throws IOException
+     */
     private LNode getLeftMostLeaf() throws IOException {
-        treeFile.seek(root);
-        Node node = nodeFactor.getNode();
+        Node node = nodeFactor.getNode(root);
         while (node instanceof BPlusTree.INode) {
             INode inner = (INode) node;
-            treeFile.seek(inner.children[0]);
-            node = nodeFactor.getNode();
+            node = nodeFactor.getNode(inner.children[0]);
         }
         return (LNode) node;
     }
 
+    /**
+     * @return 获取该B+树的所有叶子节点 value 的迭代器
+     * @throws IOException
+     */
     public BPlusTreeIterator scanAll() throws IOException {
         LNode node = getLeftMostLeaf();
         return new BPlusTreeIterator(node, node.scanAll());
     }
 
+    /**
+     * @param key 待查询的key
+     * @return 键值大于等于key的所有value组成的迭代器
+     * @throws IOException
+     */
     public BPlusTreeIterator scanGreaterEqual(typedData key) throws IOException {
         LNode node = getLNodeByKey(key);
         return new BPlusTreeIterator(node, node.scanGreaterEqual(key));
     }
 
+    /**
+     * 写入文件头
+     *
+     * @throws IOException
+     */
     private void writeHeader() throws IOException {
         treeFile.seek(0);
         treeFile.writeInt(M);
@@ -131,6 +168,11 @@ public class BPlusTree {
         treeFile.writeLong(root);
     }
 
+    /**
+     * 读取文件头
+     *
+     * @throws IOException
+     */
     private void readHeader() throws IOException {
         treeFile.seek(0);
         M = treeFile.readInt();
@@ -153,25 +195,41 @@ public class BPlusTree {
         }
     }
 
+    /**
+     * @param key 待删除的key
+     * @return 删除key所在的节点
+     * @throws IOException
+     */
     public boolean remove(typedData key) throws IOException {
         LNode leaf = getLNodeByKey(key);
         return leaf.remove(key);
     }
 
+    /**
+     * 根据key值获取其可能所在的叶子节点
+     *
+     * @param key 待查询的key
+     * @return 叶子节点
+     * @throws IOException
+     */
     private LNode getLNodeByKey(typedData key) throws IOException {
-        treeFile.seek(root);
+
         // 循环结束后到达叶子节点
-        Node node = nodeFactor.getNode();
+        Node node = nodeFactor.getNode(root);
         while (node instanceof BPlusTree.INode) {
             INode inner = (INode) node;
             int idx = inner.getLoc(key);
-            treeFile.seek(inner.children[idx]);
-            node = nodeFactor.getNode();
+            node = nodeFactor.getNode(inner.children[idx]);
         }
         return (LNode) node;
     }
 
 
+    /**
+     * 用来遍历B+树的迭代器
+     *
+     * @author cyj 2019
+     */
     public class BPlusTreeIterator implements Iterator<Long> {
         protected LNode leaf;
         protected Iterator<Long> iter;
@@ -185,10 +243,14 @@ public class BPlusTree {
             }
         }
 
+        /**
+         * 如果当前的叶子节点上的值已经遍历完了，那么就尝试遍历其指向的下一个节点
+         *
+         * @throws IOException
+         */
         public void advance() throws IOException {
             if (this.leaf.next != -1L) {
-                treeFile.seek(this.leaf.next);
-                this.leaf = (LNode) nodeFactor.getNode();
+                this.leaf = (LNode) nodeFactor.getNode(this.leaf.next);
                 this.iter = this.leaf.scanAll();
             } else {
                 leaf = null;
@@ -220,48 +282,6 @@ public class BPlusTree {
         }
     }
 
-//    public interface Condition {
-//        boolean check(typedData a, typedData b);
-//    }
-//
-//    public class BPlusTreeConditionIterator extends BPlusTreeIterator {
-//        private Condition condition;
-//        boolean nextCheck = true;
-//        typedData key;
-//        BPlusTreeConditionIterator(LNode leaf, Iterator<Long> iter, Condition condition, typedData key) throws IOException {
-//            super(leaf, iter);
-//            this.condition = condition;
-//            this.key = key;
-//        }
-//
-//        @Override
-//        public boolean hasNext() {
-//            return iter.hasNext() && nextCheck;
-//        }
-//
-//        @Override
-//        public Long next() {
-//            if (iter == null) {
-//                return null;
-//            }
-//
-//            Long data = iter.next();
-//            if (!iter.hasNext()) {
-//                try {
-//                    advance();
-//                } catch (IOException e) {
-//                    System.out.println("BPlusTree Scan Error");
-//                    System.exit(0);
-//                }
-//            }
-//            return data;
-//            Long nextValue = iter.next();
-//            if(condition.check(key,));
-//        }
-//
-//    }
-
-
     abstract class Node {
 
         protected long offset; // 该节点在文件中的保存位置
@@ -271,31 +291,78 @@ public class BPlusTree {
         protected int num; //number of keys
         public List<typedData> keys;
 
+        /**
+         * 获取该键在节点中对应的位置(小于等于)
+         *
+         * @param key 键值
+         * @return 可能的位置:存储位置/子节点位置
+         */
         @SuppressWarnings("unused")
         abstract public int getLoc(typedData key);
 
         // returns null if no split, otherwise returns split info
         abstract public Split insert(typedData key, long value) throws IOException;
 
+        /**
+         * @return 从文件读取节点
+         * @throws IOException 文件读取失败
+         */
         @SuppressWarnings("unused")
         abstract public Node fromFile() throws IOException;
 
+        /**
+         * @throws IOException 写入到文件
+         */
         abstract public void saveToFile() throws IOException;
 
+        /**
+         * 执行实际的写入操作
+         *
+         * @throws IOException 写入失败
+         */
         @SuppressWarnings("unused")
         abstract void writeData() throws IOException;
 
+        /**
+         * 同步节点信息到文件中去
+         *
+         * @return 同步的节点
+         * @throws IOException 同步写入失败
+         */
         abstract public Node sync() throws IOException;
     }
 
+    /**
+     * 从当前文件位置构造新的节点
+     */
     class NodeFactor {
         public Node getNode() throws IOException {
-            //System.out.println("==Read from file point:" + treeFile.getFilePointer() + "/" + treeFile.length());
             short type = treeFile.readShort();
             if (type == INNER) {
                 return new INode().fromFile();
             } else {
                 return new LNode().fromFile();
+            }
+        }
+
+        public Node getNode(long offset) throws IOException {
+//            if (NodeCache.containsKey(offset)) {
+//                //System.out.println("Hit cache");
+//                return NodeCache.get(offset);
+//            } else {
+//                //System.out.println("Miss cache");
+//            }
+
+            treeFile.seek(offset);
+            short type = treeFile.readShort();
+            if (type == INNER) {
+                Node node = new INode().fromFile();
+                //NodeCache.put(offset, node);
+                return node;
+            } else {
+                Node node = new LNode().fromFile();
+                //NodeCache.put(offset, node);
+                return node;
             }
         }
     }
@@ -339,9 +406,7 @@ public class BPlusTree {
                 LNode sibling = new LNode();
 
                 sibling.num = sNum;
-                //System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
                 sibling.keys = keys.subList(mid, mid + sNum);
-                //System.arraycopy(this.values, mid, sibling.values, 0, sNum);
                 sibling.values = values.subList(mid, mid + sNum);
                 // 相当于把后半部分保存到新建的叶子节点上
                 this.num = mid;
@@ -389,9 +454,6 @@ public class BPlusTree {
                 values.set(idx, value);
             } else {
                 // The key we are inserting is unique
-                //System.arraycopy(keys, idx, keys, idx + 1, num - idx);
-                //keys.remove(idx);
-                //System.arraycopy(values, idx, values, idx + 1, num - idx);
 
                 keys.add(idx, key);
                 values.add(idx, value);
@@ -400,17 +462,10 @@ public class BPlusTree {
             this.sync();
         }
 
-        public void dump() {
-            System.out.println("lNode h==0");
-            for (int i = 0; i < num; i++) {
-                System.out.println(keys.get(i));
-            }
-        }
 
         public LNode next() throws IOException {
             if (next != -1L) {
-                treeFile.seek(next);
-                return (LNode) nodeFactor.getNode();
+                return (LNode) nodeFactor.getNode(next);
             }
             return null;
         }
@@ -433,9 +488,10 @@ public class BPlusTree {
         }
 
 
-        /* 叶子节点的填充情况
-         *| type | num (number of keys)  | next (next leaf node offset) | [M]  key with [M]value staggered     |
-         *| 2    |        4              | 8                            | M * sizeof(key) +  M * 8             |
+        /**
+         * 叶子节点的填充情况
+         * | type | num (number of keys)  | next (next leaf node offset) | [M] key with [M] value STAGGERED     |
+         * | 2    |        4              | 8                            | M * sizeof(key) +  M * 8             |
          */
         @Override
         public void saveToFile() throws IOException {
@@ -490,7 +546,6 @@ public class BPlusTree {
     }
 
     class INode extends Node {
-        //final Node[] children = new BPlusTree.Node[N + 1];
 
         final Long[] children = new Long[N + 1];
 
@@ -528,7 +583,7 @@ public class BPlusTree {
                 int sNum = this.num - mid;
                 INode sibling = new INode();
                 sibling.num = sNum;
-                //System.arraycopy(this.keys, mid, sibling.keys, 0, sNum);
+
                 sibling.keys = this.keys.subList(mid, mid + sNum);
                 System.arraycopy(this.children, mid, sibling.children, 0, sNum + 1);
 
@@ -559,8 +614,7 @@ public class BPlusTree {
             // Simple linear search
 
             int idx = getLoc(key);
-            treeFile.seek(children[idx]);
-            Node child = nodeFactor.getNode();
+            Node child = nodeFactor.getNode(children[idx]);
             Split result = child.insert(key, value);
 
             if (result != null) {
@@ -573,7 +627,6 @@ public class BPlusTree {
                 } else {
                     // Insertion not at the rightmost key
                     //shift i>idx to the right
-                    //System.arraycopy(keys, idx, keys, idx + 1, num - idx);
 
                     System.arraycopy(children, idx, children, idx + 1, num - idx + 1);
 
@@ -609,9 +662,10 @@ public class BPlusTree {
             return this;
         }
 
-        /* 内部节点的填充情况
-         * | num (key数目)  |      N 个 key           | N + 1 个节点偏移量          |
-         * |        4      |      (N) * sizeof(key)  |  (N+1) * 8              |
+        /**
+         * 内部节点的填充情况
+         * | type | num (key number) | N  key          | N + 1 offset of children |
+         * |   2  | 4                | N * sizeof(key) |  (N+1) * 8               |
          */
         @Override
         public void saveToFile() throws IOException {
@@ -669,7 +723,7 @@ public class BPlusTree {
         } else {
             System.out.println("文件删除失败！");
         }
-        BPlusTree st = new BPlusTree(4, 3, Type.intType(), "test.bin");
+        BPlusTree st = new BPlusTree(4, 3, Type.intType(), "test.bin", 16);
         st.insert(new intData(4), 4);
         st.insert(new intData(5), 5);
         st.insert(new intData(6), 6);
@@ -690,13 +744,5 @@ public class BPlusTree {
             System.out.println("value=" + d);
             d = l.next();
         }
-//        LNode n = st.getLeftMostLeaf();
-//        while (n != null) {
-//            for (int i = 0; i < n.num; i++) {
-//                System.out.println("key=" + n.keys.get(i) + " value=" + n.values.get(i));
-//            }
-//            System.out.println("---------------");
-//            n = n.next();
-//        }
     }
 }

@@ -1,4 +1,5 @@
 import data.Type;
+import data.intData;
 import data.typedData;
 import data.typedDataFactor;
 
@@ -14,30 +15,24 @@ import java.util.*;
 public class Table {
     private DataBase database; // 所属的数据库
     private String tableName; // 表名
-
-
-    private List<Row> Rows; // 元组列表
-    private List<Row> toInsertRows;
-    private List<Row> toDeleteRows;
     private List<Column> indexColumns; // 索引属性列表
     private RandomAccessFile dataFile; // 数据源文件
-    private RandomAccessFile[] indexFile; //索引源文件
     private Constraint[] constraints; // 约束
     private List<Column> columns; // 属性列表
     private boolean hasPrimaryKey = false; // 是否指定了主键
-    private int uniqueID; // 自增主键当前值
+    private int uniqueID = 0; // 默认的自增主键当前值
     private long freeListPointer = -1;
     private List<BPlusTree> indexTrees;
+
+    public static final String DATA_EXTENSION = ".data";
+    public static final String INDEX_EXTENSION = ".idx";
 
 
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) {
         this.database = database;
         this.tableName = tableName;
         this.columns = Arrays.asList(columns);
-
         this.constraints = constraints;
-
-        Rows = new ArrayList<>();
         indexColumns = new ArrayList<>();
 
 
@@ -57,17 +52,17 @@ public class Table {
             createPrimaryKey(c);
 
         }
-        String dataFileName = database.getName() + "_" + this.tableName + ".data";
+        String dataFileName = database.getName() + "_" + this.tableName + DATA_EXTENSION;
         try {
             dataFile = new RandomAccessFile(dataFileName, "rw");
-            if (dataFile.length() > 8) {
-                freeListPointer = dataFile.readLong();
+            if (dataFile.length() > (Long.BYTES + Integer.BYTES)) {
+                readDataFileHeader();
             } else {
-                dataFile.writeLong(freeListPointer);
+                writeDataFileHeader();
             }
             indexTrees = new ArrayList<>();
             for (Column idxColumn : indexColumns) {
-                String indexFileName = database.getName() + "_" + this.tableName + "_" + idxColumn.getName() + ".index";
+                String indexFileName = database.getName() + "_" + this.tableName + "_" + idxColumn.getName() + INDEX_EXTENSION;
                 indexTrees.add(new BPlusTree(idxColumn.getColumnType(), indexFileName));
             }
         } catch (IOException e) {
@@ -75,6 +70,25 @@ public class Table {
         }
     }
 
+    /**
+     * 读取数据文件的文件头
+     *
+     * @throws IOException 读取失败
+     */
+    private void readDataFileHeader() throws IOException {
+        freeListPointer = dataFile.readLong();
+        uniqueID = dataFile.readInt();
+    }
+
+    /**
+     * 写入数据文件的文件头
+     *
+     * @throws IOException 写入失败
+     */
+    private void writeDataFileHeader() throws IOException {
+        dataFile.writeLong(freeListPointer);
+        dataFile.writeInt(uniqueID);
+    }
 
     private Column getColumnByName(String name) {
         for (Column c : columns) {
@@ -91,15 +105,13 @@ public class Table {
 
     // 读取单行数据
     public Row readRow(Row row) throws IOException {
-        // if (row.cachedStatus == Row.STATUS.OnlyInDisk) {
         dataFile.seek(row.position);
         for (Column c : columns) {
-            typedData d = typedDataFactor.getTypedData(c.getColumnType());
-            d.readFromFile(dataFile);
-            row.setDataByColumn(c, d);
+            typedData data = typedDataFactor.getTypedData(c.getColumnType());
+            data.readFromFile(dataFile);
+            row.setDataByColumn(c, data);
         }
-        row.cachedStatus = Row.STATUS.MemoryDisk;
-        //  }
+
         return row;
     }
 
@@ -114,24 +126,15 @@ public class Table {
 
         for (Column c : indexColumns) {
             boolean removed = indexTrees.get(indexColumns.indexOf(c)).remove(row.getDataByColumn(c));
-            System.out.println("Index Removed=" + removed);
+            //System.out.println("Index Removed=" + removed);
         }
         // 如果删除的元组存在于磁盘上，则需要改写freeListPointer
-        if (row.cachedStatus == Row.STATUS.OnlyInDisk || row.cachedStatus == Row.STATUS.MemoryDisk) {
-            dataFile.seek(row.position);
-            dataFile.writeLong(freeListPointer);
-            freeListPointer = row.position;
-        }
+        //if (row.cachedStatus == Row.STATUS.OnlyInDisk || row.cachedStatus == Row.STATUS.MemoryDisk) {
+        dataFile.seek(row.position);
+        dataFile.writeLong(freeListPointer);
+        freeListPointer = row.position;
+        //}
     }
-
-//    public void writeRows() {
-//        for (Row row : Rows) {
-//            if (row.cachedStatus == Row.STATUS.OnlyInMemory) {
-//                writeSingleRow(row);
-//                row.cachedStatus = Row.STATUS.MemoryDisk;
-//            }
-//        }
-//    }
 
 
     private void writeSingleRow(Row row) {
@@ -145,7 +148,7 @@ public class Table {
                 freeListPointer = nextFreeListPoint;
             }
             row.setPosition(dataFile.getFilePointer());
-            dataFile.write(row.getRawData());
+            dataFile.write(row.toBytes());
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -155,7 +158,14 @@ public class Table {
         return columns;
     }
 
-    public void updateRow(Row oldRow, Row newRow) throws Exception {
+    /**
+     * 更新一行数据，先删除再插入
+     *
+     * @param oldRow 老的一行元组
+     * @param newRow 新的元组
+     * @throws IOException 写入失败
+     */
+    public void updateRow(Row oldRow, Row newRow) throws IOException {
         deleteRow(oldRow);
         insertRow(newRow);
     }
@@ -175,10 +185,14 @@ public class Table {
         }
 
         writeSingleRow(row);
-        row.setStatus(Row.STATUS.MemoryDisk);
         // 插入索引
-        for (Column c : indexColumns) {
-            indexTrees.get(indexColumns.indexOf(c)).insert(row.getDataByColumn(c), row.position);
+        if (hasPrimaryKey) {
+            for (Column c : indexColumns) {
+                indexTrees.get(indexColumns.indexOf(c)).insert(row.getDataByColumn(c), row.position);
+            }
+        } else {
+            indexTrees.get(0).insert(new intData(uniqueID), row.position);
+            uniqueID++;
         }
 
     }
@@ -191,17 +205,17 @@ public class Table {
         return sum;
     }
 
-    public void commit() {
-
-        try {
-            dataFile.seek(0);
-            dataFile.writeLong(freeListPointer);
-        } catch (IOException e) {
-            System.out.println("Write freelist pointer failed");
-        }
+    /**
+     * 保证数据完整性的必须操作，完整写回数据
+     */
+    public void commit() throws IOException {
+        dataFile.seek(0);
+        writeDataFileHeader();
     }
 
-
+    /**
+     * 获取全体的元组的迭代器，利用第一个索引的全体迭代器实现
+     */
     public RowIterator scanAll() throws IOException {
         return new RowIndexIterator(this, indexTrees.get(0).scanAll());
     }
@@ -226,7 +240,7 @@ public class Table {
         return new RowConditionIterator(iter, dataEqualCondition);
     }
 
-    /*
+    /**
      * 查询大于等于该属性的元组
      * 返回迭代器
      */
@@ -317,8 +331,12 @@ public class Table {
 
         }
 
-        // 在任何情况下不要调用此方法来判断接下来是不是能返回值
-        // 应该连续调用next()方法来判断返回的是不是null来判断结束
+        /**
+         * 在任何情况下不要调用此方法来判断接下来是不是能返回值
+         * 应该连续调用此类的next()方法来判断返回的是不是null来判断结束
+         *
+         * @see RowConditionIterator
+         */
         @Override
         public boolean hasNext() {
             return iter.hasNext();

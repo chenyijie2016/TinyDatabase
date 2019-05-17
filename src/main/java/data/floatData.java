@@ -10,6 +10,10 @@ public class floatData extends typedData {
     public floatData() {
     }
 
+    public floatData(floatData another) {
+        this.data = another.data;
+    }
+
     public floatData(float data) {
         this.data = data;
     }

@@ -8,6 +8,11 @@ public class longData extends typedData {
     private Long data;
 
     public longData() {
+
+    }
+
+    public longData(longData another) {
+        data = another.data;
     }
 
     public longData(long data) {

@@ -10,6 +10,10 @@ public class doubleData extends typedData {
     public doubleData() {
     }
 
+    public doubleData(doubleData d) {
+        this.data = d.data;
+    }
+
     public doubleData(double data) {
         this.data = data;
     }
