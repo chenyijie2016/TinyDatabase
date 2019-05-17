@@ -1,4 +1,8 @@
-import data.*;
+import data.typedData;
+import data.Type;
+import data.intData;
+import data.stringData;
+
 
 import java.io.IOException;
 
@@ -11,12 +15,10 @@ public class Test {
         table = new Table(
                 testDB,
                 "table",
-                new Column[]{
-                        new Column(Type.intType(), "id"),
+                new Column[]{new Column(Type.intType(), "id"),
                         new Column(Type.stringType(20), "name"),
                         new Column(Type.stringType(20), "dept_name"),
                         new Column(Type.intType(), "salary")
-                        ,
                 },
                 new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")});
     }
@@ -89,12 +91,32 @@ public class Test {
         }
     }
 
+    public static void testUpdate() throws IOException {
+        // To decrease all member's salary 1000
+        System.out.println("========= All members before update========");
+        Table.RowIterator iter = table.scanAll();
+        Row member;
+        while ((member = iter.next()) != null) {
+            System.out.println(member);
+            Row update = new Row(member);
+            Column salaryColumn = new Column(Type.intType(), "salary");
+            intData oldSalary = (intData) member.getDataByColumn(salaryColumn);
+            update.setDataByColumn(salaryColumn, new intData((Integer) oldSalary.getData() - 1000));
+            table.updateRow(member, update);
+        }
+        System.out.println("========= All members AFTER update========");
+        iter = table.scanAll();
+        while ((member = iter.next()) != null) {
+            System.out.println(member);
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         createTableWithMetaData();
         insetTestData();
         table.commit();
         testSearch();
-//        testDelete();
+        testUpdate();
         table.commit();
     }
 }
