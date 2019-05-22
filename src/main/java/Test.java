@@ -10,7 +10,7 @@ import java.io.IOException;
 public class Test {
     static Table table;
 
-    public static void createTableWithMetaData() {
+    public static void createTableWithMetaData() throws IOException{
         DataBase testDB = new DataBase(1, "test");
         table = new Table(
                 testDB,

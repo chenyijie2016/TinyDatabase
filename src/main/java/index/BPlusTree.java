@@ -496,6 +496,7 @@ public class BPlusTree {
         @Override
         public void saveToFile() throws IOException {
             treeFile.seek(treeFile.length()); // 写到文件末尾
+
             this.offset = treeFile.getFilePointer(); // 保存当前节点在文件中的偏移量
 
             writeData();

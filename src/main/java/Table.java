@@ -1,3 +1,4 @@
+
 import data.Type;
 import data.intData;
 import data.typedData;
@@ -9,6 +10,7 @@ import index.BPlusTree;
 
 import java.io.RandomAccessFile;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 
@@ -28,7 +30,7 @@ public class Table {
     public static final String INDEX_EXTENSION = ".idx";
 
 
-    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) {
+    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException {
         this.database = database;
         this.tableName = tableName;
         this.columns = Arrays.asList(columns);
@@ -52,22 +54,21 @@ public class Table {
             createPrimaryKey(c);
 
         }
+
+
         String dataFileName = database.getName() + "_" + this.tableName + DATA_EXTENSION;
-        try {
-            dataFile = new RandomAccessFile(dataFileName, "rw");
-            if (dataFile.length() > (Long.BYTES + Integer.BYTES)) {
-                readDataFileHeader();
-            } else {
-                writeDataFileHeader();
-            }
-            indexTrees = new ArrayList<>();
-            for (Column idxColumn : indexColumns) {
-                String indexFileName = database.getName() + "_" + this.tableName + "_" + idxColumn.getName() + INDEX_EXTENSION;
-                indexTrees.add(new BPlusTree(idxColumn.getColumnType(), indexFileName));
-            }
-        } catch (IOException e) {
-            System.out.println(e);
+        dataFile = new RandomAccessFile(dataFileName, "rw");
+        if (dataFile.length() > (Long.BYTES + Integer.BYTES)) {
+            readDataFileHeader();
+        } else {
+            writeDataFileHeader();
         }
+        indexTrees = new ArrayList<>();
+        for (Column idxColumn : indexColumns) {
+            String indexFileName = database.getName() + "_" + this.tableName + "_" + idxColumn.getName() + INDEX_EXTENSION;
+            indexTrees.add(new BPlusTree(idxColumn.getColumnType(), indexFileName));
+        }
+
     }
 
     /**
@@ -203,6 +204,113 @@ public class Table {
             sum += t.getColumnType().size();
         }
         return sum;
+    }
+
+    public byte[] toSchemaBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        buffer.put("TABLE".getBytes()); // Magic Number
+        buffer.putInt(tableName.length());
+        buffer.put(tableName.getBytes());
+        buffer.putInt(columns.size());
+        for (Column column : columns) {
+            switch (column.getColumnType().type()) {
+                case INT:
+                    buffer.put((byte) 1);
+                    break;
+                case LONG:
+                    buffer.put((byte) 2);
+                    break;
+                case DOUBLE:
+                    buffer.put((byte) 3);
+                    break;
+                case FLOAT:
+                    buffer.put((byte) 4);
+                    break;
+                case STRING:
+                    buffer.put((byte) 5);
+                    buffer.putInt(column.getColumnType().size());
+                    break;
+            }
+            buffer.putShort((short) column.getName().length());
+            buffer.put(column.getName().getBytes());
+        }
+        buffer.putInt(constraints.length);
+        for (Constraint constraint : constraints) {
+            switch (constraint.getType()) {
+                case NOT_NULL:
+                    buffer.put((byte) 1);
+                    break;
+                case PRIMARY_KEY:
+                    buffer.put((byte) 0);
+                    break;
+            }
+            buffer.putShort((short) constraint.getColumnName().length());
+            buffer.put(constraint.getColumnName().getBytes());
+        }
+        return buffer.array();
+    }
+
+    public static Table fromSchemaBytes(DataBase db, byte[] schema) throws IllegalArgumentException, IOException {
+        ByteBuffer buffer = ByteBuffer.wrap(schema);
+        byte[] magic = new byte[5];
+        buffer.get(magic, 0, 5);
+        if (!new String(magic).equals("TABLE")) {
+            throw new IllegalArgumentException("Not valid schema data");
+        }
+        int tableNameSize = buffer.getInt();
+        byte[] name = new byte[tableNameSize];
+        buffer.get(name);
+        String tableName = new String(name);
+        int columnSize = buffer.getInt();
+        Column[] columns = new Column[columnSize];
+        for (int i = 0; i < columnSize; i++) {
+            Type type;
+            switch (buffer.get()) {
+                case 1:
+                    type = Type.intType();
+                    break;
+                case 2:
+                    type = Type.longType();
+                    break;
+                case 3:
+                    type = Type.doubleType();
+                    break;
+                case 4:
+                    type = Type.floatType();
+                    break;
+                case 5:
+                    int stringSize = buffer.getInt();
+                    type = Type.stringType(stringSize);
+                    break;
+                default:
+                    throw new IOException("Not valid column type flag");
+            }
+            short nameSize = buffer.getShort();
+            byte[] columnName = new byte[(int) nameSize];
+
+            columns[i] = new Column(type, new String(columnName));
+        }
+        int constraintSize = buffer.getInt();
+        Constraint[] constraints = new Constraint[constraintSize];
+        for (int i = 0; i < constraintSize; i++) {
+            Constraint.ConstraintType constraintType;
+            switch (buffer.get()) {
+                case 0:
+                    constraintType = Constraint.ConstraintType.PRIMARY_KEY;
+                    break;
+                case 1:
+                    constraintType = Constraint.ConstraintType.NOT_NULL;
+                    break;
+                default:
+                    throw new IOException("Not valid constraint type flag");
+            }
+            short columnNameSize = buffer.getShort();
+            byte[] columnName = new byte[columnNameSize];
+            buffer.get(columnName);
+            constraints[i] = new Constraint(constraintType, new String(columnName));
+        }
+
+        return new Table(db, tableName, columns, constraints);
     }
 
     /**
