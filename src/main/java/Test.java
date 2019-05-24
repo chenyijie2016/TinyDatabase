@@ -4,26 +4,46 @@ import data.intData;
 import data.stringData;
 
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.sql.DatabaseMetaData;
 
 
 public class Test {
-    static Table table;
+    //static Table table;
+    static Schema schema;
 
-    public static void createTableWithMetaData() throws IOException{
-        DataBase testDB = new DataBase(1, "test");
-        table = new Table(
-                testDB,
-                "table",
-                new Column[]{new Column(Type.intType(), "id"),
-                        new Column(Type.stringType(20), "name"),
-                        new Column(Type.stringType(20), "dept_name"),
-                        new Column(Type.intType(), "salary")
-                },
-                new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")});
+    public static void createTableWithMetaData() throws IOException {
+        DataBase testDB = new DataBase("test");
+//        table = new Table(
+//                testDB,
+//                "employee",
+//                new Column[]{new Column(Type.intType(), "id"),
+//                        new Column(Type.stringType(20), "name"),
+//                        new Column(Type.stringType(20), "dept_name"),
+//                        new Column(Type.intType(), "salary")
+//                },
+//                new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")});
+    }
+
+    public static void createTableWithSchema() throws IOException {
+        schema = Schema.getSchema();
+        schema.createDatabase(new DataBase("test"));
+        DataBase db = schema.getDatabaseByName("test");
+        db.createTable(
+                new Table(db, "employee",
+                        new Column[]{new Column(Type.intType(), "id"),
+                                new Column(Type.stringType(20), "name"),
+                                new Column(Type.stringType(20), "dept_name"),
+                                new Column(Type.intType(), "salary")
+                        },
+                        new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")})
+        );
+
     }
 
     public static void insetTestData() throws IOException {
+        Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
 
 
         System.out.println("Row size = " + table.getRowSize());
@@ -43,6 +63,7 @@ public class Test {
     }
 
     public static void testDelete() {
+        Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         try {
             Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "id"), new intData(12121));
             // System.out.println("Row[0] data length = " + a.data.length);
@@ -58,6 +79,7 @@ public class Test {
     }
 
     public static void testSearch() throws IOException {
+        Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         // Case One: equal search
         System.out.println("== Case 1: Find id=12121");
         Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "id"), new intData(12121));
@@ -92,6 +114,7 @@ public class Test {
     }
 
     public static void testUpdate() throws IOException {
+        Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         // To decrease all member's salary 1000
         System.out.println("========= All members before update========");
         Table.RowIterator iter = table.scanAll();
@@ -112,11 +135,10 @@ public class Test {
     }
 
     public static void main(String[] args) throws IOException {
-        createTableWithMetaData();
-        insetTestData();
-        table.commit();
+        //createTableWithMetaData();
+        //createTableWithSchema();
+        //insetTestData();
         testSearch();
         testUpdate();
-        table.commit();
     }
 }

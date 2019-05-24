@@ -1,9 +1,7 @@
-
 import data.Type;
 import data.intData;
 import data.typedData;
 import data.typedDataFactor;
-
 
 import index.BPlusTree;
 
@@ -26,8 +24,8 @@ public class Table {
     private long freeListPointer = -1;
     private List<BPlusTree> indexTrees;
 
-    public static final String DATA_EXTENSION = ".data";
-    public static final String INDEX_EXTENSION = ".idx";
+    private static final String DATA_EXTENSION = ".data";
+    private static final String INDEX_EXTENSION = ".idx";
 
 
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException {
@@ -69,6 +67,10 @@ public class Table {
             indexTrees.add(new BPlusTree(idxColumn.getColumnType(), indexFileName));
         }
 
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     /**
@@ -250,6 +252,14 @@ public class Table {
         return buffer.array();
     }
 
+    /**
+     *
+     * @param db 数据库
+     * @param schema 元数据Byte
+     * @return 表
+     * @throws IllegalArgumentException 元数据有误
+     * @throws IOException 元数据有误
+     */
     public static Table fromSchemaBytes(DataBase db, byte[] schema) throws IllegalArgumentException, IOException {
         ByteBuffer buffer = ByteBuffer.wrap(schema);
         byte[] magic = new byte[5];
