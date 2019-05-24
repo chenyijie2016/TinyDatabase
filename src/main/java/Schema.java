@@ -4,20 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Schema {
-    private static Schema schema;
+    private static Schema schema = new Schema();
 
-    static {
-        try {
-            schema = new Schema();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
+
 
     private static final String METADATA_FILE = "schema";
     private List<DataBase> dataBases;
 
-    private Schema() throws IOException {
+    private Schema() {
         dataBases = new ArrayList<>();
         FileInputStream inputStream = null;
         try {
@@ -26,22 +21,26 @@ public class Schema {
             System.out.println("initializing default database schema");
             System.out.println(inputStream);
         } finally {
-            if (inputStream != null) {
-                DataInputStream in = new DataInputStream(inputStream);
-                int dataBaseNumber = in.readInt();
-                for (int i = 0; i < dataBaseNumber; i++) {
-                    int nameLength = in.readInt();
-                    byte[] nameBytes = new byte[nameLength];
-                    in.read(nameBytes);
-                    dataBases.add(DataBase.readFromFile(new String(nameBytes)));
+            try {
+                if (inputStream != null) {
+                    DataInputStream in = new DataInputStream(inputStream);
+                    int dataBaseNumber = in.readInt();
+                    for (int i = 0; i < dataBaseNumber; i++) {
+                        int nameLength = in.readInt();
+                        byte[] nameBytes = new byte[nameLength];
+                        in.read(nameBytes);
+                        dataBases.add(DataBase.readFromFile(new String(nameBytes)));
+                    }
                 }
+            } catch (IOException e) {
+                    e.printStackTrace();
             }
         }
 
     }
 
     public static Schema getSchema() {
-        return schema;
+        return schema = new Schema();
     }
 
     private void updateSchema() throws IOException {

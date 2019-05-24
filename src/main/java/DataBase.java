@@ -14,7 +14,7 @@ public class DataBase {
     }
 
     private DataBase() {
-
+        tables = new ArrayList<>();
     }
 
     public String getName() {

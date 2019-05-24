@@ -275,7 +275,8 @@ public class Table {
         Column[] columns = new Column[columnSize];
         for (int i = 0; i < columnSize; i++) {
             Type type;
-            switch (buffer.get()) {
+            byte flag = buffer.get();
+            switch (flag) {
                 case 1:
                     type = Type.intType();
                     break;
@@ -297,7 +298,7 @@ public class Table {
             }
             short nameSize = buffer.getShort();
             byte[] columnName = new byte[(int) nameSize];
-
+            buffer.get(columnName);
             columns[i] = new Column(type, new String(columnName));
         }
         int constraintSize = buffer.getInt();
