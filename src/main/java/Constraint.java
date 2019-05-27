@@ -7,9 +7,9 @@ public class Constraint {
     private ConstraintType type;
     private String columnName;
 
-    Constraint(Constraint.ConstraintType t, String s) {
-        type = t;
-        columnName = s;
+    Constraint(Constraint.ConstraintType type, String columnName) {
+        this.type = type;
+        this.columnName = columnName;
     }
 
     public String getColumnName() {
