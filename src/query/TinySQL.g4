@@ -1,7 +1,7 @@
 grammar TinySQL;
 
 parse
-: (sql_stmt_list | error)* EOF
+: (sqlStatementList | error)* EOF
 ;
 
 error
@@ -11,88 +11,88 @@ error
     }
 ;
 
-sql_stmt_list
- : ';'* sql_stmt ( ';'+ sql_stmt )* ';'*
+sqlStatementList
+ : ';'* sqlStatement ( ';'+ sqlStatement )* ';'*
  ;
 
 
-sql_stmt
-: create_database_stmt
-| show_databases_stmt
-| show_database_tables_stmt
-| create_table_stmt
-| insert_table_stmt
-| select_table_stmt
-| update_table_stmt
-| delete_table_stmt
-| drop_database_stmt
-| drop_table_stmt
-| use_database_stmt
+sqlStatement
+: createDatabaseStmt
+| showDatabasesStmt
+| showDatabaseTablesStmt
+| createTableStmt
+| insertTableStmt
+| selectTableStmt
+| updateTableStmt
+| deleteTableStmt
+| dropDatabaseStmt
+| dropTableStmt
+| useDatabaseStmt
 
 ;
 
-show_databases_stmt
+showDatabasesStmt
 :K_SHOW K_DATABASES
 ;
 
-show_database_tables_stmt
-:K_SHOW K_DATABASE database_name
+showDatabaseTablesStmt
+:K_SHOW K_DATABASE databaseName
 ;
 
-create_database_stmt
-: K_CREATE K_DATABASE database_name
+createDatabaseStmt
+: K_CREATE K_DATABASE databaseName
 ;
-create_table_stmt
+createTableStmt
  : K_CREATE K_TABLE
-   ( database_name '.' )? table_name
-   ( '(' column_def ( ',' column_def )* ( ',' table_constraint )* ')'
+   ( databaseName '.' )? tableName
+   ( '(' columnDefinition ( ',' columnDefinition )* ( ',' tableConstraint )* ')'
    )
  ;
 
-column_def
- : column_name type_name column_constraint*
+columnDefinition
+ : columnName typeName columnConstraint*
  ;
 
-table_constraint
-: ( K_PRIMARY K_KEY  ) '(' indexed_column ( ',' indexed_column )* ')'
+tableConstraint
+: ( K_PRIMARY K_KEY  ) '(' indexedColumn ( ',' indexedColumn )* ')'
 ;
 
-indexed_column
- : column_name ( K_ASC | K_DESC )?
+indexedColumn
+ : columnName ( K_ASC | K_DESC )?
  ;
 
-insert_table_stmt
-: K_INSERT K_INTO ( database_name '.' )? table_name ( '(' column_name ( ',' column_name )* ')' )?
-              ( K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )* )
+insertTableStmt
+: K_INSERT K_INTO tableName ( '(' columnName ( ',' columnName )* ')' )?
+              ( K_VALUES '(' expression ( ',' expression )* ')' ( ',' '(' expression ( ',' expression )* ')' )* )
 ;
 
-expr
-: literal_value
- | ( ( database_name '.' )? table_name '.' )? column_name
- | unary_operator expr
+expression
+: literalValue                                       # valueExpression
+ | ( tableName '.' )? columnName                     # tableColumnExpression
+ | unaryOperator expression                          # unaryExpression
 // | expr '||' expr
 // | expr ( '*' | '/' | '%' ) expr
- | expr ( '+' | '-' ) expr
+ | expression ( '+' | '-' ) expression                # addSubExpression
 // | expr ( '<<' | '>>' | '&' | '|' ) expr
- | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | '<>') expr
+ | expression ( '<' | '<=' | '>' | '>=' ) expression  # lessZGreaterExpression
+ | expression ( '=' | '==' | '!=' | '<>') expression  # euqalExpression
 // | expr K_AND expr
 // | expr K_OR expr
- | '(' expr ')'
+ | '(' expression ')'                                 # parenthesisExpression
 // | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
 // | expr K_IS K_NOT? expr
 // | expr K_NOT? K_BETWEEN expr K_AND expr
  ;
 
 
-unary_operator
+unaryOperator
  : '-'
  | '+'
  | '~'
  | K_NOT
  ;
 
-literal_value
+literalValue
 : NUMERIC_LITERAL
  | STRING_LITERAL
  | K_NULL
@@ -103,68 +103,68 @@ STRING_LITERAL
  ;
 
 
-select_table_stmt
-: K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
-     ( K_FROM ( table_name ( ',' table_name )* | join_clause ) )?
-     ( K_WHERE expr )?
+selectTableStmt
+: K_SELECT ( K_DISTINCT | K_ALL )? resultColumn ( ',' resultColumn )*
+     ( K_FROM ( tableName ( ',' tableName )* | joinClause ) )?
+     ( K_WHERE expression )?
 //     ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
 //   | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
 
-result_column
+resultColumn
  :
  | '*'
- | table_name '.' '*'
- | expr
+ | tableName '.' '*'
+ | expression
  ;
 
-join_clause
-:table_name ( join_operator table_name join_constraint )*
+joinClause
+:tableName ( joinOperator tableName join_constraint )*
 ;
 join_constraint
- : ( K_ON expr)?
+ : ( K_ON expression)?
  //  | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
-join_operator
+joinOperator
  : ','
  | K_NATURAL? ( K_LEFT K_OUTER? | K_INNER )? K_JOIN
  ;
 
 
-update_table_stmt
-: K_UPDATE table_name K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
+updateTableStmt
+: K_UPDATE tableName K_SET columnName '=' expression ( ',' columnName '=' expression )* ( K_WHERE expression )?
 ;
 
-delete_table_stmt
-: K_DELETE K_FROM table_name K_WHERE expr
-;
-
-
-
-drop_database_stmt
-: K_DROP K_DATABASE database_name
-;
-
-drop_table_stmt
-: K_DROP K_TABLE table_name
-;
-
-use_database_stmt
-: K_USE database_name
+deleteTableStmt
+: K_DELETE K_FROM tableName K_WHERE expression
 ;
 
 
 
+dropDatabaseStmt
+: K_DROP K_DATABASE databaseName
+;
 
-type_name
- : name ( '(' signed_number ')' )?
+dropTableStmt
+: K_DROP K_TABLE tableName
+;
+
+useDatabaseStmt
+: K_USE databaseName
+;
+
+
+
+
+typeName
+ : name ( '(' signedNumber ')' )?
  ;
-signed_number
+signedNumber
  : ( '+' | '-' )? NUMERIC_LITERAL
  ;
 
-column_constraint
+columnConstraint
 : K_PRIMARY K_KEY (K_ASC | K_DESC)?
 | K_NOT K_NULL
 ;
@@ -189,22 +189,22 @@ NUMERIC_LITERAL
 
 
 name
-: any_name
+: anyName
 ;
 
-database_name
- : any_name
+databaseName
+ : anyName
  ;
 
-table_name
- : any_name
+tableName
+ : anyName
  ;
 
-column_name
- : any_name
+columnName
+ : anyName
  ;
 
-any_name
+anyName
  : IDENTIFIER
  | keyword
  ;

@@ -1,0 +1,6 @@
+create table test(
+id int,
+name string(32),
+primary key(id)
+);
+create database test;
