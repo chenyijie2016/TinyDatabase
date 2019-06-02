@@ -1,4 +1,4 @@
-package query;
+package query.statement;
 
 public class Statement {
     public static final int CREATE_DATEBASE = 1;
