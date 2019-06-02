@@ -1102,21 +1102,21 @@ public class TinySQLParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class LessZGreaterExpressionContext extends ExpressionContext {
+	public static class LessGreaterExpressionContext extends ExpressionContext {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
-		public LessZGreaterExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
+		public LessGreaterExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterLessZGreaterExpression(this);
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterLessGreaterExpression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitLessZGreaterExpression(this);
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitLessGreaterExpression(this);
 		}
 	}
 	public static class ValueExpressionContext extends ExpressionContext {
@@ -1325,7 +1325,7 @@ public class TinySQLParser extends Parser {
 						break;
 					case 2:
 						{
-						_localctx = new LessZGreaterExpressionContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new LessGreaterExpressionContext(new ExpressionContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(244);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");

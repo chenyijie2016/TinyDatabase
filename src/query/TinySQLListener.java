@@ -128,17 +128,17 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code lessZGreaterExpression}
+	 * Enter a parse tree produced by the {@code lessGreaterExpression}
 	 * labeled alternative in {@link TinySQLParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void enterLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx);
+	void enterLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code lessZGreaterExpression}
+	 * Exit a parse tree produced by the {@code lessGreaterExpression}
 	 * labeled alternative in {@link TinySQLParser#expression}.
 	 * @param ctx the parse tree
 	 */
-	void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx);
+	void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code valueExpression}
 	 * labeled alternative in {@link TinySQLParser#expression}.

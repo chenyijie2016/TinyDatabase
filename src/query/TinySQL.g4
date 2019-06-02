@@ -74,7 +74,7 @@ expression
 // | expr ( '*' | '/' | '%' ) expr
  | expression ( '+' | '-' ) expression                # addSubExpression
 // | expr ( '<<' | '>>' | '&' | '|' ) expr
- | expression ( '<' | '<=' | '>' | '>=' ) expression  # lessZGreaterExpression
+ | expression ( '<' | '<=' | '>' | '>=' ) expression  # lessGreaterExpression
  | expression ( '=' | '==' | '!=' | '<>') expression  # euqalExpression
 // | expr K_AND expr
 // | expr K_OR expr

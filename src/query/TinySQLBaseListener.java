@@ -160,13 +160,13 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) { }
+	@Override public void enterLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) { }
+	@Override public void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
