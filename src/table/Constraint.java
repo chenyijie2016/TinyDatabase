@@ -1,3 +1,5 @@
+package table;
+
 public class Constraint {
     public enum ConstraintType {
         PRIMARY_KEY,
@@ -7,7 +9,7 @@ public class Constraint {
     private ConstraintType type;
     private String columnName;
 
-    Constraint(ConstraintType type, String columnName) {
+    public Constraint(ConstraintType type, String columnName) {
         this.type = type;
         this.columnName = columnName;
     }

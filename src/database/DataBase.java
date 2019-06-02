@@ -1,3 +1,7 @@
+package database;
+
+import table.Table;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +54,7 @@ public class DataBase {
         outputStream.close();
     }
 
-    static DataBase readFromFile(String name) throws FileNotFoundException, IOException {
+     public static DataBase readFromFile(String name) throws FileNotFoundException, IOException {
 
         FileInputStream inputStream = new FileInputStream(name + SCHEMA_EXTENSION);
         DataInputStream in = new DataInputStream(inputStream);
@@ -67,7 +71,7 @@ public class DataBase {
         return db;
     }
 
-    void createTable(Table table) throws IOException {
+    public void createTable(Table table) throws IOException {
         tables.add(table);
         updateSchema();
     }

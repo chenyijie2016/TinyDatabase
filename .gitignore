@@ -3,7 +3,7 @@
 out
 build
 data
-scheam
+schema
 *.idx
 *.meta
 *.data

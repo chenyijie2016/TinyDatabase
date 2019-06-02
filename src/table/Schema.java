@@ -1,3 +1,6 @@
+package table;
+
+import database.DataBase;
 
 import java.io.*;
 import java.util.ArrayList;

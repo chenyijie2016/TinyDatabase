@@ -1,29 +1,28 @@
-import data.typedData;
 import data.Type;
 import data.intData;
 import data.stringData;
+import database.DataBase;
+import table.*;
 
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.sql.DatabaseMetaData;
 
 
 public class Test {
-    //static Table table;
+    //static table.Table table;
     static Schema schema;
 
     public static void createTableWithMetaData() throws IOException {
         DataBase testDB = new DataBase("test");
-//        table = new Table(
+//        table = new table.Table(
 //                testDB,
 //                "employee",
-//                new Column[]{new Column(Type.intType(), "id"),
-//                        new Column(Type.stringType(20), "name"),
-//                        new Column(Type.stringType(20), "dept_name"),
-//                        new Column(Type.intType(), "salary")
+//                new table.Column[]{new table.Column(Type.intType(), "id"),
+//                        new table.Column(Type.stringType(20), "name"),
+//                        new table.Column(Type.stringType(20), "dept_name"),
+//                        new table.Column(Type.intType(), "salary")
 //                },
-//                new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")});
+//                new table.Constraint[]{new table.Constraint(table.Constraint.ConstraintType.PRIMARY_KEY, "id")});
     }
 
     public static void createTableWithSchema() throws IOException {
@@ -46,7 +45,7 @@ public class Test {
         Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
 
 
-        System.out.println("Row size = " + table.getRowSize());
+        System.out.println("table.Row size = " + table.getRowSize());
         table.insertRow(new Row(table, new Object[]{10101, "Srinivasan", "Comp. Sci.", 65000}));
         table.insertRow(new Row(table, new Object[]{12121, "Wu", "Finance", 90000}));
         table.insertRow(new Row(table, new Object[]{15151, "Mozart", "Music", 40000}));
@@ -66,10 +65,10 @@ public class Test {
         Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         try {
             Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "id"), new intData(12121));
-            // System.out.println("Row[0] data length = " + a.data.length);
+            // System.out.println("table.Row[0] data length = " + a.data.length);
             Row b = a.next();
             while (b != null) {
-                System.out.println("Found Row:" + b);
+                System.out.println("Found table.Row:" + b);
                 b = a.next();
             }
         } catch (Exception e) {

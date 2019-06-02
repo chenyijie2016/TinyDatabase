@@ -1,8 +1,12 @@
+package table;
+
+
 import data.Type;
 import data.intData;
 import data.typedData;
 import data.typedDataFactor;
 
+import database.DataBase;
 import index.BPlusTree;
 
 
@@ -137,7 +141,7 @@ public class Table {
 
         }
         // 如果删除的元组存在于磁盘上，则需要改写freeListPointer
-        //if (row.cachedStatus == Row.STATUS.OnlyInDisk || row.cachedStatus == Row.STATUS.MemoryDisk) {
+        //if (row.cachedStatus == table.Row.STATUS.OnlyInDisk || row.cachedStatus == table.Row.STATUS.MemoryDisk) {
         dataFile.seek(row.position);
         dataFile.writeLong(freeListPointer);
         freeListPointer = row.position;
@@ -215,7 +219,7 @@ public class Table {
         return sum;
     }
 
-    byte[] toSchemaBytes() {
+    public byte[] toSchemaBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         buffer.put("TABLE".getBytes()); // Magic Number
         buffer.putInt(tableName.length());
@@ -266,7 +270,7 @@ public class Table {
      * @throws IllegalArgumentException 元数据有误
      * @throws IOException              元数据有误
      */
-    static Table fromSchemaBytes(DataBase db, byte[] schema) throws IllegalArgumentException, IOException {
+    public static Table fromSchemaBytes(DataBase db, byte[] schema) throws IllegalArgumentException, IOException {
         ByteBuffer buffer = ByteBuffer.wrap(schema);
         byte[] magic = new byte[5];
         buffer.get(magic, 0, 5);
@@ -341,11 +345,11 @@ public class Table {
     /**
      * 获取全体的元组的迭代器，利用第一个索引的全体迭代器实现
      */
-    RowIterator scanAll() throws IOException {
+    public RowIterator scanAll() throws IOException {
         return new RowIndexIterator(this, indexTrees.get(0).scanAll());
     }
 
-    RowIterator scanEqual(Column column, typedData key) throws IOException {
+    public RowIterator scanEqual(Column column, typedData key) throws IOException {
         // 查询指定属性的值等于key的元组， 如果查询在索引列的话暂时只返回一个
         Long position;
         if (indexColumns.indexOf(column) != -1) {
@@ -382,7 +386,7 @@ public class Table {
         return new RowIndexIterator(t, iter);
     }
 
-    abstract class RowIterator implements Iterator<Row> {
+    public abstract class RowIterator implements Iterator<Row> {
         abstract public boolean hasNext();
 
         abstract public Row next();
@@ -435,7 +439,7 @@ public class Table {
                 try {
                     return readRow(new Row(table, iter.next()));
                 } catch (IOException e) {
-                    System.out.println("Can not Iterator Row");
+                    System.out.println("Can not Iterator table.Row");
                     System.exit(0);
                 }
                 return null;
