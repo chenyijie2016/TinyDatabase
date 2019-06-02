@@ -3,7 +3,9 @@ id int not null,
 name string(32) not null,
 primary key(id)
 );
-create table database1.test2(
-id int,
-name string(16) primary key not null
-);
+create database test;
+show databases;
+select *
+from table1 join table2
+where id = 123;
+show database test;

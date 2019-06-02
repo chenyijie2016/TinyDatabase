@@ -21,7 +21,7 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void enterSqlStatementList(TinySQLParser.SqlStatementListContext ctx) {
         statementList = new ArrayList<>();
-        System.out.println(ctx.start);
+        // System.out.println(ctx.start);
     }
 
 
@@ -110,9 +110,24 @@ public class Listener extends TinySQLBaseListener {
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a, b);
         statement.setSql(ctx.start.getInputStream().getText(interval));
-        System.out.println(ctx.getRuleIndex());
         statementList.add(statement);
         statement = null;
+    }
+
+
+    @Override
+    public void enterCreateDatabaseStmt(TinySQLParser.CreateDatabaseStmtContext ctx) {
+        statement = new SchemaStatement(Statement.CREATE_DATABASE).setDatabaseName(ctx.databaseName().getText());
+    }
+
+    @Override
+    public void enterShowDatabasesStmt(TinySQLParser.ShowDatabasesStmtContext ctx) {
+        statement = new SchemaStatement(Statement.SHOW_DATABASES);
+    }
+
+    @Override
+    public void enterShowDatabaseTablesStmt(TinySQLParser.ShowDatabaseTablesStmtContext ctx) {
+        statement = new SchemaStatement(Statement.SHOW_DATABASE_TABLE).setDatabaseName(ctx.databaseName().getText());
     }
 
 
