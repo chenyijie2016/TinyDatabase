@@ -2,7 +2,7 @@ package query.statement;
 
 import query.Result;
 
-public class SchemaStatement extends Statement {
+public class CreateTableStatement extends Statement {
 
     @Override
     public Result execute() {
