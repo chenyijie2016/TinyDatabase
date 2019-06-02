@@ -1,10 +1,9 @@
 create table test(
-id int,
-name string(32),
+id int not null,
+name string(32) not null,
 primary key(id)
 );
 create table database1.test2(
 id int,
-name string(32),
-primary key(id)
+name string(16) primary key not null
 );

@@ -7,3 +7,5 @@ schema
 *.idx
 *.meta
 *.data
+*.bin
+gen
