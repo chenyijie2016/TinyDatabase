@@ -131,7 +131,7 @@ literalValue
 selectTableStmt
 resultColumn
 joinClause
-join_constraint
+joinConstraint
 joinOperator
 updateTableStmt
 deleteTableStmt

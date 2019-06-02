@@ -262,15 +262,15 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitJoinClause(TinySQLParser.JoinClauseContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link TinySQLParser#join_constraint}.
+	 * Enter a parse tree produced by {@link TinySQLParser#joinConstraint}.
 	 * @param ctx the parse tree
 	 */
-	void enterJoin_constraint(TinySQLParser.Join_constraintContext ctx);
+	void enterJoinConstraint(TinySQLParser.JoinConstraintContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link TinySQLParser#join_constraint}.
+	 * Exit a parse tree produced by {@link TinySQLParser#joinConstraint}.
 	 * @param ctx the parse tree
 	 */
-	void exitJoin_constraint(TinySQLParser.Join_constraintContext ctx);
+	void exitJoinConstraint(TinySQLParser.JoinConstraintContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinySQLParser#joinOperator}.
 	 * @param ctx the parse tree

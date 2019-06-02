@@ -304,13 +304,13 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterJoin_constraint(TinySQLParser.Join_constraintContext ctx) { }
+	@Override public void enterJoinConstraint(TinySQLParser.JoinConstraintContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitJoin_constraint(TinySQLParser.Join_constraintContext ctx) { }
+	@Override public void exitJoinConstraint(TinySQLParser.JoinConstraintContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -119,9 +119,9 @@ resultColumn
  ;
 
 joinClause
-:tableName ( joinOperator tableName join_constraint )*
+:tableName ( joinOperator tableName joinConstraint )*
 ;
-join_constraint
+joinConstraint
  : ( K_ON expression)?
  //  | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;

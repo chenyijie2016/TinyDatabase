@@ -32,7 +32,7 @@ public class TinySQLParser extends Parser {
 		RULE_createTableStmt = 7, RULE_columnDefinition = 8, RULE_tableConstraint = 9, 
 		RULE_indexedColumn = 10, RULE_insertTableStmt = 11, RULE_expression = 12, 
 		RULE_unaryOperator = 13, RULE_literalValue = 14, RULE_selectTableStmt = 15, 
-		RULE_resultColumn = 16, RULE_joinClause = 17, RULE_join_constraint = 18, 
+		RULE_resultColumn = 16, RULE_joinClause = 17, RULE_joinConstraint = 18, 
 		RULE_joinOperator = 19, RULE_updateTableStmt = 20, RULE_deleteTableStmt = 21, 
 		RULE_dropDatabaseStmt = 22, RULE_dropTableStmt = 23, RULE_useDatabaseStmt = 24, 
 		RULE_typeName = 25, RULE_signedNumber = 26, RULE_columnConstraint = 27, 
@@ -44,7 +44,7 @@ public class TinySQLParser extends Parser {
 			"showDatabaseTablesStmt", "createDatabaseStmt", "createTableStmt", "columnDefinition", 
 			"tableConstraint", "indexedColumn", "insertTableStmt", "expression", 
 			"unaryOperator", "literalValue", "selectTableStmt", "resultColumn", "joinClause", 
-			"join_constraint", "joinOperator", "updateTableStmt", "deleteTableStmt", 
+			"joinConstraint", "joinOperator", "updateTableStmt", "deleteTableStmt", 
 			"dropDatabaseStmt", "dropTableStmt", "useDatabaseStmt", "typeName", "signedNumber", 
 			"columnConstraint", "name", "databaseName", "tableName", "columnName", 
 			"anyName", "keyword"
@@ -1711,11 +1711,11 @@ public class TinySQLParser extends Parser {
 		public JoinOperatorContext joinOperator(int i) {
 			return getRuleContext(JoinOperatorContext.class,i);
 		}
-		public List<Join_constraintContext> join_constraint() {
-			return getRuleContexts(Join_constraintContext.class);
+		public List<JoinConstraintContext> joinConstraint() {
+			return getRuleContexts(JoinConstraintContext.class);
 		}
-		public Join_constraintContext join_constraint(int i) {
-			return getRuleContext(Join_constraintContext.class,i);
+		public JoinConstraintContext joinConstraint(int i) {
+			return getRuleContext(JoinConstraintContext.class,i);
 		}
 		public JoinClauseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1751,7 +1751,7 @@ public class TinySQLParser extends Parser {
 				setState(300);
 				tableName();
 				setState(301);
-				join_constraint();
+				joinConstraint();
 				}
 				}
 				setState(307);
@@ -1771,28 +1771,28 @@ public class TinySQLParser extends Parser {
 		return _localctx;
 	}
 
-	public static class Join_constraintContext extends ParserRuleContext {
+	public static class JoinConstraintContext extends ParserRuleContext {
 		public TerminalNode K_ON() { return getToken(TinySQLParser.K_ON, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
-		public Join_constraintContext(ParserRuleContext parent, int invokingState) {
+		public JoinConstraintContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_join_constraint; }
+		@Override public int getRuleIndex() { return RULE_joinConstraint; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterJoin_constraint(this);
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterJoinConstraint(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitJoin_constraint(this);
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitJoinConstraint(this);
 		}
 	}
 
-	public final Join_constraintContext join_constraint() throws RecognitionException {
-		Join_constraintContext _localctx = new Join_constraintContext(_ctx, getState());
-		enterRule(_localctx, 36, RULE_join_constraint);
+	public final JoinConstraintContext joinConstraint() throws RecognitionException {
+		JoinConstraintContext _localctx = new JoinConstraintContext(_ctx, getState());
+		enterRule(_localctx, 36, RULE_joinConstraint);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
