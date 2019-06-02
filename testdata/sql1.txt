@@ -4,3 +4,8 @@ name string(32),
 primary key(id)
 );
 create database test;
+show databases;
+select *
+from table1 join table2
+where id = 123;
+show database test;

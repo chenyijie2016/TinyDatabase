@@ -7,9 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import query.statement.SchemaStatement;
 import query.statement.Statement;
+import table.Schema;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -39,10 +42,12 @@ public class ListenerTest {
         try {
             CharStream in = CharStreams.fromFileName("testdata/sql1.txt");
             prepareEnv(in);
-            assertEquals(2, listener.getStatementList().size());
-            for (Statement statement : listener.getStatementList()) {
-                System.out.println(statement);
-            }
+            List<Statement> statementList = listener.getStatementList();
+            assertEquals(2, statementList.size());
+//            for (Statement statement : statementList) {
+//                System.out.println(statement);
+//            }
+            assertTrue(statementList.get(1) instanceof SchemaStatement);
         } catch (IOException e) {
             return;
         }

@@ -1,4 +1,7 @@
 package query;
 
-public class Result {
+import table.TableBase;
+
+public class Result extends TableBase {
+
 }

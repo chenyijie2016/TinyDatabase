@@ -3,7 +3,7 @@ package query.statement;
 import query.Result;
 
 public abstract class Statement {
-    public static final int CREATE_DATEBASE = 1;
+    public static final int CREATE_DATABASE = 1;
     public static final int SHOW_DATABASES = 2;
     public static final int SHOW_DATABASE_TABLE = 3;
     public static final int CREATE_TABLE = 4;
