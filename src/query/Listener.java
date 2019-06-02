@@ -21,17 +21,43 @@ public class Listener extends TinySQLBaseListener {
     }
 
 
-//    @Override
-//    public void enterCreateDatabaseStmt(TinySQLParser.CreateDatabaseStmtContext ctx) {
-//        super.enterCreateDatabaseStmt(ctx);
-//        statement = new CreateDatabaseStatement(ctx.databaseName().getText());
-//    }
-
-
     @Override
     public void enterCreateTableStmt(TinySQLParser.CreateTableStmtContext ctx) {
         super.enterCreateTableStmt(ctx);
-        statement = new query.statement.CreateTableStatement();
+        String databaseName = ctx.databaseName() == null ? "" : ctx.databaseName().getText();
+        int columnNum = ctx.columnDefinition().size();
+        String[] columnsName = new String[columnNum];
+        String[] columnsTypeName = new String[columnNum];
+        Boolean[] columnsIsNotNull = new Boolean[columnNum];
+        for (int i = 0; i < columnNum; i++) {
+            columnsName[i] = ctx.columnDefinition(i).columnName().getText();
+            columnsTypeName[i] = ctx.columnDefinition(i).typeName().getText();
+
+
+
+
+
+
+        }
+        String[] primaryKeys;
+        Boolean[] primaryKeysAsc;
+        int primaryKeySize = 0;
+        if (ctx.tableConstraint() != null) {
+            primaryKeySize = ctx.tableConstraint().indexedColumn().size();
+            primaryKeys = new String[primaryKeySize];
+            primaryKeysAsc = new Boolean[primaryKeySize];
+            for (int i = 0; i < primaryKeySize; i++) {
+                primaryKeys[i] = ctx.tableConstraint().indexedColumn(i).columnName().getText();
+                primaryKeysAsc[i] = (ctx.tableConstraint().indexedColumn(i).K_DESC() == null);
+            }
+        }
+        else {
+            primaryKeys = new String[0];
+            primaryKeysAsc = new Boolean[0];
+        }
+        statement = new query.statement.CreateTableStatement(databaseName, ctx.tableName().getText(),
+                                                             columnNum, columnsName, columnsTypeName,
+                                                             primaryKeySize, primaryKeys, primaryKeysAsc);
     }
 
 
@@ -44,5 +70,13 @@ public class Listener extends TinySQLBaseListener {
         System.out.println(ctx.getRuleIndex());
         statementList.add(statement);
         statement = null;
+    }
+
+
+    @Override
+    public void exitSqlStatementList(TinySQLParser.SqlStatementListContext ctx) {
+        for (Statement s: statementList) {
+            s.execute();
+        }
     }
 }

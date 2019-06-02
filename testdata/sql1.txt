@@ -3,4 +3,8 @@ id int,
 name string(32),
 primary key(id)
 );
-create database test;
+create table database1.test2(
+id int,
+name string(32),
+primary key(id)
+);

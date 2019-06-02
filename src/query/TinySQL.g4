@@ -45,7 +45,7 @@ createDatabaseStmt
 createTableStmt
  : K_CREATE K_TABLE
    ( databaseName '.' )? tableName
-   ( '(' columnDefinition ( ',' columnDefinition )* ( ',' tableConstraint )* ')'
+   ( '(' columnDefinition ( ',' columnDefinition )* ( ',' tableConstraint )? ')'
    )
  ;
 

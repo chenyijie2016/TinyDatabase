@@ -1,4 +1,4 @@
-// Generated from C:/Users/cyj/Desktop/TinyDatabase/src/query\TinySQL.g4 by ANTLR 4.7.2
+// Generated from query/TinySQL.g4 by ANTLR 4.7.2
 package query;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
