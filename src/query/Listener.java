@@ -24,7 +24,7 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void enterSqlStatement(TinySQLParser.SqlStatementContext ctx) {
         super.enterSqlStatement(ctx);
-        statement = new Statement();
+        //statement = new Statement();
         int a = ctx.start.getStartIndex();
         int b = ctx.stop.getStopIndex();
         Interval interval = new Interval(a, b);
