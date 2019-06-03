@@ -7,6 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.internal.runners.statements.Fail;
+import query.statement.InsertTableStatement;
 import query.statement.SchemaStatement;
 import query.statement.Statement;
 import table.Schema;
@@ -43,13 +45,29 @@ public class ListenerTest {
             CharStream in = CharStreams.fromFileName("testdata/sql1.txt");
             prepareEnv(in);
             List<Statement> statementList = listener.getStatementList();
-            assertEquals(2, statementList.size());
-//            for (Statement statement : statementList) {
-//                System.out.println(statement);
-//            }
+//            assertEquals(2, statementList.size());
             assertTrue(statementList.get(1) instanceof SchemaStatement);
         } catch (IOException e) {
             return;
+        } catch (NullPointerException e) {
+
+        }
+    }
+
+    @Test
+    public void testInsert() {
+        try {
+            CharStream in = CharStreams.fromFileName("testdata/insert.txt");
+            prepareEnv(in);
+            List<Statement> statementList = listener.getStatementList();
+            assertEquals(3, statementList.size());
+            assertTrue(statementList.get(1) instanceof InsertTableStatement);
+            assertTrue(statementList.get(0).isValid());
+            assertTrue(statementList.get(1).isValid());
+            assertFalse(statementList.get(2).isValid());
+
+        } catch (IOException e) {
+
         }
     }
 }

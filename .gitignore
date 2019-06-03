@@ -9,3 +9,5 @@ schema
 *.data
 *.bin
 gen
+classes
+.DS_STORE

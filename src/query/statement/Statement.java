@@ -18,6 +18,8 @@ public abstract class Statement {
 
     public String sql;
     public int type;
+    private boolean valid = true;
+    private String message;
 
     public void setSql(String sql) {
         this.sql = sql;
@@ -37,4 +39,20 @@ public abstract class Statement {
     }
 
     public abstract Result execute();
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

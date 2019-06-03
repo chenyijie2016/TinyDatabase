@@ -16,16 +16,15 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 
-public class Table {
+public class Table extends TableBase {
     private static final String DATA_EXTENSION = ".data";
     private static final String INDEX_EXTENSION = ".idx";
 
     private DataBase database; // 所属的数据库
-    private String tableName; // 表名
     private List<Column> indexColumns; // 索引属性列表
     private RandomAccessFile dataFile; // 数据源文件
     private Constraint[] constraints; // 约束
-    private List<Column> columns; // 属性列表
+
     private boolean hasPrimaryKey = false; // 是否指定了主键
     private int uniqueID = 0; // 默认的自增主键当前值
     private long freeListPointer = -1;
@@ -141,11 +140,9 @@ public class Table {
 
         }
         // 如果删除的元组存在于磁盘上，则需要改写freeListPointer
-        //if (row.cachedStatus == table.Row.STATUS.OnlyInDisk || row.cachedStatus == table.Row.STATUS.MemoryDisk) {
         dataFile.seek(row.position);
         dataFile.writeLong(freeListPointer);
         freeListPointer = row.position;
-        //}
     }
 
     /**
@@ -168,9 +165,7 @@ public class Table {
 
     }
 
-    public List<Column> getColumns() {
-        return columns;
-    }
+
 
     /**
      * 更新一行数据，先删除再插入

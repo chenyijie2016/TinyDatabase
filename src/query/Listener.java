@@ -4,6 +4,7 @@ import data.Type;
 import org.antlr.v4.runtime.misc.Interval;
 import query.statement.*;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -15,13 +16,15 @@ import query.expression.*;
 public class Listener extends TinySQLBaseListener {
     private List<Statement> statementList;
     private Statement statement;
-    private Stack<ValueExpression> valueExpressionStack = new Stack<ValueExpression>();
-    private Stack<CompareExpression> compareExpressionStack = new Stack<CompareExpression>();
+    private Stack<ValueExpression> valueExpressionStack = new Stack<>();
+    private Stack<CompareExpression> compareExpressionStack = new Stack<>();
     private BaseData baseExpressionValue;
+    private List<String> expressionValueList;
 
     public List<Statement> getStatementList() {
         return statementList;
     }
+
 
     @Override
     public void enterSqlStatementList(TinySQLParser.SqlStatementListContext ctx) {
@@ -35,12 +38,16 @@ public class Listener extends TinySQLBaseListener {
     public void enterLiteralValue(TinySQLParser.LiteralValueContext ctx) {
         if (ctx.NUMERIC_LITERAL() != null) {
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.NUMBER, ctx.NUMERIC_LITERAL().getText());
+            expressionValueList.add(ctx.NUMERIC_LITERAL().getText());
         }
         else if (ctx.STRING_LITERAL() != null) {
-            baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, ctx.STRING_LITERAL().getText());
+            String str = ctx.STRING_LITERAL().getText();
+            baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, str.substring(1, str.length() - 1));
+            expressionValueList.add(str.substring(1, str.length() - 1));
         }
         else {
             baseExpressionValue = new BaseData();
+            expressionValueList.add(null);
         }
     }
 
@@ -256,6 +263,40 @@ public class Listener extends TinySQLBaseListener {
 
 
     @Override
+    public void enterInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx) {
+        InsertTableStatement stmt = new InsertTableStatement();
+        stmt.setTableName(ctx.tableName().getText());
+        if (ctx.columnName().size() > 0 && ctx.columnName().size() != ctx.expression().size()) {
+            stmt.setValid(false);
+            stmt.setMessage("SQL Parse Error in [Insert Statement]: number of column must equals to number of values");
+        } else if (ctx.columnName().size() > 0) {
+            stmt.setSpecifiedAttribute(true);
+        }
+
+        expressionValueList = new ArrayList<>();
+        statement = stmt;
+    }
+
+    @Override
+    public void exitInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx) {
+        InsertTableStatement stmt = (InsertTableStatement) statement;
+        if (stmt.isSpecifiedAttribute()) {
+
+            for (TinySQLParser.ColumnNameContext column : ctx.columnName()) {
+                if (stmt.getInsertedData().containsKey(column.getText())) {
+                    stmt.setValid(false);
+                    stmt.setMessage("SQL parse Error in [Insert Statement]: duplicate column name");
+                    return;
+                } else {
+                    stmt.getInsertedData().put(column.getText(), expressionValueList.get(ctx.columnName().indexOf(column)));
+                }
+            }
+        }
+        expressionValueList = null;
+
+    }
+
+    @Override
     public void enterCreateDatabaseStmt(TinySQLParser.CreateDatabaseStmtContext ctx) {
         statement = new SchemaStatement(Statement.CREATE_DATABASE).setDatabaseName(ctx.databaseName().getText());
     }
@@ -270,6 +311,16 @@ public class Listener extends TinySQLBaseListener {
         statement = new SchemaStatement(Statement.SHOW_DATABASE_TABLE).setDatabaseName(ctx.databaseName().getText());
     }
 
+
+    @Override
+    public void enterDropDatabaseStmt(TinySQLParser.DropDatabaseStmtContext ctx) {
+        statement = new SchemaStatement(Statement.DROP_DATABASE).setDatabaseName(ctx.databaseName().getText());
+    }
+
+    @Override
+    public void enterDropTableStmt(TinySQLParser.DropTableStmtContext ctx) {
+        statement = new SchemaStatement(Statement.DROP_TABLE).setTableName(ctx.tableName().getText());
+    }
 
     @Override
     public void exitSqlStatementList(TinySQLParser.SqlStatementListContext ctx) {

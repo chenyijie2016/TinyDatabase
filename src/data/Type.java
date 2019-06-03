@@ -1,5 +1,7 @@
 package data;
 
+import org.junit.Test;
+
 public class Type {
     private TYPE type;
     private long size;
@@ -9,7 +11,8 @@ public class Type {
         LONG,
         DOUBLE,
         FLOAT,
-        STRING
+        STRING,
+        NULL
     }
 
     Type(TYPE t) {
@@ -58,6 +61,10 @@ public class Type {
 
     public static Type stringType(long s) {
         return new Type(TYPE.STRING, s);
+    }
+
+    public static Type nullType() {
+        return new Type(TYPE.NULL);
     }
 
     public boolean equals(Object obj) {
