@@ -71,19 +71,22 @@ expression
  | ( tableName '.' )? columnName                     # tableColumnExpression
  | unaryOperator expression                          # unaryExpression
 // | expr '||' expr
-// | expr ( '*' | '/' | '%' ) expr
- | expression ( '+' | '-' ) expression                # addSubExpression
-// | expr ( '<<' | '>>' | '&' | '|' ) expr
- | expression ( '<' | '<=' | '>' | '>=' ) expression  # lessZGreaterExpression
- | expression ( '=' | '==' | '!=' | '<>') expression  # euqalExpression
-// | expr K_AND expr
-// | expr K_OR expr
- | '(' expression ')'                                 # parenthesisExpression
-// | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
-// | expr K_IS K_NOT? expr
-// | expr K_NOT? K_BETWEEN expr K_AND expr
+// | expression ( '*' | '/' | '%' ) expression
+ | expression ( '+' | '-' ) expression               # addSubExpression
+// | expression ( '<<' | '>>' | '&' | '|' ) expression
+ | '(' expression ')'                                # parenthesisExpression
  ;
 
+conditionExpression
+: expression ( '<' | '<=' | '>' | '>=' ) expression  # lessZGreaterExpression
+ | expression ( '=' | '==' | '!=' | '<>') expression # euqalExpression
+ | '(' conditionExpression ')'                       # parenthesisConditionExpression
+// | conditionExpression K_AND conditionExpression
+// | conditionExpression K_OR conditionExpression
+// | expression ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
+// | expression K_IS K_NOT? expression
+// | expression K_NOT? K_BETWEEN expression K_AND expression
+;
 
 unaryOperator
  : '-'
@@ -106,7 +109,7 @@ STRING_LITERAL
 selectTableStmt
 : K_SELECT ( K_DISTINCT | K_ALL )? resultColumn ( ',' resultColumn )*
      ( K_FROM ( tableName ( ',' tableName )* | joinClause ) )?
-     ( K_WHERE expression )?
+     ( K_WHERE conditionExpression )?
 //     ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
 //   | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
  ;
@@ -133,11 +136,11 @@ joinOperator
 
 
 updateTableStmt
-: K_UPDATE tableName K_SET columnName '=' expression ( ',' columnName '=' expression )* ( K_WHERE expression )?
+: K_UPDATE tableName K_SET columnName '=' expression ( ',' columnName '=' expression )* ( K_WHERE conditionExpression )?
 ;
 
 deleteTableStmt
-: K_DELETE K_FROM tableName K_WHERE expression
+: K_DELETE K_FROM tableName K_WHERE conditionExpression
 ;
 
 

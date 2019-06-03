@@ -6,13 +6,18 @@ import query.statement.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import table.*;
 import common.Tokens;
+import query.expression.*;
 
 public class Listener extends TinySQLBaseListener {
     private List<Statement> statementList;
     private Statement statement;
+    private Stack<ValueExpression> valueExpressionStack = new Stack<ValueExpression>();
+    private Stack<CompareExpression> compareExpressionStack = new Stack<CompareExpression>();
+    private BaseData baseExpressionValue;
 
     public List<Statement> getStatementList() {
         return statementList;
@@ -25,9 +30,109 @@ public class Listener extends TinySQLBaseListener {
     }
 
 
+    // DEAL WITH EXPRESSIONS
+    @Override
+    public void enterLiteralValue(TinySQLParser.LiteralValueContext ctx) {
+        if (ctx.NUMERIC_LITERAL() != null) {
+            baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.NUMBER, ctx.NUMERIC_LITERAL().getText());
+        }
+        else if (ctx.STRING_LITERAL() != null) {
+            baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, ctx.STRING_LITERAL().getText());
+        }
+        else {
+            baseExpressionValue = new BaseData();
+        }
+    }
+
+
+    @Override
+    public void exitValueExpression(TinySQLParser.ValueExpressionContext ctx) {
+        valueExpressionStack.push(new ValueExpression(baseExpressionValue));
+    }
+
+
+    @Override
+    public void exitTableColumnExpression(TinySQLParser.TableColumnExpressionContext ctx) {
+        String tableName = ctx.tableName() == null ? "" : ctx.tableName().getText();
+        baseExpressionValue = new BaseData(tableName, ctx.columnName().getText());
+        valueExpressionStack.push(new ValueExpression(baseExpressionValue));
+    }
+
+
+    @Override
+    public void exitUnaryExpression(TinySQLParser.UnaryExpressionContext ctx) {
+        int rule_type = ctx.unaryOperator().getRuleIndex();
+        ValueExpression.SUB_TYPE subType;
+        switch (rule_type) {
+            case 0:
+                subType = ValueExpression.SUB_TYPE.NEG;
+                break;
+            case 1:
+                subType = ValueExpression.SUB_TYPE.POS;
+                break;
+            case 2:
+                subType = ValueExpression.SUB_TYPE.BIT_REVERSE;
+                break;
+            default:
+                subType = ValueExpression.SUB_TYPE.NOT;
+                break;
+        }
+        valueExpressionStack.push(new ValueExpression(subType, valueExpressionStack.pop()));
+    }
+
+
+    @Override
+    public void exitAddSubExpression(TinySQLParser.AddSubExpressionContext ctx) {
+        ValueExpression b = valueExpressionStack.pop();
+        ValueExpression a = valueExpressionStack.pop();
+        if (ctx.getChild(1).getText().charAt(0) == '+') {
+            valueExpressionStack.push(new ValueExpression(ValueExpression.SUB_TYPE.ADD, a, b));
+        }
+        else {
+            valueExpressionStack.push(new ValueExpression(ValueExpression.SUB_TYPE.MINUS, a, b));
+        }
+    }
+
+
+    @Override
+    public void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) {
+        ValueExpression b = valueExpressionStack.pop();
+        ValueExpression a = valueExpressionStack.pop();
+        switch (ctx.getChild(1).getText()) {
+            case "<":
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.LT, a, b));
+                break;
+            case "<=":
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.LTE, a, b));
+                break;
+            case ">":
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.GT, a, b));
+                break;
+            default:
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.GTE, a, b));
+                break;
+        }
+    }
+
+
+    @Override
+    public void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) {
+        ValueExpression b = valueExpressionStack.pop();
+        ValueExpression a = valueExpressionStack.pop();
+        switch (ctx.getChild(1).getText()) {
+            case "=":
+            case "==":
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.EQ, a, b));
+                break;
+            default:
+                compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.NEQ, a, b));
+                break;
+        }
+    }
+
+
     @Override
     public void enterCreateTableStmt(TinySQLParser.CreateTableStmtContext ctx) throws IllegalArgumentException {
-        super.enterCreateTableStmt(ctx);
         String databaseName = ctx.databaseName() == null ? "" : ctx.databaseName().getText();
         int columnNum = ctx.columnDefinition().size();
         Column[] columns = new Column[columnNum];
@@ -101,6 +206,41 @@ public class Listener extends TinySQLBaseListener {
         constraints.toArray(constraintsArray);
         statement = new query.statement.CreateTableStatement(databaseName, ctx.tableName().getText(), columns,
                                                              constraintsArray);
+    }
+
+
+    @Override
+    public void enterUpdateTableStmt(TinySQLParser.UpdateTableStmtContext ctx) {
+        String tableName = ctx.tableName().getText();
+        int newDataLength = ctx.columnName().size();
+        String[] columns = new String[newDataLength];
+        for (int i = 0; i < newDataLength; i++) {
+            columns[i] = ctx.columnName(i).getText();
+        }
+        statement = new query.statement.UpdateTableStatement(tableName, columns);
+    }
+
+
+    @Override
+    public void exitUpdateTableStmt(TinySQLParser.UpdateTableStmtContext ctx) {
+        ValueExpression[] data = new ValueExpression[valueExpressionStack.size()];
+        valueExpressionStack.copyInto(data);
+        valueExpressionStack.clear();
+        ((UpdateTableStatement)statement).setData(data);
+        ((UpdateTableStatement)statement).setWhereCondition(compareExpressionStack.pop());
+    }
+
+
+    @Override
+    public void enterDeleteTableStmt(TinySQLParser.DeleteTableStmtContext ctx) {
+        String tableName = ctx.tableName().getText();
+        statement = new query.statement.DeleteTableStatement(tableName);
+    }
+
+
+    @Override
+    public void exitDeleteTableStmt(TinySQLParser.DeleteTableStmtContext ctx) {
+        ((DeleteTableStatement)statement).setWhereCondition(compareExpressionStack.pop());
     }
 
 
