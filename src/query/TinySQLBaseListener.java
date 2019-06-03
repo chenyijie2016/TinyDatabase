@@ -1,4 +1,4 @@
-// Generated from C:/Users/cyj/Desktop/TinyDatabase/src/query\TinySQL.g4 by ANTLR 4.7.2
+// Generated from query/TinySQL.g4 by ANTLR 4.7.2
 package query;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -160,18 +160,6 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterValueExpression(TinySQLParser.ValueExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -191,18 +179,6 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitAddSubExpression(TinySQLParser.AddSubExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -239,6 +215,42 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTableColumnExpression(TinySQLParser.TableColumnExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

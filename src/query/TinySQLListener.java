@@ -1,4 +1,4 @@
-// Generated from C:/Users/cyj/Desktop/TinyDatabase/src/query\TinySQL.g4 by ANTLR 4.7.2
+// Generated from query/TinySQL.g4 by ANTLR 4.7.2
 package query;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -128,18 +128,6 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code lessGreaterExpression}
-	 * labeled alternative in {@link TinySQLParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code lessGreaterExpression}
-	 * labeled alternative in {@link TinySQLParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code valueExpression}
 	 * labeled alternative in {@link TinySQLParser#expression}.
 	 * @param ctx the parse tree
@@ -163,18 +151,6 @@ public interface TinySQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAddSubExpression(TinySQLParser.AddSubExpressionContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code euqalExpression}
-	 * labeled alternative in {@link TinySQLParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code euqalExpression}
-	 * labeled alternative in {@link TinySQLParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code parenthesisExpression}
 	 * labeled alternative in {@link TinySQLParser#expression}.
@@ -211,6 +187,42 @@ public interface TinySQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTableColumnExpression(TinySQLParser.TableColumnExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code lessZGreaterExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code lessZGreaterExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code euqalExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code euqalExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code parenthesisConditionExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code parenthesisConditionExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinySQLParser#unaryOperator}.
 	 * @param ctx the parse tree
