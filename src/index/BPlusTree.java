@@ -156,6 +156,39 @@ public class BPlusTree {
         return new BPlusTreeIterator(node, node.scanGreaterEqual(key));
     }
 
+
+    /**
+     * @param key 待查询的key
+     * @return 键值大于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreeIterator scanGreaterThan(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreeIterator(node, node.scanGreaterThan(key));
+    }
+
+
+    /**
+     * @param key 待查询的key
+     * @return 键值小于等于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreeIterator scanLessEqual(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreeIterator(node, node.scanLessEqual(key));
+    }
+
+
+    /**
+     * @param key 待查询的key
+     * @return 键值小于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreeIterator scanLessThan(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreeIterator(node, node.scanLessThan(key));
+    }
+
     /**
      * 写入文件头
      *
@@ -536,6 +569,21 @@ public class BPlusTree {
         }
 
         private Iterator<Long> scanGreaterEqual(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx, num).iterator();
+        }
+
+        private Iterator<Long> scanGreaterThan(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx, num).iterator();
+        }
+
+        private Iterator<Long> scanLessEqual(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx, num).iterator();
+        }
+
+        private Iterator<Long> scanLessThan(typedData key) {
             int idx = getLoc(key);
             return values.subList(idx, num).iterator();
         }

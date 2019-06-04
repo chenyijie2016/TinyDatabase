@@ -249,7 +249,12 @@ public class Table extends TableBase {
                     buffer.put((byte) 1);
                     break;
                 case PRIMARY_KEY:
-                    buffer.put((byte) 0);
+                    if (constraint.getOrder() == Constraint.Order.ASC) {
+                        buffer.put((byte) 0);
+                    }
+                    else {
+                        buffer.put((byte) 2);
+                    }
                     break;
             }
             buffer.putShort((short) constraint.getColumnName().length());
@@ -310,9 +315,14 @@ public class Table extends TableBase {
         Constraint[] constraints = new Constraint[constraintSize];
         for (int i = 0; i < constraintSize; i++) {
             Constraint.ConstraintType constraintType;
+            Constraint.Order order = Constraint.Order.ASC;
             switch (buffer.get()) {
                 case 0:
                     constraintType = Constraint.ConstraintType.PRIMARY_KEY;
+                    break;
+                case 2:
+                    constraintType = Constraint.ConstraintType.PRIMARY_KEY;
+                    order = Constraint.Order.DESC;
                     break;
                 case 1:
                     constraintType = Constraint.ConstraintType.NOT_NULL;
@@ -323,7 +333,7 @@ public class Table extends TableBase {
             short columnNameSize = buffer.getShort();
             byte[] columnName = new byte[columnNameSize];
             buffer.get(columnName);
-            constraints[i] = new Constraint(constraintType, new String(columnName));
+            constraints[i] = new Constraint(constraintType, order, new String(columnName));
         }
 
         return new Table(db, tableName, columns, constraints);
@@ -374,6 +384,45 @@ public class Table extends TableBase {
         }
         RowCondition dataGreaterEqual = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
         return new RowConditionIterator(scanAll(), dataGreaterEqual);
+    }
+
+
+    /**
+     * 查询大于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterThan(key));
+        }
+        RowCondition dataGreaterThan = (row) -> row.getDataByColumn(column).compareTo(key) > 0;
+        return new RowConditionIterator(scanAll(), dataGreaterThan);
+    }
+
+
+    /**
+     * 查询大于等于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanLessEqual(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessEqual(key));
+        }
+        RowCondition dataLessEqual = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
+        return new RowConditionIterator(scanAll(), dataLessEqual);
+    }
+
+
+    /**
+     * 查询大于等于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanLessThan(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessThan(key));
+        }
+        RowCondition dataLessThan = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
+        return new RowConditionIterator(scanAll(), dataLessThan);
     }
 
 
