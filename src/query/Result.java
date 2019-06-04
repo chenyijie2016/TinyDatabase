@@ -24,8 +24,9 @@ public class Result extends TableBase {
         rows = new ArrayList<>();
     }
 
-    public void setColumns(Column[] columns) {
+    public Result setColumns(Column[] columns) {
         this.columns = Arrays.asList(columns);
+        return this;
     }
 
     @Override
@@ -48,5 +49,15 @@ public class Result extends TableBase {
             builder.append("|\n");
         }
         return builder.toString();
+    }
+
+    public void addRow(Row row) {
+        rows.add(row);
+    }
+
+    public static Result setInfo(String message) {
+        Result res = new Result().setColumns(new Column[]{new Column(Type.stringType((long) message.length()), "message")});
+        res.addRow(new Row(res, new Object[]{message}));
+        return res;
     }
 }

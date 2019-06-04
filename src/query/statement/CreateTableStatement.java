@@ -39,18 +39,6 @@ public class CreateTableStatement extends Statement {
         } catch (IOException e) {
             throw new IllegalArgumentException("SQL Execute Error [create table]: Unknown Error");
         }
-//        if (databaseName.equals("")) {
-//            System.out.println("Creating table in current database:");
-//        } else {
-//            System.out.println("Creating table in database: " + databaseName);
-//        }
-//        System.out.println("    name: " + tableName);
-//        for (Column c : columns) {
-//            System.out.println("        columns: " + c.getName() + "  type: " + c.getColumnType().type().name());
-//        }
-//        for (Constraint c : constraints) {
-//            System.out.println("        constraints: " + c.getColumnName() + "  type: " + c.getType().name());
-//        }
-        return null;
+        return Result.setInfo("successfully create table");
     }
 }

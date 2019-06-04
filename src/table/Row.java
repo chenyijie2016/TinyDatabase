@@ -12,15 +12,15 @@ import java.util.Arrays;
 
 public class Row {
     public long position;
-    private Table table;
+    private TableBase table;
     public typedData[] data;
 
-    public Row(Table t, long position) {
+    public Row(TableBase t, long position) {
         this.table = t;
         this.position = position;
     }
 
-    public Row(Table t, Object[] objs) {
+    public Row(TableBase t, Object[] objs) {
         this.table = t;
         setData(objs);
     }
@@ -40,7 +40,7 @@ public class Row {
         return this;
     }
 
-    public Table getTable() {
+    public TableBase getTable() {
         return table;
     }
 

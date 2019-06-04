@@ -46,7 +46,6 @@ public class DataBase {
         DataOutputStream out = new DataOutputStream(outputStream);
         out.writeInt(tables.size());
         for (Table table : tables) {
-            System.out.println("table bytes length" + table.toSchemaBytes().length);
             out.writeInt(table.toSchemaBytes().length);
             out.write(table.toSchemaBytes());
         }
@@ -94,5 +93,6 @@ public class DataBase {
         tables.clear();
         updateSchema();
     }
+
 
 }

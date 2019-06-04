@@ -1,17 +1,14 @@
 package query.statement;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import query.Listener;
-import query.TinySQLLexer;
-import query.TinySQLParser;
-import schema.Schema;
-import schema.SchemaManager;
 
 import java.io.IOException;
 import java.util.List;
 
+
 import static org.junit.Assert.*;
+
 
 public class CreateTableStatementTest extends BaseTest {
 
