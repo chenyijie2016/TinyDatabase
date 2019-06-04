@@ -374,6 +374,14 @@ public class Table extends TableBase {
         return new RowConditionIterator(iter, dataEqualCondition);
     }
 
+    public RowIterator scanNotEqual(Column column, typedData key) throws IOException {
+        // 不相等的应该很多，所以可以直接线性扫描
+        RowCondition dataNotEqualCondition = (row) -> (!row.getDataByColumn(column).equals(key));
+
+        RowIterator iter = scanAll();
+        return new RowConditionIterator(iter, dataNotEqualCondition);
+    }
+
     /**
      * 查询大于等于该属性的元组
      * 返回迭代器

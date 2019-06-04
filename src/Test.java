@@ -96,8 +96,8 @@ public class Test {
             b = a.next();
         }
 
-        System.out.println("== Case 3: Find who's dept_name=='Comp.Sci.'");
-        a = table.scanEqual(new Column(Type.stringType(20), "dept_name"), new stringData("Comp.Sci."));
+        System.out.println("== Case 3: Find who's dept_name!='Comp.Sci.'");
+        a = table.scanNotEqual(new Column(Type.stringType(20), "dept_name"), new stringData("Comp.Sci."));
         b = a.next();
         while (b != null) {
             System.out.println(b);
