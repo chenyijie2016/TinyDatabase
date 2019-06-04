@@ -25,7 +25,7 @@ public class TinySQLParser extends Parser {
 		K_NOT=33, K_NULL=34, K_WHERE=35, K_INTO=36, K_FROM=37, K_USE=38, K_ASC=39, 
 		K_DESC=40, K_VALUES=41, K_DATABASES=42, K_SHOW=43, K_ON=44, K_JOIN=45, 
 		K_NATURAL=46, K_DISTINCT=47, K_ALL=48, K_OUTER=49, K_LEFT=50, K_INNER=51, 
-		K_SET=52, UNEXPECTED_CHAR=53, IDENTIFIER=54;
+		K_SET=52, IDENTIFIER=53, UNEXPECTED_CHAR=54;
 	public static final int
 		RULE_parse = 0, RULE_error = 1, RULE_sqlStatementList = 2, RULE_sqlStatement = 3, 
 		RULE_showDatabasesStmt = 4, RULE_showDatabaseTablesStmt = 5, RULE_createDatabaseStmt = 6, 
@@ -68,7 +68,7 @@ public class TinySQLParser extends Parser {
 			"K_PRIMARY", "K_KEY", "K_NOT", "K_NULL", "K_WHERE", "K_INTO", "K_FROM", 
 			"K_USE", "K_ASC", "K_DESC", "K_VALUES", "K_DATABASES", "K_SHOW", "K_ON", 
 			"K_JOIN", "K_NATURAL", "K_DISTINCT", "K_ALL", "K_OUTER", "K_LEFT", "K_INNER", 
-			"K_SET", "UNEXPECTED_CHAR", "IDENTIFIER"
+			"K_SET", "IDENTIFIER", "UNEXPECTED_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1819,8 +1819,8 @@ public class TinySQLParser extends Parser {
 
 	public static class JoinConstraintContext extends ParserRuleContext {
 		public TerminalNode K_ON() { return getToken(TinySQLParser.K_ON, 0); }
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
+		public ConditionExpressionContext conditionExpression() {
+			return getRuleContext(ConditionExpressionContext.class,0);
 		}
 		public JoinConstraintContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1851,7 +1851,7 @@ public class TinySQLParser extends Parser {
 				setState(315);
 				match(K_ON);
 				setState(316);
-				expression(0);
+				conditionExpression();
 				}
 			}
 
@@ -2808,17 +2808,17 @@ public class TinySQLParser extends Parser {
 		"\2\28\u017c\3\2\2\2:\u0187\3\2\2\2<\u0189\3\2\2\2>\u018b\3\2\2\2@\u018d"+
 		"\3\2\2\2B\u018f\3\2\2\2D\u0193\3\2\2\2F\u0195\3\2\2\2HK\5\6\4\2IK\5\4"+
 		"\3\2JH\3\2\2\2JI\3\2\2\2KN\3\2\2\2LJ\3\2\2\2LM\3\2\2\2MO\3\2\2\2NL\3\2"+
-		"\2\2OP\7\2\2\3P\3\3\2\2\2QR\7\67\2\2RS\b\3\1\2S\5\3\2\2\2TV\7\3\2\2UT"+
-		"\3\2\2\2VY\3\2\2\2WU\3\2\2\2WX\3\2\2\2XZ\3\2\2\2YW\3\2\2\2Zc\5\b\5\2["+
-		"]\7\3\2\2\\[\3\2\2\2]^\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_`\3\2\2\2`b\5\b\5"+
-		"\2a\\\3\2\2\2be\3\2\2\2ca\3\2\2\2cd\3\2\2\2di\3\2\2\2ec\3\2\2\2fh\7\3"+
-		"\2\2gf\3\2\2\2hk\3\2\2\2ig\3\2\2\2ij\3\2\2\2j\7\3\2\2\2ki\3\2\2\2lx\5"+
-		"\16\b\2mx\5\n\6\2nx\5\f\7\2ox\5\20\t\2px\5\30\r\2qx\5\"\22\2rx\5,\27\2"+
-		"sx\5.\30\2tx\5\60\31\2ux\5\62\32\2vx\5\64\33\2wl\3\2\2\2wm\3\2\2\2wn\3"+
-		"\2\2\2wo\3\2\2\2wp\3\2\2\2wq\3\2\2\2wr\3\2\2\2ws\3\2\2\2wt\3\2\2\2wu\3"+
-		"\2\2\2wv\3\2\2\2x\t\3\2\2\2yz\7-\2\2z{\7,\2\2{\13\3\2\2\2|}\7-\2\2}~\7"+
-		"\32\2\2~\177\5> \2\177\r\3\2\2\2\u0080\u0081\7\31\2\2\u0081\u0082\7\32"+
-		"\2\2\u0082\u0083\5> \2\u0083\17\3\2\2\2\u0084\u0085\7\31\2\2\u0085\u0089"+
+		"\2\2OP\7\2\2\3P\3\3\2\2\2QR\78\2\2RS\b\3\1\2S\5\3\2\2\2TV\7\3\2\2UT\3"+
+		"\2\2\2VY\3\2\2\2WU\3\2\2\2WX\3\2\2\2XZ\3\2\2\2YW\3\2\2\2Zc\5\b\5\2[]\7"+
+		"\3\2\2\\[\3\2\2\2]^\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_`\3\2\2\2`b\5\b\5\2a"+
+		"\\\3\2\2\2be\3\2\2\2ca\3\2\2\2cd\3\2\2\2di\3\2\2\2ec\3\2\2\2fh\7\3\2\2"+
+		"gf\3\2\2\2hk\3\2\2\2ig\3\2\2\2ij\3\2\2\2j\7\3\2\2\2ki\3\2\2\2lx\5\16\b"+
+		"\2mx\5\n\6\2nx\5\f\7\2ox\5\20\t\2px\5\30\r\2qx\5\"\22\2rx\5,\27\2sx\5"+
+		".\30\2tx\5\60\31\2ux\5\62\32\2vx\5\64\33\2wl\3\2\2\2wm\3\2\2\2wn\3\2\2"+
+		"\2wo\3\2\2\2wp\3\2\2\2wq\3\2\2\2wr\3\2\2\2ws\3\2\2\2wt\3\2\2\2wu\3\2\2"+
+		"\2wv\3\2\2\2x\t\3\2\2\2yz\7-\2\2z{\7,\2\2{\13\3\2\2\2|}\7-\2\2}~\7\32"+
+		"\2\2~\177\5> \2\177\r\3\2\2\2\u0080\u0081\7\31\2\2\u0081\u0082\7\32\2"+
+		"\2\u0082\u0083\5> \2\u0083\17\3\2\2\2\u0084\u0085\7\31\2\2\u0085\u0089"+
 		"\7\33\2\2\u0086\u0087\5> \2\u0087\u0088\7\4\2\2\u0088\u008a\3\2\2\2\u0089"+
 		"\u0086\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u008b\3\2\2\2\u008b\u008c\5@"+
 		"!\2\u008c\u008d\7\5\2\2\u008d\u0092\5\22\n\2\u008e\u008f\7\6\2\2\u008f"+
@@ -2878,7 +2878,7 @@ public class TinySQLParser extends Parser {
 		"\3\2\2\2\u0132%\3\2\2\2\u0133\u013a\5@!\2\u0134\u0135\5*\26\2\u0135\u0136"+
 		"\5@!\2\u0136\u0137\5(\25\2\u0137\u0139\3\2\2\2\u0138\u0134\3\2\2\2\u0139"+
 		"\u013c\3\2\2\2\u013a\u0138\3\2\2\2\u013a\u013b\3\2\2\2\u013b\'\3\2\2\2"+
-		"\u013c\u013a\3\2\2\2\u013d\u013e\7.\2\2\u013e\u0140\5\32\16\2\u013f\u013d"+
+		"\u013c\u013a\3\2\2\2\u013d\u013e\7.\2\2\u013e\u0140\5\34\17\2\u013f\u013d"+
 		"\3\2\2\2\u013f\u0140\3\2\2\2\u0140)\3\2\2\2\u0141\u014e\7\6\2\2\u0142"+
 		"\u0144\7\60\2\2\u0143\u0142\3\2\2\2\u0143\u0144\3\2\2\2\u0144\u014a\3"+
 		"\2\2\2\u0145\u0147\7\64\2\2\u0146\u0148\7\63\2\2\u0147\u0146\3\2\2\2\u0147"+
@@ -2904,12 +2904,12 @@ public class TinySQLParser extends Parser {
 		"\3\2\2\2\u0185\u0186\7#\2\2\u0186\u0188\7$\2\2\u0187\u0180\3\2\2\2\u0187"+
 		"\u0185\3\2\2\2\u0188;\3\2\2\2\u0189\u018a\5D#\2\u018a=\3\2\2\2\u018b\u018c"+
 		"\5D#\2\u018c?\3\2\2\2\u018d\u018e\5D#\2\u018eA\3\2\2\2\u018f\u0190\5D"+
-		"#\2\u0190C\3\2\2\2\u0191\u0194\78\2\2\u0192\u0194\5F$\2\u0193\u0191\3"+
-		"\2\2\2\u0193\u0192\3\2\2\2\u0194E\3\2\2\2\u0195\u0196\t\t\2\2\u0196G\3"+
-		"\2\2\2,JLW^ciw\u0089\u0092\u0097\u00a0\u00ac\u00b3\u00be\u00c3\u00cc\u00d7"+
-		"\u00de\u00e6\u00f0\u00f7\u0106\u010e\u0115\u011e\u0122\u0124\u0128\u0131"+
-		"\u013a\u013f\u0143\u0147\u014a\u014d\u015c\u0161\u0179\u017c\u0183\u0187"+
-		"\u0193";
+		"#\2\u0190C\3\2\2\2\u0191\u0194\7\67\2\2\u0192\u0194\5F$\2\u0193\u0191"+
+		"\3\2\2\2\u0193\u0192\3\2\2\2\u0194E\3\2\2\2\u0195\u0196\t\t\2\2\u0196"+
+		"G\3\2\2\2,JLW^ciw\u0089\u0092\u0097\u00a0\u00ac\u00b3\u00be\u00c3\u00cc"+
+		"\u00d7\u00de\u00e6\u00f0\u00f7\u0106\u010e\u0115\u011e\u0122\u0124\u0128"+
+		"\u0131\u013a\u013f\u0143\u0147\u014a\u014d\u015c\u0161\u0179\u017c\u0183"+
+		"\u0187\u0193";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

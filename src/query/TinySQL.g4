@@ -126,7 +126,7 @@ joinClause
 :tableName ( joinOperator tableName joinConstraint )*
 ;
 joinConstraint
- : ( K_ON expression)?
+ : ( K_ON conditionExpression)?
  //  | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
@@ -190,8 +190,6 @@ NUMERIC_LITERAL
  | '.' DIGIT*
  ;
 
-
-
 name
 : anyName
 ;
@@ -241,35 +239,6 @@ keyword
 | K_SET
 ;
 
-
-fragment DIGIT : [0-9];
-fragment A : [aA];
-fragment B : [bB];
-fragment C : [cC];
-fragment D : [dD];
-fragment E : [eE];
-fragment F : [fF];
-fragment G : [gG];
-fragment H : [hH];
-fragment I : [iI];
-fragment J : [jJ];
-fragment K : [kK];
-fragment L : [lL];
-fragment M : [mM];
-fragment N : [nN];
-fragment O : [oO];
-fragment P : [pP];
-fragment Q : [qQ];
-fragment R : [rR];
-fragment S : [sS];
-fragment T : [tT];
-fragment U : [uU];
-fragment V : [vV];
-fragment W : [wW];
-fragment X : [xX];
-fragment Y : [yY];
-fragment Z : [zZ];
-
 K_CREATE : C R E A T E;
 K_DATABASE : D A T A B A S E;
 K_TABLE : T A B L E;
@@ -300,11 +269,40 @@ K_OUTER: O U T E R;
 K_LEFT: L E F T;
 K_INNER: I N N E R;
 K_SET: S E T;
-UNEXPECTED_CHAR
- : .
- ;
 
 IDENTIFIER
  :
  [a-zA-Z_] [a-zA-Z_0-9]* // TODO check: needs more chars in set
  ;
+
+UNEXPECTED_CHAR
+ : .
+ ;
+
+fragment DIGIT : [0-9];
+fragment A : [aA];
+fragment B : [bB];
+fragment C : [cC];
+fragment D : [dD];
+fragment E : [eE];
+fragment F : [fF];
+fragment G : [gG];
+fragment H : [hH];
+fragment I : [iI];
+fragment J : [jJ];
+fragment K : [kK];
+fragment L : [lL];
+fragment M : [mM];
+fragment N : [nN];
+fragment O : [oO];
+fragment P : [pP];
+fragment Q : [qQ];
+fragment R : [rR];
+fragment S : [sS];
+fragment T : [tT];
+fragment U : [uU];
+fragment V : [vV];
+fragment W : [wW];
+fragment X : [xX];
+fragment Y : [yY];
+fragment Z : [zZ];
