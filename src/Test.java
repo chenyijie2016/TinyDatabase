@@ -240,8 +240,8 @@ public class Test {
 
     public static void main(String[] args) throws IOException {
 //        createTableWithMetaData();
-//        createTableWithSchema();
-//        insetTestData();
+        createTableWithSchema();
+        insetTestData();
         testSearch();
 //        testUpdate();
     }
