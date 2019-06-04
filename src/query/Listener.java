@@ -191,8 +191,8 @@ public class Listener extends TinySQLBaseListener {
                     }
                     gotPrimaryKey = true;
                     boolean primaryKeyAsc = (data.K_DESC() == null);
-                    // TODO: ADD primaryKeyAsc into constraints
-                    constraints.add(new Constraint(Constraint.ConstraintType.PRIMARY_KEY, columnName));
+                    constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
+                                    columnName));
                 }
                 else {
                     constraints.add(new Constraint(Constraint.ConstraintType.NOT_NULL, columnName));
@@ -205,8 +205,8 @@ public class Listener extends TinySQLBaseListener {
             }
             for (TinySQLParser.IndexedColumnContext data: ctx.tableConstraint().indexedColumn()) {
                 boolean primaryKeyAsc = (data.K_DESC() == null);
-                // TODO: ADD primaryKeyAsc into constraints
-                constraints.add(new Constraint(Constraint.ConstraintType.PRIMARY_KEY, data.columnName().getText()));
+                constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
+                                               data.columnName().getText()));
             }
         }
         Constraint[] constraintsArray = new Constraint[constraints.size()];

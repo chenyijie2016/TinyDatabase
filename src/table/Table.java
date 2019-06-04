@@ -249,7 +249,12 @@ public class Table extends TableBase {
                     buffer.put((byte) 1);
                     break;
                 case PRIMARY_KEY:
-                    buffer.put((byte) 0);
+                    if (constraint.getOrder() == Constraint.Order.ASC) {
+                        buffer.put((byte) 0);
+                    }
+                    else {
+                        buffer.put((byte) 2);
+                    }
                     break;
             }
             buffer.putShort((short) constraint.getColumnName().length());
@@ -310,9 +315,14 @@ public class Table extends TableBase {
         Constraint[] constraints = new Constraint[constraintSize];
         for (int i = 0; i < constraintSize; i++) {
             Constraint.ConstraintType constraintType;
+            Constraint.Order order = Constraint.Order.ASC;
             switch (buffer.get()) {
                 case 0:
                     constraintType = Constraint.ConstraintType.PRIMARY_KEY;
+                    break;
+                case 2:
+                    constraintType = Constraint.ConstraintType.PRIMARY_KEY;
+                    order = Constraint.Order.DESC;
                     break;
                 case 1:
                     constraintType = Constraint.ConstraintType.NOT_NULL;
@@ -323,7 +333,7 @@ public class Table extends TableBase {
             short columnNameSize = buffer.getShort();
             byte[] columnName = new byte[columnNameSize];
             buffer.get(columnName);
-            constraints[i] = new Constraint(constraintType, new String(columnName));
+            constraints[i] = new Constraint(constraintType, order, new String(columnName));
         }
 
         return new Table(db, tableName, columns, constraints);
@@ -364,6 +374,14 @@ public class Table extends TableBase {
         return new RowConditionIterator(iter, dataEqualCondition);
     }
 
+    public RowIterator scanNotEqual(Column column, typedData key) throws IOException {
+        // 不相等的应该很多，所以可以直接线性扫描
+        RowCondition dataNotEqualCondition = (row) -> (!row.getDataByColumn(column).equals(key));
+
+        RowIterator iter = scanAll();
+        return new RowConditionIterator(iter, dataNotEqualCondition);
+    }
+
     /**
      * 查询大于等于该属性的元组
      * 返回迭代器
@@ -374,6 +392,45 @@ public class Table extends TableBase {
         }
         RowCondition dataGreaterEqual = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
         return new RowConditionIterator(scanAll(), dataGreaterEqual);
+    }
+
+
+    /**
+     * 查询大于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterThan(key));
+        }
+        RowCondition dataGreaterThan = (row) -> row.getDataByColumn(column).compareTo(key) > 0;
+        return new RowConditionIterator(scanAll(), dataGreaterThan);
+    }
+
+
+    /**
+     * 查询大于等于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanLessEqual(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessEqual(key));
+        }
+        RowCondition dataLessEqual = (row) -> row.getDataByColumn(column).compareTo(key) <= 0;
+        return new RowConditionIterator(scanAll(), dataLessEqual);
+    }
+
+
+    /**
+     * 查询大于等于该属性的元组
+     * 返回迭代器
+     */
+    public RowIterator scanLessThan(Column column, typedData key) throws IOException {
+        if (indexColumns.indexOf(column) != -1) {
+            return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessThan(key));
+        }
+        RowCondition dataLessThan = (row) -> row.getDataByColumn(column).compareTo(key) < 0;
+        return new RowConditionIterator(scanAll(), dataLessThan);
     }
 
 
@@ -419,6 +476,35 @@ public class Table extends TableBase {
         private Table table;
 
         RowIndexIterator(Table table, BPlusTree.BPlusTreeIterator iter) {
+            this.iter = iter;
+            this.table = table;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public Row next() {
+            if (iter.hasNext()) {
+                try {
+                    return readRow(new Row(table, iter.next()));
+                } catch (IOException e) {
+                    System.out.println("Can not Iterator table.Row");
+                    System.exit(0);
+                }
+                return null;
+            } else
+                return null;
+        }
+    }
+
+    class RowIndexPrevIterator extends RowIterator {
+        private BPlusTree.BPlusTreePrevIterator iter;
+        private Table table;
+
+        RowIndexPrevIterator(Table table, BPlusTree.BPlusTreePrevIterator iter) {
             this.iter = iter;
             this.table = table;
         }

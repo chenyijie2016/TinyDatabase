@@ -103,8 +103,113 @@ public class Test {
             System.out.println(b);
             b = a.next();
         }
-        System.out.println("== Case 4: Find who's id> 30000 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(30000));
+
+        System.out.println("== Case 4: Find who's (primary key)id>45565 ");
+        a = table.scanGreaterThan(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 5: Find who's (primary key)id>=45565 ");
+        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 6: Find who's (primary key)id<45565 ");
+        a = table.scanLessThan(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 7: Find who's (primary key)id<=45565 ");
+        a = table.scanLessEqual(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 8: Find who's (primary key)id>45565 ");
+        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 9: Find who's (primary key)id=45565 ");
+        a = table.scanEqual(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 10: Find who's (primary key)id<>45565 ");
+        a = table.scanNotEqual(new Column(Type.intType(), "id"), new intData(45565));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 11: Find who's (not indexed key)salary>80000 ");
+        a = table.scanGreaterThan(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 12: Find who's (not indexed key)salary>=80000 ");
+        a = table.scanGreaterEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 13: Find who's (not indexed key)salary<80000 ");
+        a = table.scanLessThan(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 14: Find who's (not indexed key)salary<=80000 ");
+        a = table.scanLessEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 15: Find who's (not indexed key)salary>80000 ");
+        a = table.scanGreaterEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 16: Find who's (not indexed key)salary=80000 ");
+        a = table.scanEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        b = a.next();
+        while (b != null) {
+            System.out.println(b);
+            b = a.next();
+        }
+
+        System.out.println("== Case 17: Find who's (not indexed key)salary<>80000 ");
+        a = table.scanNotEqual(new Column(Type.intType(), "salary"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -134,10 +239,10 @@ public class Test {
     }
 
     public static void main(String[] args) throws IOException {
-        //createTableWithMetaData();
-        createTableWithSchema();
-        insetTestData();
+//        createTableWithMetaData();
+//        createTableWithSchema();
+//        insetTestData();
         testSearch();
-        testUpdate();
+//        testUpdate();
     }
 }

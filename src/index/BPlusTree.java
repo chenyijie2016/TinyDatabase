@@ -156,6 +156,39 @@ public class BPlusTree {
         return new BPlusTreeIterator(node, node.scanGreaterEqual(key));
     }
 
+
+    /**
+     * @param key 待查询的key
+     * @return 键值大于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreeIterator scanGreaterThan(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreeIterator(node, node.scanGreaterThan(key));
+    }
+
+
+    /**
+     * @param key 待查询的key
+     * @return 键值小于等于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreePrevIterator scanLessEqual(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreePrevIterator(node, node.scanLessEqual(key));
+    }
+
+
+    /**
+     * @param key 待查询的key
+     * @return 键值小于key的所有value组成的迭代器
+     * @throws IOException
+     */
+    public BPlusTreePrevIterator scanLessThan(typedData key) throws IOException {
+        LNode node = getLNodeByKey(key);
+        return new BPlusTreePrevIterator(node, node.scanLessThan(key));
+    }
+
     /**
      * 写入文件头
      *
@@ -282,10 +315,63 @@ public class BPlusTree {
         }
     }
 
+    public class BPlusTreePrevIterator implements Iterator<Long> {
+        protected LNode leaf;
+        protected ListIterator<Long> iter;
+
+        public BPlusTreePrevIterator(LNode leaf, ListIterator<Long> iter) throws IOException {
+            this.leaf = leaf;
+            this.iter = iter;
+
+            if (!this.iter.hasPrevious()) {
+                advance();
+            }
+        }
+
+        /**
+         * 如果当前的叶子节点上的值已经遍历完了，那么就尝试遍历其指向的下一个节点
+         *
+         * @throws IOException
+         */
+        public void advance() throws IOException {
+            if (this.leaf.prev != -1L) {
+                this.leaf = (LNode) nodeFactor.getNode(this.leaf.prev);
+                this.iter = this.leaf.scanAllPrev();
+            } else {
+                leaf = null;
+                iter = null;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.iter != null;
+        }
+
+        @Override
+        public Long next() {
+            if (iter == null) {
+                return null;
+            }
+
+            Long data = iter.previous();
+            if (!iter.hasPrevious()) {
+                try {
+                    advance();
+                } catch (IOException e) {
+                    System.out.println("BPlusTree Scan Error");
+                    System.exit(0);
+                }
+            }
+            return data;
+        }
+    }
+
+
     abstract class Node {
 
         protected long offset; // 该节点在文件中的保存位置
-        //protected long prev;
+        protected long prev = -1L;
         protected long next = -1L;
         protected short type;
         protected int num; //number of keys
@@ -414,6 +500,7 @@ public class BPlusTree {
                 sibling.next = this.next;
                 sibling.saveToFile(); // 保存新建的节点到文件
                 this.next = sibling.offset; // 同时更新链表情况
+                sibling.prev = this.offset;
 
                 if (i < mid) {
                     // Inserted element goes to left sibling
@@ -480,6 +567,7 @@ public class BPlusTree {
             offset = treeFile.getFilePointer() - Short.BYTES;
             num = treeFile.readInt();
             next = treeFile.readLong();
+            prev = treeFile.readLong();
             for (int i = 0; i < num; i++) {
                 keys.add(i, typedDataFactor.getTypedData(keyType).readFromFile(treeFile));
                 values.add(i, treeFile.readLong());
@@ -504,10 +592,11 @@ public class BPlusTree {
 
         @Override
         void writeData() throws IOException {
-            ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES + Integer.BYTES + Long.BYTES + M * keyType.size() + M * Long.BYTES);
+            ByteBuffer buffer = ByteBuffer.allocate(Short.BYTES + Integer.BYTES + Long.BYTES + Long.BYTES + M * keyType.size() + 2 * M * Long.BYTES);
             buffer.putShort(type);
             buffer.putInt(num);
             buffer.putLong(next);
+            buffer.putLong(prev);
 
 
             for (int i = 0; i < num; i++) {
@@ -518,6 +607,7 @@ public class BPlusTree {
                 byte[] bytes = new byte[keyType.size()];
                 Arrays.fill(bytes, (byte) 0);
                 buffer.put(bytes);
+                buffer.putLong(-1L);
                 buffer.putLong(-1L);
             }
 
@@ -535,9 +625,40 @@ public class BPlusTree {
             return values.iterator();
         }
 
+        private ListIterator<Long> scanAllPrev() {
+            ListIterator<Long> ans = values.listIterator();
+            while (ans.hasNext()) {
+                ans.next();
+            }
+            return ans;
+        }
+
         private Iterator<Long> scanGreaterEqual(typedData key) {
             int idx = getLoc(key);
             return values.subList(idx, num).iterator();
+        }
+
+        private Iterator<Long> scanGreaterThan(typedData key) {
+            int idx = getLoc(key);
+            return values.subList(idx + 1, num).iterator();
+        }
+
+        private ListIterator<Long> scanLessEqual(typedData key) {
+            int idx = getLoc(key);
+            ListIterator<Long> ans = values.subList(0, idx + 1).listIterator();
+            while (ans.hasNext()) {
+                ans.next();
+            }
+            return ans;
+        }
+
+        private ListIterator<Long> scanLessThan(typedData key) {
+            int idx = getLoc(key);
+            ListIterator<Long> ans = values.subList(0, idx).listIterator();
+            while (ans.hasNext()) {
+                ans.next();
+            }
+            return ans;
         }
 
         private Iterator<Long> scanEqual(typedData key) {
