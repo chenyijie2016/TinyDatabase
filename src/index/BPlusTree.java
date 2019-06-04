@@ -48,6 +48,7 @@ public class BPlusTree {
     private Type keyType;
 
     private RandomAccessFile treeFile;
+    private String filename;
     private final NodeFactor nodeFactor = new NodeFactor();
 
     private static final short INNER = 0;
@@ -81,7 +82,7 @@ public class BPlusTree {
         M = m;
         N = n;
         NodeCache = createLRUMap(MAX_CACHE_SIZE);
-
+        this.filename = filename;
         treeFile = new RandomAccessFile(filename, "rw");
         this.keyType = type;
         if (treeFile.length() > 0) {
@@ -95,6 +96,12 @@ public class BPlusTree {
             writeHeader();
         }
 
+    }
+
+    public boolean drop() throws IOException {
+        this.treeFile.close();
+        File f = new File(filename);
+        return f.delete();
     }
 
     /**
