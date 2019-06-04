@@ -300,11 +300,11 @@ K_OUTER: O U T E R;
 K_LEFT: L E F T;
 K_INNER: I N N E R;
 K_SET: S E T;
-UNEXPECTED_CHAR
- : .
- ;
-
 IDENTIFIER
  :
  [a-zA-Z_] [a-zA-Z_0-9]* // TODO check: needs more chars in set
  ;
+UNEXPECTED_CHAR
+ : .
+ ;
+

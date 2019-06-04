@@ -1,4 +1,4 @@
-// Generated from query/TinySQL.g4 by ANTLR 4.7.2
+// Generated from C:/Users/cyj/Desktop/TinyDatabase/src/query\TinySQL.g4 by ANTLR 4.7.2
 package query;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -25,7 +25,7 @@ public class TinySQLLexer extends Lexer {
 		K_NOT=33, K_NULL=34, K_WHERE=35, K_INTO=36, K_FROM=37, K_USE=38, K_ASC=39, 
 		K_DESC=40, K_VALUES=41, K_DATABASES=42, K_SHOW=43, K_ON=44, K_JOIN=45, 
 		K_NATURAL=46, K_DISTINCT=47, K_ALL=48, K_OUTER=49, K_LEFT=50, K_INNER=51, 
-		K_SET=52, UNEXPECTED_CHAR=53, IDENTIFIER=54;
+		K_SET=52, IDENTIFIER=53, UNEXPECTED_CHAR=54;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -45,8 +45,7 @@ public class TinySQLLexer extends Lexer {
 			"K_UPDATE", "K_DELETE", "K_INSERT", "K_PRIMARY", "K_KEY", "K_NOT", "K_NULL", 
 			"K_WHERE", "K_INTO", "K_FROM", "K_USE", "K_ASC", "K_DESC", "K_VALUES", 
 			"K_DATABASES", "K_SHOW", "K_ON", "K_JOIN", "K_NATURAL", "K_DISTINCT", 
-			"K_ALL", "K_OUTER", "K_LEFT", "K_INNER", "K_SET", "UNEXPECTED_CHAR", 
-			"IDENTIFIER"
+			"K_ALL", "K_OUTER", "K_LEFT", "K_INNER", "K_SET", "IDENTIFIER", "UNEXPECTED_CHAR"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -67,7 +66,7 @@ public class TinySQLLexer extends Lexer {
 			"K_PRIMARY", "K_KEY", "K_NOT", "K_NULL", "K_WHERE", "K_INTO", "K_FROM", 
 			"K_USE", "K_ASC", "K_DESC", "K_VALUES", "K_DATABASES", "K_SHOW", "K_ON", 
 			"K_JOIN", "K_NATURAL", "K_DISTINCT", "K_ALL", "K_OUTER", "K_LEFT", "K_INNER", 
-			"K_SET", "UNEXPECTED_CHAR", "IDENTIFIER"
+			"K_SET", "IDENTIFIER", "UNEXPECTED_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -159,7 +158,7 @@ public class TinySQLLexer extends Lexer {
 		"E\3E\3E\3E\3F\3F\3F\3F\3F\3F\3F\3F\3F\3F\3G\3G\3G\3G\3G\3H\3H\3H\3I\3"+
 		"I\3I\3I\3I\3J\3J\3J\3J\3J\3J\3J\3J\3K\3K\3K\3K\3K\3K\3K\3K\3K\3L\3L\3"+
 		"L\3L\3M\3M\3M\3M\3M\3M\3N\3N\3N\3N\3N\3O\3O\3O\3O\3O\3O\3P\3P\3P\3P\3"+
-		"Q\3Q\3R\3R\7R\u01f9\nR\fR\16R\u01fc\13R\3\u00e8\2S\3\3\5\4\7\5\t\6\13"+
+		"Q\3Q\7Q\u01f7\nQ\fQ\16Q\u01fa\13Q\3R\3R\3\u00e8\2S\3\3\5\4\7\5\t\6\13"+
 		"\7\r\b\17\t\21\n\23\13\25\f\27\r\31\16\33\17\35\20\37\21!\22#\23%\24\'"+
 		"\25)\26+\27-\30/\2\61\2\63\2\65\2\67\29\2;\2=\2?\2A\2C\2E\2G\2I\2K\2M"+
 		"\2O\2Q\2S\2U\2W\2Y\2[\2]\2_\2a\2c\2e\31g\32i\33k\34m\35o\36q\37s u!w\""+
@@ -198,7 +197,7 @@ public class TinySQLLexer extends Lexer {
 		"\3\2\2\2\u008d\u01bd\3\2\2\2\u008f\u01c2\3\2\2\2\u0091\u01c5\3\2\2\2\u0093"+
 		"\u01ca\3\2\2\2\u0095\u01d2\3\2\2\2\u0097\u01db\3\2\2\2\u0099\u01df\3\2"+
 		"\2\2\u009b\u01e5\3\2\2\2\u009d\u01ea\3\2\2\2\u009f\u01f0\3\2\2\2\u00a1"+
-		"\u01f4\3\2\2\2\u00a3\u01f6\3\2\2\2\u00a5\u00a6\7=\2\2\u00a6\4\3\2\2\2"+
+		"\u01f4\3\2\2\2\u00a3\u01fb\3\2\2\2\u00a5\u00a6\7=\2\2\u00a6\4\3\2\2\2"+
 		"\u00a7\u00a8\7\60\2\2\u00a8\6\3\2\2\2\u00a9\u00aa\7*\2\2\u00aa\b\3\2\2"+
 		"\2\u00ab\u00ac\7.\2\2\u00ac\n\3\2\2\2\u00ad\u00ae\7+\2\2\u00ae\f\3\2\2"+
 		"\2\u00af\u00b0\7-\2\2\u00b0\16\3\2\2\2\u00b1\u00b2\7/\2\2\u00b2\20\3\2"+
@@ -290,10 +289,10 @@ public class TinySQLLexer extends Lexer {
 		"\u01e9\5W,\2\u01e9\u009c\3\2\2\2\u01ea\u01eb\5A!\2\u01eb\u01ec\5K&\2\u01ec"+
 		"\u01ed\5K&\2\u01ed\u01ee\59\35\2\u01ee\u01ef\5S*\2\u01ef\u009e\3\2\2\2"+
 		"\u01f0\u01f1\5U+\2\u01f1\u01f2\59\35\2\u01f2\u01f3\5W,\2\u01f3\u00a0\3"+
-		"\2\2\2\u01f4\u01f5\13\2\2\2\u01f5\u00a2\3\2\2\2\u01f6\u01fa\t \2\2\u01f7"+
-		"\u01f9\t!\2\2\u01f8\u01f7\3\2\2\2\u01f9\u01fc\3\2\2\2\u01fa\u01f8\3\2"+
-		"\2\2\u01fa\u01fb\3\2\2\2\u01fb\u00a4\3\2\2\2\u01fc\u01fa\3\2\2\2\16\2"+
-		"\u00d0\u00d2\u00dd\u00e8\u00ee\u00f9\u00ff\u0102\u0108\u010b\u01fa\3\2"+
+		"\2\2\2\u01f4\u01f8\t \2\2\u01f5\u01f7\t!\2\2\u01f6\u01f5\3\2\2\2\u01f7"+
+		"\u01fa\3\2\2\2\u01f8\u01f6\3\2\2\2\u01f8\u01f9\3\2\2\2\u01f9\u00a2\3\2"+
+		"\2\2\u01fa\u01f8\3\2\2\2\u01fb\u01fc\13\2\2\2\u01fc\u00a4\3\2\2\2\16\2"+
+		"\u00d0\u00d2\u00dd\u00e8\u00ee\u00f9\u00ff\u0102\u0108\u010b\u01f8\3\2"+
 		"\3\2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
