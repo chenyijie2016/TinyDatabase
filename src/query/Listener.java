@@ -146,7 +146,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterCreateTableStmt(TinySQLParser.CreateTableStmtContext ctx) throws IllegalArgumentException {
-        String databaseName = ctx.databaseName() == null ? "" : ctx.databaseName().getText();
+        String databaseName = ctx.databaseName() == null ? null : ctx.databaseName().getText();
         int columnNum = ctx.columnDefinition().size();
         Column[] columns = new Column[columnNum];
         List<Constraint> constraints = new ArrayList<>();
@@ -419,8 +419,5 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void exitSqlStatementList(TinySQLParser.SqlStatementListContext ctx) {
-        for (Statement s: statementList) {
-            s.execute();
-        }
     }
 }

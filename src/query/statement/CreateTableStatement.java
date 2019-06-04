@@ -1,8 +1,12 @@
 package query.statement;
 
+import database.DataBase;
 import query.Result;
+import schema.Schema;
 import schema.SchemaManager;
 import table.*;
+
+import java.io.IOException;
 
 public class CreateTableStatement extends Statement {
     private String databaseName;
@@ -18,20 +22,35 @@ public class CreateTableStatement extends Statement {
     }
 
     @Override
-    public Result execute(SchemaManager schemaManager) {
-        if (databaseName.equals("")) {
-            System.out.println("Creating table in current database:");
+    public Result execute(SchemaManager schemaManager) throws IllegalArgumentException {
+        DataBase db;
+        if (databaseName != null) {
+            db = Schema.getSchema().getDatabaseByName(databaseName);
+        } else {
+            db = schemaManager.getCurrentDataBase();
         }
-        else {
-            System.out.println("Creating table in database: " + databaseName);
+        try {
+            if (db != null) {
+
+                db.createTable(new Table(db, tableName, columns, constraints));
+            } else {
+                throw new IllegalArgumentException("SQL Execute Error [create table]: Database not specified (Default database is not available)");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("SQL Execute Error [create table]: Unknown Error");
         }
-        System.out.println("    name: " + tableName);
-        for (Column c: columns) {
-            System.out.println("        columns: " + c.getName() + "  type: " + c.getColumnType().type().name());
-        }
-        for (Constraint c: constraints) {
-            System.out.println("        constraints: " + c.getColumnName() + "  type: " + c.getType().name());
-        }
+//        if (databaseName.equals("")) {
+//            System.out.println("Creating table in current database:");
+//        } else {
+//            System.out.println("Creating table in database: " + databaseName);
+//        }
+//        System.out.println("    name: " + tableName);
+//        for (Column c : columns) {
+//            System.out.println("        columns: " + c.getName() + "  type: " + c.getColumnType().type().name());
+//        }
+//        for (Constraint c : constraints) {
+//            System.out.println("        constraints: " + c.getColumnName() + "  type: " + c.getType().name());
+//        }
         return null;
     }
 }

@@ -35,7 +35,6 @@ public class Schema {
                     }
                 } else {
                     createDatabase(new DataBase(DEFAULT_DATABASE));
-                    updateSchema();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -88,12 +87,4 @@ public class Schema {
         return getDatabaseByName(DEFAULT_DATABASE);
     }
 
-    /**
-     * 删除所有有关表和数据文件
-     *
-     * @throws IOException
-     */
-    public void dropAll() throws IOException {
-
-    }
 }

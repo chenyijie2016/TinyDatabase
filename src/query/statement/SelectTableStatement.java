@@ -4,6 +4,8 @@ import query.Result;
 import query.expression.CompareExpression;
 import query.expression.Expression;
 import query.resultColumn.ResultColumn;
+import schema.Schema;
+import schema.SchemaManager;
 import table.Column;
 import table.Constraint;
 
@@ -39,7 +41,7 @@ public class SelectTableStatement extends Statement {
     }
 
     @Override
-    public Result execute() {
+    public Result execute(SchemaManager schemaManager) {
         return null;
     }
 }

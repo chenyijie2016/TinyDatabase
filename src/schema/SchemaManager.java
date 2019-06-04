@@ -15,7 +15,6 @@ public class SchemaManager {
     public static SchemaManager getNewSchemaManger() {
         uid++;
         return new SchemaManager(uid);
-
     }
 
     public DataBase getCurrentDataBase() {

@@ -54,7 +54,7 @@ public class DataBase {
         outputStream.close();
     }
 
-     public static DataBase readFromFile(String name) throws IOException {
+    public static DataBase readFromFile(String name) throws IOException {
 
         FileInputStream inputStream = new FileInputStream(name + SCHEMA_EXTENSION);
         DataInputStream in = new DataInputStream(inputStream);
@@ -72,6 +72,11 @@ public class DataBase {
     }
 
     public void createTable(Table table) throws IOException {
+        for (Table t : tables) {
+            if (t.getTableName().equals(table.getTableName())) {
+                throw new IllegalArgumentException("SQL Execute Error [create table]: Cannot create a table with the same name as an existing table");
+            }
+        }
         tables.add(table);
         updateSchema();
     }
@@ -79,6 +84,14 @@ public class DataBase {
     public void dropTable(Table table) throws IOException {
         table.drop();
         tables.remove(table);
+        updateSchema();
+    }
+
+    public void dropAll() throws IOException {
+        for (Table table : tables) {
+            table.drop();
+        }
+        tables.clear();
         updateSchema();
     }
 

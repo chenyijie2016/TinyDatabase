@@ -26,8 +26,6 @@ public class ListenerTest {
 
     @Before
     public void setUp() {
-        System.out.println("Start Test");
-
 
     }
 
