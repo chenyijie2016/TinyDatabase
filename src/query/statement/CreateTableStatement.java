@@ -1,6 +1,7 @@
 package query.statement;
 
 import query.Result;
+import schema.SchemaManager;
 import table.*;
 
 public class CreateTableStatement extends Statement {
@@ -17,7 +18,7 @@ public class CreateTableStatement extends Statement {
     }
 
     @Override
-    public Result execute() {
+    public Result execute(SchemaManager schemaManager) {
         if (databaseName.equals("")) {
             System.out.println("Creating table in current database:");
         }

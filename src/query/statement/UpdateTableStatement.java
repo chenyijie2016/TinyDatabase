@@ -2,6 +2,8 @@ package query.statement;
 
 import query.Result;
 import query.expression.*;
+import schema.Schema;
+import schema.SchemaManager;
 import table.Column;
 
 public class UpdateTableStatement extends Statement {
@@ -17,9 +19,9 @@ public class UpdateTableStatement extends Statement {
     }
 
     @Override
-    public Result execute() {
+    public Result execute(SchemaManager schemaManager) {
         System.out.println("Updating table name: " + tableName);
-        for (String c: columns) {
+        for (String c : columns) {
             System.out.println("        columns: " + c);
         }
         return null;

@@ -10,6 +10,7 @@ import database.DataBase;
 import index.BPlusTree;
 
 
+import java.io.File;
 import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -30,12 +31,16 @@ public class Table extends TableBase {
     private long freeListPointer = -1;
     private List<BPlusTree> indexTrees;
 
-
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException {
+        this(database, tableName, columns, constraints, 1);
+    }
+
+    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints, int uniqueID) throws IOException {
         this.database = database;
         this.tableName = tableName;
         this.columns = Arrays.asList(columns);
         this.constraints = constraints;
+        this.uniqueID = uniqueID;
         indexColumns = new ArrayList<>();
 
 
@@ -51,9 +56,7 @@ public class Table extends TableBase {
 
         if (!hasPrimaryKey) { // 没有主键约束就自己创建一个 默认INT
             Column c = new Column(Type.intType(), "IDX");
-            uniqueID = 1;
             createPrimaryKey(c);
-
         }
 
 
@@ -166,7 +169,6 @@ public class Table extends TableBase {
     }
 
 
-
     /**
      * 更新一行数据，先删除再插入
      *
@@ -180,7 +182,7 @@ public class Table extends TableBase {
     }
 
 
-    public void insertRow(Row row) throws IOException {
+    public void insertRow(Row row) throws IOException, IllegalArgumentException {
         // 先检查约束
         // TODO
         // 插入数据
@@ -219,6 +221,7 @@ public class Table extends TableBase {
         buffer.put("TABLE".getBytes()); // Magic Number
         buffer.putInt(tableName.length());
         buffer.put(tableName.getBytes());
+        buffer.putInt(uniqueID);
         buffer.putInt(columns.size());
         for (Column column : columns) {
             switch (column.getColumnType().type()) {
@@ -251,8 +254,7 @@ public class Table extends TableBase {
                 case PRIMARY_KEY:
                     if (constraint.getOrder() == Constraint.Order.ASC) {
                         buffer.put((byte) 0);
-                    }
-                    else {
+                    } else {
                         buffer.put((byte) 2);
                     }
                     break;
@@ -281,6 +283,7 @@ public class Table extends TableBase {
         byte[] name = new byte[tableNameSize];
         buffer.get(name);
         String tableName = new String(name);
+        int uniqueID = buffer.getInt();
         int columnSize = buffer.getInt();
         Column[] columns = new Column[columnSize];
         for (int i = 0; i < columnSize; i++) {
@@ -336,7 +339,7 @@ public class Table extends TableBase {
             constraints[i] = new Constraint(constraintType, order, new String(columnName));
         }
 
-        return new Table(db, tableName, columns, constraints);
+        return new Table(db, tableName, columns, constraints, uniqueID);
     }
 
     /**
@@ -346,6 +349,26 @@ public class Table extends TableBase {
         dataFile.seek(0);
         writeDataFileHeader();
     }
+
+    /**
+     * 删除表
+     *
+     * @throws IOException 删除表出错
+     */
+    public boolean drop() throws IOException {
+        this.indexTrees.forEach(index -> {
+            try {
+                index.drop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        this.dataFile.close();
+        String dataFileName = database.getName() + "_" + this.tableName + DATA_EXTENSION;
+        File file = new File(dataFileName);
+        return file.delete();
+    }
+
 
     /**
      * 获取全体的元组的迭代器，利用第一个索引的全体迭代器实现

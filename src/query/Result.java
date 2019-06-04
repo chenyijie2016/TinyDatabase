@@ -44,10 +44,7 @@ public class Result extends TableBase {
         }
         builder.append("|\n");
         for (Row row : rows) {
-            for (typedData data : row.getData()) {
-                builder.append("| ");
-                builder.append(data.toString());
-            }
+            builder.append(row.toString());
             builder.append("|\n");
         }
         return builder.toString();

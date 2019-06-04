@@ -2,6 +2,7 @@ import data.Type;
 import data.intData;
 import data.stringData;
 import database.DataBase;
+import schema.Schema;
 import table.*;
 
 

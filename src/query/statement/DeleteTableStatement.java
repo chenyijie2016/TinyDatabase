@@ -3,6 +3,7 @@ package query.statement;
 import query.Result;
 import query.expression.CompareExpression;
 import query.expression.ValueExpression;
+import schema.SchemaManager;
 
 public class DeleteTableStatement extends Statement {
     private String tableName;
@@ -14,7 +15,7 @@ public class DeleteTableStatement extends Statement {
     }
 
     @Override
-    public Result execute() {
+    public Result execute(SchemaManager schemaManager) {
         System.out.println("Updating table name: " + tableName);
         return null;
     }

@@ -1,6 +1,7 @@
 package query.statement;
 
 import query.Result;
+import schema.SchemaManager;
 
 public abstract class Statement {
     public static final int CREATE_DATABASE = 1;
@@ -38,7 +39,7 @@ public abstract class Statement {
         return sql;
     }
 
-    public abstract Result execute();
+    public abstract Result execute(SchemaManager schemaManager);
 
     public boolean isValid() {
         return valid;

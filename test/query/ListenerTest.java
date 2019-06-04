@@ -7,11 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.junit.internal.runners.statements.Fail;
 import query.statement.InsertTableStatement;
 import query.statement.SchemaStatement;
 import query.statement.Statement;
-import table.Schema;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,6 +20,9 @@ public class ListenerTest {
     private TinySQLParser parser;
     private TinySQLLexer lexer;
     private Listener listener;
+
+
+
 
     @Before
     public void setUp() {

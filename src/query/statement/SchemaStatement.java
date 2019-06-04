@@ -1,6 +1,7 @@
 package query.statement;
 
 import query.Result;
+import schema.SchemaManager;
 
 public class SchemaStatement extends Statement {
     private String databaseName;
@@ -11,7 +12,12 @@ public class SchemaStatement extends Statement {
     }
 
     @Override
-    public Result execute() {
+    public Result execute(SchemaManager schemaManager) {
+        switch (this.type) {
+            case CREATE_DATABASE:
+                break;
+
+        }
         return null;
     }
 

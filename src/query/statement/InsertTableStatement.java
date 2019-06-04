@@ -2,6 +2,7 @@ package query.statement;
 
 import data.typedData;
 import query.Result;
+import schema.SchemaManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +16,6 @@ public class InsertTableStatement extends Statement {
         this.type = INSERT_TABLE;
     }
 
-    @Override
-    public Result execute() {
-        return null;
-    }
 
     public InsertTableStatement setTableName(String tableName) {
         this.tableName = tableName;
@@ -35,5 +32,10 @@ public class InsertTableStatement extends Statement {
 
     public void setSpecifiedAttribute(boolean specifiedAttribute) {
         this.specifiedAttribute = specifiedAttribute;
+    }
+
+    @Override
+    public Result execute(SchemaManager schemaManager) {
+        return null;
     }
 }

@@ -54,7 +54,7 @@ public class DataBase {
         outputStream.close();
     }
 
-     public static DataBase readFromFile(String name) throws FileNotFoundException, IOException {
+     public static DataBase readFromFile(String name) throws IOException {
 
         FileInputStream inputStream = new FileInputStream(name + SCHEMA_EXTENSION);
         DataInputStream in = new DataInputStream(inputStream);
@@ -77,6 +77,7 @@ public class DataBase {
     }
 
     public void dropTable(Table table) throws IOException {
+        table.drop();
         tables.remove(table);
         updateSchema();
     }
