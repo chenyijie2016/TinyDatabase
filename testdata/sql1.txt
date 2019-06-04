@@ -4,5 +4,9 @@ name string(32) not null,
 primary key(id)
 );
 create database test;
+select a.data, b.*, c.m from
+a natural join b, c
+where
+a.ttt = c.ttt;
 show databases;
 show database test;

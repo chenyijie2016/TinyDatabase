@@ -2,6 +2,7 @@ package query;
 
 import data.Type;
 import org.antlr.v4.runtime.misc.Interval;
+import query.resultColumn.ResultColumn;
 import query.statement.*;
 
 
@@ -19,6 +20,11 @@ public class Listener extends TinySQLBaseListener {
     private Stack<ValueExpression> valueExpressionStack = new Stack<>();
     private Stack<CompareExpression> compareExpressionStack = new Stack<>();
     private BaseData baseExpressionValue;
+    private List<ResultColumn> resultColumnList = new ArrayList<>();
+    private List<String> tableNamesForSelect = new ArrayList<>();
+    private List<SelectTableStatement.JOIN_TYPE> joinOperatorsForSelect = new ArrayList<>();
+
+    // TODO: remove it
     private List<String> expressionValueList;
 
     public List<Statement> getStatementList() {
@@ -217,6 +223,89 @@ public class Listener extends TinySQLBaseListener {
 
 
     @Override
+    public void exitResultColumn(TinySQLParser.ResultColumnContext ctx) {
+        if (ctx.tableName() != null) {
+            resultColumnList.add(new ResultColumn(ctx.tableName().getText()));
+        }
+        else if (ctx.expression() != null) {
+            resultColumnList.add(new ResultColumn(valueExpressionStack.pop()));
+        }
+        else {
+            resultColumnList.add(new ResultColumn());
+        }
+    }
+
+
+    @Override
+    public void exitJoinClause(TinySQLParser.JoinClauseContext ctx) {
+        for (TinySQLParser.TableNameContext tableName : ctx.tableName()) {
+            tableNamesForSelect.add(tableName.getText());
+        }
+        for (TinySQLParser.JoinOperatorContext joinOperator : ctx.joinOperator()) {
+            SelectTableStatement.JOIN_TYPE type;
+            if (joinOperator.K_JOIN() == null) {
+                type = SelectTableStatement.JOIN_TYPE.CROSS;
+            }
+            else {
+                if (joinOperator.K_NATURAL() != null) {
+                    if (joinOperator.K_INNER() != null) {
+                        type = SelectTableStatement.JOIN_TYPE.NATURAL_INNER;
+                    }
+                    else {
+                        type = SelectTableStatement.JOIN_TYPE.NATURAL_LEFT_OUTER;
+                    }
+                }
+                else {
+                    if (joinOperator.K_INNER() != null) {
+                        type = SelectTableStatement.JOIN_TYPE.INNER;
+                    }
+                    else {
+                        type = SelectTableStatement.JOIN_TYPE.LEFT_OUTER;
+                    }
+                }
+            }
+            joinOperatorsForSelect.add(type);
+        }
+    }
+
+
+    @Override
+    public void exitSelectTableStmt(TinySQLParser.SelectTableStmtContext ctx) {
+        int tableNamesSize = ctx.tableName().size();
+        CompareExpression whereCondition = ctx.conditionExpression() == null ? null : compareExpressionStack.pop();
+        if (ctx.joinClause() == null) {
+            for (int i = 0; i < tableNamesSize; i++) {
+                tableNamesForSelect.add(ctx.tableName(i).getText());
+                joinOperatorsForSelect.add(SelectTableStatement.JOIN_TYPE.CROSS);
+            }
+            if (tableNamesSize > 0) {
+                joinOperatorsForSelect.remove(0);
+            }
+        }
+        SelectTableStatement.SELECT_TYPE selectType = ctx.K_DISTINCT() == null ? SelectTableStatement.SELECT_TYPE.ALL :
+                                                                          SelectTableStatement.SELECT_TYPE.DISTINCT;
+        ResultColumn[] resultColumns = new ResultColumn[resultColumnList.size()];
+        resultColumnList.toArray(resultColumns);
+        String[] tableNamesForSelectStrs = new String[tableNamesForSelect.size()];
+        tableNamesForSelect.toArray(tableNamesForSelectStrs);
+        SelectTableStatement.JOIN_TYPE[] joinOperatorsForSelects =
+                new SelectTableStatement.JOIN_TYPE[joinOperatorsForSelect.size()];
+        joinOperatorsForSelect.toArray(joinOperatorsForSelects);
+        CompareExpression[] joinConstraints = new CompareExpression[compareExpressionStack.size()];
+        compareExpressionStack.toArray(joinConstraints);
+        statement = new query.statement.SelectTableStatement(selectType, resultColumns,
+                                                             tableNamesForSelectStrs,
+                                                             joinOperatorsForSelects,
+                                                             joinConstraints,  // joinConstraint
+                                                             whereCondition);
+        resultColumnList.clear();
+        compareExpressionStack.clear();
+        tableNamesForSelect.clear();
+        joinOperatorsForSelect.clear();
+    }
+
+
+    @Override
     public void enterUpdateTableStmt(TinySQLParser.UpdateTableStmtContext ctx) {
         String tableName = ctx.tableName().getText();
         int newDataLength = ctx.columnName().size();
@@ -248,6 +337,7 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void exitDeleteTableStmt(TinySQLParser.DeleteTableStmtContext ctx) {
         ((DeleteTableStatement)statement).setWhereCondition(compareExpressionStack.pop());
+        compareExpressionStack.clear();
     }
 
 
@@ -315,6 +405,11 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void enterDropDatabaseStmt(TinySQLParser.DropDatabaseStmtContext ctx) {
         statement = new SchemaStatement(Statement.DROP_DATABASE).setDatabaseName(ctx.databaseName().getText());
+    }
+
+    @Override
+    public void enterUseDatabaseStmt(TinySQLParser.UseDatabaseStmtContext ctx) {
+        statement = new SchemaStatement(Statement.USE_DATABASE).setDatabaseName(ctx.databaseName().getText());
     }
 
     @Override
