@@ -1,4 +1,4 @@
-// Generated from C:/Users/cyj/Desktop/TinyDatabase/src/query\TinySQL.g4 by ANTLR 4.7.2
+// Generated from query/TinySQL.g4 by ANTLR 4.7.2
 package query;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -1819,8 +1819,8 @@ public class TinySQLParser extends Parser {
 
 	public static class JoinConstraintContext extends ParserRuleContext {
 		public TerminalNode K_ON() { return getToken(TinySQLParser.K_ON, 0); }
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
+		public ConditionExpressionContext conditionExpression() {
+			return getRuleContext(ConditionExpressionContext.class,0);
 		}
 		public JoinConstraintContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1851,7 +1851,7 @@ public class TinySQLParser extends Parser {
 				setState(315);
 				match(K_ON);
 				setState(316);
-				expression(0);
+				conditionExpression();
 				}
 			}
 
@@ -2878,7 +2878,7 @@ public class TinySQLParser extends Parser {
 		"\3\2\2\2\u0132%\3\2\2\2\u0133\u013a\5@!\2\u0134\u0135\5*\26\2\u0135\u0136"+
 		"\5@!\2\u0136\u0137\5(\25\2\u0137\u0139\3\2\2\2\u0138\u0134\3\2\2\2\u0139"+
 		"\u013c\3\2\2\2\u013a\u0138\3\2\2\2\u013a\u013b\3\2\2\2\u013b\'\3\2\2\2"+
-		"\u013c\u013a\3\2\2\2\u013d\u013e\7.\2\2\u013e\u0140\5\32\16\2\u013f\u013d"+
+		"\u013c\u013a\3\2\2\2\u013d\u013e\7.\2\2\u013e\u0140\5\34\17\2\u013f\u013d"+
 		"\3\2\2\2\u013f\u0140\3\2\2\2\u0140)\3\2\2\2\u0141\u014e\7\6\2\2\u0142"+
 		"\u0144\7\60\2\2\u0143\u0142\3\2\2\2\u0143\u0144\3\2\2\2\u0144\u014a\3"+
 		"\2\2\2\u0145\u0147\7\64\2\2\u0146\u0148\7\63\2\2\u0147\u0146\3\2\2\2\u0147"+
