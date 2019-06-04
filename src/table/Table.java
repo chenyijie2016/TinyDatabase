@@ -406,9 +406,9 @@ public class Table extends TableBase {
      */
     public RowIterator scanLessEqual(Column column, typedData key) throws IOException {
         if (indexColumns.indexOf(column) != -1) {
-            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessEqual(key));
+            return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessEqual(key));
         }
-        RowCondition dataLessEqual = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
+        RowCondition dataLessEqual = (row) -> row.getDataByColumn(column).compareTo(key) <= 0;
         return new RowConditionIterator(scanAll(), dataLessEqual);
     }
 
@@ -419,9 +419,9 @@ public class Table extends TableBase {
      */
     public RowIterator scanLessThan(Column column, typedData key) throws IOException {
         if (indexColumns.indexOf(column) != -1) {
-            return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessThan(key));
+            return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessThan(key));
         }
-        RowCondition dataLessThan = (row) -> row.getDataByColumn(column).compareTo(key) >= 0;
+        RowCondition dataLessThan = (row) -> row.getDataByColumn(column).compareTo(key) < 0;
         return new RowConditionIterator(scanAll(), dataLessThan);
     }
 
@@ -468,6 +468,35 @@ public class Table extends TableBase {
         private Table table;
 
         RowIndexIterator(Table table, BPlusTree.BPlusTreeIterator iter) {
+            this.iter = iter;
+            this.table = table;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public Row next() {
+            if (iter.hasNext()) {
+                try {
+                    return readRow(new Row(table, iter.next()));
+                } catch (IOException e) {
+                    System.out.println("Can not Iterator table.Row");
+                    System.exit(0);
+                }
+                return null;
+            } else
+                return null;
+        }
+    }
+
+    class RowIndexPrevIterator extends RowIterator {
+        private BPlusTree.BPlusTreePrevIterator iter;
+        private Table table;
+
+        RowIndexPrevIterator(Table table, BPlusTree.BPlusTreePrevIterator iter) {
             this.iter = iter;
             this.table = table;
         }

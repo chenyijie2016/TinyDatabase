@@ -103,8 +103,8 @@ public class Test {
             System.out.println(b);
             b = a.next();
         }
-        System.out.println("== Case 4: Find who's id> 30000 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(30000));
+        System.out.println("== Case 4: Find who's id>45565 ");
+        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -134,10 +134,10 @@ public class Test {
     }
 
     public static void main(String[] args) throws IOException {
-        //createTableWithMetaData();
-        createTableWithSchema();
-        insetTestData();
+//        createTableWithMetaData();
+//        createTableWithSchema();
+//        insetTestData();
         testSearch();
-        testUpdate();
+//        testUpdate();
     }
 }
