@@ -238,7 +238,7 @@ public class SelectTableStatement extends Statement {
                 while (row != null) {
                     Object[] rowData = new Object[columnsForOutputSize];
                     for (int i = 0; i < columnsForOutputSize; i++) {
-                        rowData[i] = row.getDataByColumn(columnsForOutput.get(i));
+                        rowData[i] = row.getDataByColumn(columnsForOutput.get(i)).getData();
                     }
                     Row newRow = new Row(result, rowData);
                     result.addRow(newRow);

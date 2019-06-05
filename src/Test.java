@@ -19,26 +19,28 @@ public class Test {
 //        table = new table.Table(
 //                testDB,
 //                "employee",
-//                new table.Column[]{new table.Column(Type.intType(), "id"),
-//                        new table.Column(Type.stringType(20), "name"),
-//                        new table.Column(Type.stringType(20), "dept_name"),
-//                        new table.Column(Type.intType(), "salary")
+//                new table.Column[]{new table.Column(Type.intType(), "ID"),
+//                        new table.Column(Type.stringType(20), "NAME"),
+//                        new table.Column(Type.stringType(20), "DEPT_NAME"),
+//                        new table.Column(Type.intType(), "SALARY")
 //                },
-//                new table.Constraint[]{new table.Constraint(table.Constraint.ConstraintType.PRIMARY_KEY, "id")});
+//                new table.Constraint[]{new table.Constraint(table.Constraint.ConstraintType.PRIMARY_KEY, "ID")});
     }
 
     public static void createTableWithSchema() throws IOException, SQLExecuteException {
         schema = Schema.getSchema();
-        schema.createDatabase(new DataBase("test"));
         DataBase db = schema.getDatabaseByName("test");
+        if (db == null) {
+            schema.createDatabaseByName("test");
+        }
         db.createTable(
                 new Table(db, "employee",
-                        new Column[]{new Column(Type.intType(), "id"),
-                                new Column(Type.stringType(20), "name"),
-                                new Column(Type.stringType(20), "dept_name"),
-                                new Column(Type.intType(), "salary")
+                        new Column[]{new Column(Type.intType(), "ID"),
+                                new Column(Type.stringType(20), "NAME"),
+                                new Column(Type.stringType(20), "DEPT_NAME"),
+                                new Column(Type.intType(), "SALARY")
                         },
-                        new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "id")})
+                        new Constraint[]{new Constraint(Constraint.ConstraintType.PRIMARY_KEY, "ID")})
         );
 
     }
@@ -66,7 +68,7 @@ public class Test {
     public static void testDelete() {
         Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         try {
-            Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "id"), new intData(12121));
+            Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "ID"), new intData(12121));
             // System.out.println("table.Row[0] data length = " + a.data.length);
             Row b = a.next();
             while (b != null) {
@@ -83,7 +85,7 @@ public class Test {
         Table table = Schema.getSchema().getDatabaseByName("test").getTableByName("employee");
         // Case One: equal search
         System.out.println("== Case 1: Find id=12121");
-        Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "id"), new intData(12121));
+        Table.RowIterator a = table.scanEqual(new Column(Type.intType(), "ID"), new intData(12121));
         Row b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -91,7 +93,7 @@ public class Test {
         }
 
         System.out.println("== Case 2: Find salary>=80000");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanGreaterEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -99,7 +101,7 @@ public class Test {
         }
 
         System.out.println("== Case 3: Find who's dept_name=='Comp.Sci.'");
-        a = table.scanEqual(new Column(Type.stringType(20), "dept_name"), new stringData("Comp.Sci."));
+        a = table.scanEqual(new Column(Type.stringType(20), "DEPT_NAME"), new stringData("Comp.Sci."));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -107,7 +109,7 @@ public class Test {
         }
 
         System.out.println("== Case 4: Find who's (primary key)id>45565 ");
-        a = table.scanGreaterThan(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanGreaterThan(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -115,7 +117,7 @@ public class Test {
         }
 
         System.out.println("== Case 5: Find who's (primary key)id>=45565 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanGreaterEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -123,7 +125,7 @@ public class Test {
         }
 
         System.out.println("== Case 6: Find who's (primary key)id<45565 ");
-        a = table.scanLessThan(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanLessThan(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -131,7 +133,7 @@ public class Test {
         }
 
         System.out.println("== Case 7: Find who's (primary key)id<=45565 ");
-        a = table.scanLessEqual(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanLessEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -139,7 +141,7 @@ public class Test {
         }
 
         System.out.println("== Case 8: Find who's (primary key)id>45565 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanGreaterEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -147,7 +149,7 @@ public class Test {
         }
 
         System.out.println("== Case 9: Find who's (primary key)id=45565 ");
-        a = table.scanEqual(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -155,7 +157,7 @@ public class Test {
         }
 
         System.out.println("== Case 10: Find who's (primary key)id<>45565 ");
-        a = table.scanNotEqual(new Column(Type.intType(), "id"), new intData(45565));
+        a = table.scanNotEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -163,7 +165,7 @@ public class Test {
         }
 
         System.out.println("== Case 11: Find who's (not indexed key)salary>80000 ");
-        a = table.scanGreaterThan(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanGreaterThan(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -171,7 +173,7 @@ public class Test {
         }
 
         System.out.println("== Case 12: Find who's (not indexed key)salary>=80000 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanGreaterEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -179,7 +181,7 @@ public class Test {
         }
 
         System.out.println("== Case 13: Find who's (not indexed key)salary<80000 ");
-        a = table.scanLessThan(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanLessThan(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -187,7 +189,7 @@ public class Test {
         }
 
         System.out.println("== Case 14: Find who's (not indexed key)salary<=80000 ");
-        a = table.scanLessEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanLessEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -195,7 +197,7 @@ public class Test {
         }
 
         System.out.println("== Case 15: Find who's (not indexed key)salary>80000 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanGreaterEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -203,7 +205,7 @@ public class Test {
         }
 
         System.out.println("== Case 16: Find who's (not indexed key)salary=80000 ");
-        a = table.scanEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -211,7 +213,7 @@ public class Test {
         }
 
         System.out.println("== Case 17: Find who's (not indexed key)salary<>80000 ");
-        a = table.scanNotEqual(new Column(Type.intType(), "salary"), new intData(80000));
+        a = table.scanNotEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);
@@ -228,7 +230,7 @@ public class Test {
         while ((member = iter.next()) != null) {
             System.out.println(member);
             Row update = new Row(member);
-            Column salaryColumn = new Column(Type.intType(), "salary");
+            Column salaryColumn = new Column(Type.intType(), "SALARY");
             intData oldSalary = (intData) member.getDataByColumn(salaryColumn);
             update.setDataByColumn(salaryColumn, new intData((Integer) oldSalary.getData() - 1000));
             table.updateRow(member, update);
