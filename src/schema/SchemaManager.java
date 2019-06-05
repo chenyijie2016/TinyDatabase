@@ -14,7 +14,7 @@ public class SchemaManager {
     }
 
 
-    public Schema schema(){
+    public Schema schema() {
         return Schema.getSchema();
     }
 
@@ -23,7 +23,10 @@ public class SchemaManager {
         return new SchemaManager(uid);
     }
 
-    public DataBase getCurrentDataBase() {
+    public DataBase getCurrentDataBase() throws SQLExecuteException {
+        if (currentDataBase == null) {
+            throw new SQLExecuteException("");
+        }
         return currentDataBase;
     }
 

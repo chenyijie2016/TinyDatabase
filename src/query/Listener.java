@@ -70,8 +70,8 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void exitTableColumnExpression(TinySQLParser.TableColumnExpressionContext ctx) {
-        String tableName = ctx.tableName() == null ? null : ctx.tableName().getText();
-        baseExpressionValue = new BaseData(tableName, ctx.columnName().getText());
+        String tableName = ctx.tableName() == null ? null : ctx.tableName().getText().toUpperCase();
+        baseExpressionValue = new BaseData(tableName, ctx.columnName().getText().toUpperCase());
         valueExpressionStack.push(new ValueExpression(baseExpressionValue));
     }
 
@@ -132,7 +132,7 @@ public class Listener extends TinySQLBaseListener {
 
 
     @Override
-    public void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) {
+    public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) {
         ValueExpression b = valueExpressionStack.pop();
         ValueExpression a = valueExpressionStack.pop();
         switch (ctx.getChild(1).getText()) {
@@ -156,7 +156,7 @@ public class Listener extends TinySQLBaseListener {
         boolean gotPrimaryKey = false;  // Is there a primary key in the declaration of columns?
         for (int i = 0; i < columnNum; i++) {
             String columnTypeStr = ctx.columnDefinition(i).typeName().name().getText().toUpperCase();
-            String columnName = ctx.columnDefinition(i).columnName().getText();
+            String columnName = ctx.columnDefinition(i).columnName().getText().toUpperCase();
             if (ctx.columnDefinition(i).typeName().signedNumber() == null) {
                 switch (columnTypeStr) {
                     case Tokens.DOUBLE:

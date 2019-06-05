@@ -43,9 +43,7 @@ public class Result extends TableBase {
             if (column.getColumnType().type() != Type.TYPE.STRING) {
                 builder.append("   ");
             } else {
-                for (int i = 0; i < column.getColumnType().size(); i++) {
-                    builder.append(" ");
-                }
+                builder.append(" ".repeat(Math.max(0, column.getColumnType().size())));
             }
         }
         builder.append("|\n");

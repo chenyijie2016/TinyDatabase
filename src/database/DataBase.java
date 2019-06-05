@@ -1,5 +1,6 @@
 package database;
 
+import exception.SQLExecuteException;
 import table.Table;
 
 import java.io.*;
@@ -23,6 +24,10 @@ public class DataBase {
 
     public String getName() {
         return this.databaseName;
+    }
+
+    public List<Table> getTables() {
+        return tables;
     }
 
     /**
@@ -80,10 +85,21 @@ public class DataBase {
         updateSchema();
     }
 
-    public void dropTable(Table table) throws IOException {
-        table.drop();
-        tables.remove(table);
-        updateSchema();
+    public void dropTableByName(String tableName) throws SQLExecuteException {
+        if (tableName == null) {
+            throw new SQLExecuteException("[drop table]: Null Table Name");
+        }
+        Table table = getTableByName(tableName);
+        if (table == null) {
+            throw new SQLExecuteException("[drop table]: No Such Name");
+        }
+        try {
+            table.drop();
+            tables.remove(table);
+            updateSchema();
+        } catch (IOException e) {
+            throw new SQLExecuteException("[drop table]: Unknown Error");
+        }
     }
 
     public void dropAll() throws IOException {

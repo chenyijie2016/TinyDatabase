@@ -200,17 +200,17 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code euqalExpression}
+	 * Enter a parse tree produced by the {@code equalExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
+	void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code euqalExpression}
+	 * Exit a parse tree produced by the {@code equalExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx);
+	void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code parenthesisConditionExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
