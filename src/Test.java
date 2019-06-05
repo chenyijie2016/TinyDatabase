@@ -2,6 +2,7 @@ import data.Type;
 import data.intData;
 import data.stringData;
 import database.DataBase;
+import exception.SQLExecuteException;
 import schema.Schema;
 import table.*;
 
@@ -26,7 +27,7 @@ public class Test {
 //                new table.Constraint[]{new table.Constraint(table.Constraint.ConstraintType.PRIMARY_KEY, "id")});
     }
 
-    public static void createTableWithSchema() throws IOException {
+    public static void createTableWithSchema() throws IOException, SQLExecuteException {
         schema = Schema.getSchema();
         schema.createDatabase(new DataBase("test"));
         DataBase db = schema.getDatabaseByName("test");
@@ -239,7 +240,7 @@ public class Test {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLExecuteException {
 //        createTableWithMetaData();
         createTableWithSchema();
         insetTestData();

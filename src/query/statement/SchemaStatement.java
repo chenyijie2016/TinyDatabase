@@ -1,5 +1,6 @@
 package query.statement;
 
+import exception.SQLExecuteException;
 import query.Result;
 import schema.SchemaManager;
 
@@ -12,9 +13,14 @@ public class SchemaStatement extends Statement {
     }
 
     @Override
-    public Result execute(SchemaManager schemaManager) {
+    public Result execute(SchemaManager schemaManager) throws SQLExecuteException {
         switch (this.type) {
             case CREATE_DATABASE:
+
+                break;
+            case DROP_DATABASE:
+                break;
+            case DROP_TABLE:
                 break;
 
         }

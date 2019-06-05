@@ -45,13 +45,11 @@ public class Listener extends TinySQLBaseListener {
         if (ctx.NUMERIC_LITERAL() != null) {
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.NUMBER, ctx.NUMERIC_LITERAL().getText());
             expressionValueList.add(ctx.NUMERIC_LITERAL().getText());
-        }
-        else if (ctx.STRING_LITERAL() != null) {
+        } else if (ctx.STRING_LITERAL() != null) {
             String str = ctx.STRING_LITERAL().getText();
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, str.substring(1, str.length() - 1));
             expressionValueList.add(str.substring(1, str.length() - 1));
-        }
-        else {
+        } else {
             baseExpressionValue = new BaseData();
             expressionValueList.add(null);
         }
@@ -100,8 +98,7 @@ public class Listener extends TinySQLBaseListener {
         ValueExpression a = valueExpressionStack.pop();
         if (ctx.getChild(1).getText().charAt(0) == '+') {
             valueExpressionStack.push(new ValueExpression(ValueExpression.SUB_TYPE.ADD, a, b));
-        }
-        else {
+        } else {
             valueExpressionStack.push(new ValueExpression(ValueExpression.SUB_TYPE.MINUS, a, b));
         }
     }
@@ -145,7 +142,7 @@ public class Listener extends TinySQLBaseListener {
 
 
     @Override
-    public void enterCreateTableStmt(TinySQLParser.CreateTableStmtContext ctx) throws IllegalArgumentException {
+    public void enterCreateTableStmt(TinySQLParser.CreateTableStmtContext ctx) {
         String databaseName = ctx.databaseName() == null ? null : ctx.databaseName().getText();
         int columnNum = ctx.columnDefinition().size();
         Column[] columns = new Column[columnNum];
@@ -169,56 +166,59 @@ public class Listener extends TinySQLBaseListener {
                         columns[i] = new Column(Type.longType(), columnName);
                         break;
                     default:
-                        throw new IllegalArgumentException("Type parsing error!");
+                        statement = new CreateTableStatement().setValid(false).setMessage("Type parsing error!");
+                        return;
                 }
-            }
-            else {
+            } else {
                 if (columnTypeStr.equals(Tokens.STRING)) {
                     long string_size;
                     try {
                         string_size = Integer.parseInt(ctx.columnDefinition(i).typeName().signedNumber().getText());
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("Param of the length info cannot be parsed!");
+                        statement = new CreateTableStatement().setValid(false).setMessage("Param of the length info cannot be parsed!");
+                        return;
                     }
                     if (string_size <= 0) {
-                        throw new IllegalArgumentException("Length of string must be positive!");
+                        statement = new CreateTableStatement().setValid(false).setMessage("Length of string must be positive!");
+                        return;
                     }
                     columns[i] = new Column(Type.stringType(string_size), columnName);
-                }
-                else {
-                    throw new IllegalArgumentException("Type parsing error!");
+                } else {
+                    statement = new CreateTableStatement().setValid(false).setMessage("Type parsing error!");
+                    return;
                 }
             }
             // Parsed all kinds of columns, BUT NOT CHECKING duplicate names
-            for (TinySQLParser.ColumnConstraintContext data: ctx.columnDefinition(i).columnConstraint()) {
+            for (TinySQLParser.ColumnConstraintContext data : ctx.columnDefinition(i).columnConstraint()) {
                 if (data.K_PRIMARY() != null) {
                     if (gotPrimaryKey) {
-                        throw new IllegalArgumentException("Duplicate primary keys!");
+                        statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
+                        return;
                     }
                     gotPrimaryKey = true;
                     boolean primaryKeyAsc = (data.K_DESC() == null);
                     constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
-                                    columnName));
-                }
-                else {
+                            columnName));
+                } else {
                     constraints.add(new Constraint(Constraint.ConstraintType.NOT_NULL, columnName));
                 }
             }
         }
         if (ctx.tableConstraint() != null) {
             if (gotPrimaryKey) {
-                throw new IllegalArgumentException("Duplicate primary keys!");
+                statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
+                return;
             }
-            for (TinySQLParser.IndexedColumnContext data: ctx.tableConstraint().indexedColumn()) {
+            for (TinySQLParser.IndexedColumnContext data : ctx.tableConstraint().indexedColumn()) {
                 boolean primaryKeyAsc = (data.K_DESC() == null);
                 constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
-                                               data.columnName().getText()));
+                        data.columnName().getText()));
             }
         }
         Constraint[] constraintsArray = new Constraint[constraints.size()];
         constraints.toArray(constraintsArray);
         statement = new query.statement.CreateTableStatement(databaseName, ctx.tableName().getText(), columns,
-                                                             constraintsArray);
+                constraintsArray);
     }
 
 
@@ -226,11 +226,9 @@ public class Listener extends TinySQLBaseListener {
     public void exitResultColumn(TinySQLParser.ResultColumnContext ctx) {
         if (ctx.tableName() != null) {
             resultColumnList.add(new ResultColumn(ctx.tableName().getText()));
-        }
-        else if (ctx.expression() != null) {
+        } else if (ctx.expression() != null) {
             resultColumnList.add(new ResultColumn(valueExpressionStack.pop()));
-        }
-        else {
+        } else {
             resultColumnList.add(new ResultColumn());
         }
     }
@@ -245,21 +243,17 @@ public class Listener extends TinySQLBaseListener {
             SelectTableStatement.JOIN_TYPE type;
             if (joinOperator.K_JOIN() == null) {
                 type = SelectTableStatement.JOIN_TYPE.CROSS;
-            }
-            else {
+            } else {
                 if (joinOperator.K_NATURAL() != null) {
                     if (joinOperator.K_INNER() != null) {
                         type = SelectTableStatement.JOIN_TYPE.NATURAL_INNER;
-                    }
-                    else {
+                    } else {
                         type = SelectTableStatement.JOIN_TYPE.NATURAL_LEFT_OUTER;
                     }
-                }
-                else {
+                } else {
                     if (joinOperator.K_INNER() != null) {
                         type = SelectTableStatement.JOIN_TYPE.INNER;
-                    }
-                    else {
+                    } else {
                         type = SelectTableStatement.JOIN_TYPE.LEFT_OUTER;
                     }
                 }
@@ -283,7 +277,7 @@ public class Listener extends TinySQLBaseListener {
             }
         }
         SelectTableStatement.SELECT_TYPE selectType = ctx.K_DISTINCT() == null ? SelectTableStatement.SELECT_TYPE.ALL :
-                                                                          SelectTableStatement.SELECT_TYPE.DISTINCT;
+                SelectTableStatement.SELECT_TYPE.DISTINCT;
         ResultColumn[] resultColumns = new ResultColumn[resultColumnList.size()];
         resultColumnList.toArray(resultColumns);
         String[] tableNamesForSelectStrs = new String[tableNamesForSelect.size()];
@@ -294,10 +288,10 @@ public class Listener extends TinySQLBaseListener {
         CompareExpression[] joinConstraints = new CompareExpression[compareExpressionStack.size()];
         compareExpressionStack.toArray(joinConstraints);
         statement = new query.statement.SelectTableStatement(selectType, resultColumns,
-                                                             tableNamesForSelectStrs,
-                                                             joinOperatorsForSelects,
-                                                             joinConstraints,  // joinConstraint
-                                                             whereCondition);
+                tableNamesForSelectStrs,
+                joinOperatorsForSelects,
+                joinConstraints,  // joinConstraint
+                whereCondition);
         resultColumnList.clear();
         compareExpressionStack.clear();
         tableNamesForSelect.clear();
@@ -322,8 +316,8 @@ public class Listener extends TinySQLBaseListener {
         ValueExpression[] data = new ValueExpression[valueExpressionStack.size()];
         valueExpressionStack.copyInto(data);
         valueExpressionStack.clear();
-        ((UpdateTableStatement)statement).setData(data);
-        ((UpdateTableStatement)statement).setWhereCondition(compareExpressionStack.pop());
+        ((UpdateTableStatement) statement).setData(data);
+        ((UpdateTableStatement) statement).setWhereCondition(compareExpressionStack.pop());
     }
 
 
@@ -336,7 +330,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void exitDeleteTableStmt(TinySQLParser.DeleteTableStmtContext ctx) {
-        ((DeleteTableStatement)statement).setWhereCondition(compareExpressionStack.pop());
+        ((DeleteTableStatement) statement).setWhereCondition(compareExpressionStack.pop());
         compareExpressionStack.clear();
     }
 
@@ -358,7 +352,7 @@ public class Listener extends TinySQLBaseListener {
         stmt.setTableName(ctx.tableName().getText());
         if (ctx.columnName().size() > 0 && ctx.columnName().size() != ctx.expression().size()) {
             stmt.setValid(false);
-            stmt.setMessage("SQL Parse Error in [Insert Statement]: number of column must equals to number of values");
+            stmt.setMessage("[Insert Statement]: number of column must equals to number of values");
         } else if (ctx.columnName().size() > 0) {
             stmt.setSpecifiedAttribute(true);
         }
@@ -375,7 +369,7 @@ public class Listener extends TinySQLBaseListener {
             for (TinySQLParser.ColumnNameContext column : ctx.columnName()) {
                 if (stmt.getInsertedData().containsKey(column.getText())) {
                     stmt.setValid(false);
-                    stmt.setMessage("SQL parse Error in [Insert Statement]: duplicate column name");
+                    stmt.setMessage("[Insert Statement]: duplicate column name");
                     return;
                 } else {
                     stmt.getInsertedData().put(column.getText(), expressionValueList.get(ctx.columnName().indexOf(column)));

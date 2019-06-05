@@ -1,6 +1,7 @@
 package query.statement;
 
 import database.DataBase;
+import exception.SQLExecuteException;
 import query.Result;
 import schema.Schema;
 import schema.SchemaManager;
@@ -14,6 +15,10 @@ public class CreateTableStatement extends Statement {
     private Column[] columns; // 属性列表
     private Constraint[] constraints; // 约束
 
+    public CreateTableStatement() {
+
+    }
+
     public CreateTableStatement(String databaseName, String tableName, Column[] columns, Constraint[] constraints) {
         this.databaseName = databaseName;
         this.tableName = tableName;
@@ -22,23 +27,22 @@ public class CreateTableStatement extends Statement {
     }
 
     @Override
-    public Result execute(SchemaManager schemaManager) throws IllegalArgumentException {
+    public Result execute(SchemaManager schemaManager) throws SQLExecuteException {
         DataBase db;
         if (databaseName != null) {
-            db = Schema.getSchema().getDatabaseByName(databaseName);
+            db = schemaManager.schema().getDatabaseByName(databaseName);
         } else {
             db = schemaManager.getCurrentDataBase();
         }
         try {
             if (db != null) {
-
                 db.createTable(new Table(db, tableName, columns, constraints));
             } else {
-                throw new IllegalArgumentException("SQL Execute Error [create table]: Database not specified (Default database is not available)");
+                throw new SQLExecuteException("[create table]: Database not specified (Default database is not available)");
             }
         } catch (IOException e) {
-            throw new IllegalArgumentException("SQL Execute Error [create table]: Unknown Error");
+            throw new SQLExecuteException("[create table]: Unknown Error");
         }
-        return Result.setInfo("successfully create table");
+        return Result.setInfo("successfully create table " + tableName);
     }
 }

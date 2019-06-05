@@ -1,8 +1,3 @@
-create table test(
-id int not null,
-name string(32) not null,
-primary key(id)
-);
 create database test;
 select a.data, b.*, c.m from
 a natural join b, c

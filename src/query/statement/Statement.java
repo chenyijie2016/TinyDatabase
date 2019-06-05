@@ -1,5 +1,6 @@
 package query.statement;
 
+import exception.SQLExecuteException;
 import query.Result;
 import schema.SchemaManager;
 
@@ -39,21 +40,23 @@ public abstract class Statement {
         return sql;
     }
 
-    public abstract Result execute(SchemaManager schemaManager);
+    public abstract Result execute(SchemaManager schemaManager) throws SQLExecuteException;
 
     public boolean isValid() {
         return valid;
     }
 
-    public void setValid(boolean valid) {
+    public Statement setValid(boolean valid) {
         this.valid = valid;
+        return this;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public Statement setMessage(String message) {
         this.message = message;
+        return this;
     }
 }

@@ -1,6 +1,7 @@
 package schema;
 
 import database.DataBase;
+import exception.SQLExecuteException;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -8,8 +9,6 @@ import java.util.List;
 
 public class Schema {
     private static Schema schema = new Schema();
-
-
     private static final String METADATA_FILE = "schema";
     private static final String DEFAULT_DATABASE = "test";
     private List<DataBase> dataBases;
@@ -34,9 +33,10 @@ public class Schema {
                         dataBases.add(DataBase.readFromFile(new String(nameBytes)));
                     }
                 } else {
+
                     createDatabase(new DataBase(DEFAULT_DATABASE));
                 }
-            } catch (IOException e) {
+            } catch (IOException | SQLExecuteException e) {
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -60,10 +60,10 @@ public class Schema {
         outputStream.close();
     }
 
-    public void createDatabase(DataBase dataBase) throws IOException, IllegalArgumentException {
+    public void createDatabase(DataBase dataBase) throws IOException, SQLExecuteException {
         for (DataBase db : dataBases) {
             if (db.getName().equals(dataBase.getName())) {
-                throw new IllegalArgumentException("SQL Execute Error [create database]: Cannot create a database with the same name as an existing database");
+                throw new SQLExecuteException("[create database]: Cannot create a database with the same name as an existing database");
             }
         }
         dataBases.add(dataBase);
