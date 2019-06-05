@@ -26,4 +26,16 @@ public class ResultColumn {
         this.resultColumnType = RESULT_COLUMN_TYPE.EXPRESSION;
         this.expression = expression;
     }
+
+    public RESULT_COLUMN_TYPE getResultColumnType() {
+        return resultColumnType;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public Expression getExpression() {
+        return expression;
+    }
 }

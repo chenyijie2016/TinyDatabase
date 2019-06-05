@@ -99,7 +99,7 @@ public class Table extends TableBase {
         dataFile.writeInt(uniqueID);
     }
 
-    private Column getColumnByName(String name) {
+    public Column getColumnByName(String name) {
         for (Column c : columns) {
             if (name.equals(c.getName())) {
                 return c;

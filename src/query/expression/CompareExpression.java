@@ -17,9 +17,17 @@ public class CompareExpression extends Expression{
     private List<ValueExpression> valueExpressionList = new ArrayList<>();
 
     public CompareExpression(COMPARE_SUB_TYPE compareSubType, ValueExpression a, ValueExpression b) {
-        super(BASE_TYPE.COMPARE);
+        super(EXPRESSION_BASE_TYPE.COMPARE);
         this.compareSubType = compareSubType;
         this.valueExpressionList.add(a);
         this.valueExpressionList.add(b);
+    }
+
+    public List<ValueExpression> getValueExpressionList() {
+        return valueExpressionList;
+    }
+
+    public COMPARE_SUB_TYPE getCompareSubType() {
+        return compareSubType;
     }
 }

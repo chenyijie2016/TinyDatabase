@@ -44,14 +44,20 @@ public class Listener extends TinySQLBaseListener {
     public void enterLiteralValue(TinySQLParser.LiteralValueContext ctx) {
         if (ctx.NUMERIC_LITERAL() != null) {
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.NUMBER, ctx.NUMERIC_LITERAL().getText());
-            expressionValueList.add(ctx.NUMERIC_LITERAL().getText());
+            if (expressionValueList != null) {
+                expressionValueList.add(ctx.NUMERIC_LITERAL().getText());
+            }
         } else if (ctx.STRING_LITERAL() != null) {
             String str = ctx.STRING_LITERAL().getText();
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, str.substring(1, str.length() - 1));
-            expressionValueList.add(str.substring(1, str.length() - 1));
+            if (expressionValueList != null) {
+                expressionValueList.add(str.substring(1, str.length() - 1));
+            }
         } else {
             baseExpressionValue = new BaseData();
-            expressionValueList.add(null);
+            if (expressionValueList != null) {
+                expressionValueList.add(null);
+            }
         }
     }
 
@@ -64,7 +70,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void exitTableColumnExpression(TinySQLParser.TableColumnExpressionContext ctx) {
-        String tableName = ctx.tableName() == null ? "" : ctx.tableName().getText();
+        String tableName = ctx.tableName() == null ? null : ctx.tableName().getText();
         baseExpressionValue = new BaseData(tableName, ctx.columnName().getText());
         valueExpressionStack.push(new ValueExpression(baseExpressionValue));
     }

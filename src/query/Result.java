@@ -14,18 +14,23 @@ public class Result extends TableBase {
     private List<Row> rows;
 
 
-    Result() {
+    public Result() {
         this.tableName = "result";
         rows = new ArrayList<>();
     }
 
-    Result(String name) {
+    public Result(String name) {
         this.tableName = name;
         rows = new ArrayList<>();
     }
 
     public Result setColumns(Column[] columns) {
         this.columns = Arrays.asList(columns);
+        return this;
+    }
+
+    public Result setColumns(List<Column> columns) {
+        this.columns = columns;
         return this;
     }
 
