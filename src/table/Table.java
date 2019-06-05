@@ -554,7 +554,9 @@ public class Table extends TableBase {
         }
     }
 
-    // 通常用作遍历中带条件判断
+    /**
+     * 通常用作遍历中带条件判断
+     */
     class RowConditionIterator extends RowIterator {
         RowIterator iter;
         RowCondition condition;
@@ -572,6 +574,7 @@ public class Table extends TableBase {
          * 应该连续调用此类的next()方法来判断返回的是不是null来判断结束
          *
          * @see RowConditionIterator
+         * @TODO: 改进此方法使之支持通用调用
          */
         @Override
         public boolean hasNext() {

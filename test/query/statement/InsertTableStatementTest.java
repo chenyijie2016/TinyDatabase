@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 public class InsertTableStatementTest extends BaseTest {
     @Test
     public void TestInsert() throws SQLExecuteException, SQLParseException, IOException {
-        Listener listener = getListenerByTestFile("testdata/insert/insert.sql");
+        Listener listener = getListenerByTestFile("resources/insert/insert.sql");
         for (Statement statement : listener.getStatementList()) {
             if (statement.isValid()) {
                 statement.execute(schemaManager);
