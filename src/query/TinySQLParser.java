@@ -1324,23 +1324,6 @@ public class TinySQLParser extends Parser {
 			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitLessZGreaterExpression(this);
 		}
 	}
-	public static class EuqalExpressionContext extends ConditionExpressionContext {
-		public List<ExpressionContext> expression() {
-			return getRuleContexts(ExpressionContext.class);
-		}
-		public ExpressionContext expression(int i) {
-			return getRuleContext(ExpressionContext.class,i);
-		}
-		public EuqalExpressionContext(ConditionExpressionContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterEuqalExpression(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitEuqalExpression(this);
-		}
-	}
 	public static class ParenthesisConditionExpressionContext extends ConditionExpressionContext {
 		public ConditionExpressionContext conditionExpression() {
 			return getRuleContext(ConditionExpressionContext.class,0);
@@ -1353,6 +1336,23 @@ public class TinySQLParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitParenthesisConditionExpression(this);
+		}
+	}
+	public static class EqualExpressionContext extends ConditionExpressionContext {
+		public List<ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public EqualExpressionContext(ConditionExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterEqualExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitEqualExpression(this);
 		}
 	}
 
@@ -1385,7 +1385,7 @@ public class TinySQLParser extends Parser {
 				}
 				break;
 			case 2:
-				_localctx = new EuqalExpressionContext(_localctx);
+				_localctx = new EqualExpressionContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(252);

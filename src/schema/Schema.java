@@ -2,6 +2,7 @@ package schema;
 
 import database.DataBase;
 import exception.SQLExecuteException;
+import table.Table;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class Schema {
                     }
                 } else {
 
-                    createDatabase(new DataBase(DEFAULT_DATABASE));
+                    createDatabaseByName(DEFAULT_DATABASE);
                 }
             } catch (IOException | SQLExecuteException e) {
                 e.printStackTrace();
@@ -60,14 +61,35 @@ public class Schema {
         outputStream.close();
     }
 
-    public void createDatabase(DataBase dataBase) throws IOException, SQLExecuteException {
+    public void createDatabaseByName(String dataBaseName) throws SQLExecuteException {
+
         for (DataBase db : dataBases) {
-            if (db.getName().equals(dataBase.getName())) {
+            if (db.getName().equals(dataBaseName)) {
                 throw new SQLExecuteException("[create database]: Cannot create a database with the same name as an existing database");
             }
         }
-        dataBases.add(dataBase);
-        updateSchema();
+        try {
+            dataBases.add(new DataBase(dataBaseName));
+            updateSchema();
+        } catch (IOException e) {
+            throw new SQLExecuteException("[create database]: Unknown Error");
+        }
+    }
+
+    public boolean dropDataBaseByName(String dataBaseName) throws SQLExecuteException {
+        if (dataBaseName == null) {
+            throw new SQLExecuteException("[drop database]: Null database name");
+        }
+        DataBase db = schema.getDatabaseByName(dataBaseName);
+        if (db == null) {
+            throw new SQLExecuteException("[drop database]: No Such Database");
+        }
+        try {
+            db.dropAll();
+        } catch (IOException e) {
+            throw new SQLExecuteException("[drop database]: Unknown Error (IO Failure)");
+        }
+        return true;
     }
 
     public DataBase getDatabaseByName(String name) {

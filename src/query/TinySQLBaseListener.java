@@ -232,13 +232,13 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
+	@Override public void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEuqalExpression(TinySQLParser.EuqalExpressionContext ctx) { }
+	@Override public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

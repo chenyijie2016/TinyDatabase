@@ -1,5 +1,6 @@
 package query.statement;
 
+import exception.SQLExecuteException;
 import exception.SQLParseException;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -11,7 +12,6 @@ import query.ErrorListener;
 import query.Listener;
 import query.TinySQLLexer;
 import query.TinySQLParser;
-import schema.Schema;
 import schema.SchemaManager;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class BaseTest {
     }
 
     @AfterClass
-    public static void cleanUp() throws IOException {
+    public static void cleanUp() throws SQLExecuteException, IOException {
         schemaManager.getCurrentDataBase().dropAll();
     }
 }
