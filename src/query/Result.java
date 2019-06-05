@@ -1,6 +1,7 @@
 package query;
 
 import data.Type;
+import data.stringData;
 import data.typedData;
 import table.Column;
 import table.Row;
@@ -54,7 +55,7 @@ public class Result extends TableBase {
     }
 
     public static Result setInfo(String message) {
-        Result res = new Result().setColumns(new Column[]{new Column(Type.stringType((long) message.length()), "message")});
+        Result res = new Result().setColumns(new Column[]{new Column(Type.stringType(message.length() + 1), "message")});
         res.addRow(new Row(res, new Object[]{message}));
         return res;
     }

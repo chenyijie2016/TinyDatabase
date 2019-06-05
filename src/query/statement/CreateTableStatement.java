@@ -16,7 +16,7 @@ public class CreateTableStatement extends Statement {
     private Constraint[] constraints; // 约束
 
     public CreateTableStatement() {
-
+        this.type = CREATE_TABLE;
     }
 
     public CreateTableStatement(String databaseName, String tableName, Column[] columns, Constraint[] constraints) {
@@ -24,6 +24,7 @@ public class CreateTableStatement extends Statement {
         this.tableName = tableName;
         this.columns = columns;
         this.constraints = constraints;
+        this.type = CREATE_TABLE;
     }
 
     @Override

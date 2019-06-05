@@ -25,7 +25,7 @@ public class Listener extends TinySQLBaseListener {
     private List<SelectTableStatement.JOIN_TYPE> joinOperatorsForSelect = new ArrayList<>();
 
     // TODO: remove it
-    private List<String> expressionValueList;
+    private List<String> expressionToInsertList;
 
     public List<Statement> getStatementList() {
         return statementList;
@@ -44,14 +44,20 @@ public class Listener extends TinySQLBaseListener {
     public void enterLiteralValue(TinySQLParser.LiteralValueContext ctx) {
         if (ctx.NUMERIC_LITERAL() != null) {
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.NUMBER, ctx.NUMERIC_LITERAL().getText());
-            expressionValueList.add(ctx.NUMERIC_LITERAL().getText());
+
+            if (ctx.getParent().getParent() instanceof TinySQLParser.InsertTableStmtContext) {
+                expressionToInsertList.add(ctx.NUMERIC_LITERAL().getText());
+            }
         } else if (ctx.STRING_LITERAL() != null) {
             String str = ctx.STRING_LITERAL().getText();
             baseExpressionValue = new BaseData(BaseData.BASE_DATA_TYPE.STRING, str.substring(1, str.length() - 1));
-            expressionValueList.add(str.substring(1, str.length() - 1));
+            if (ctx.getParent().getParent() instanceof TinySQLParser.InsertTableStmtContext) {
+                expressionToInsertList.add(str.substring(1, str.length() - 1));
+            }
+
         } else {
             baseExpressionValue = new BaseData();
-            expressionValueList.add(null);
+            expressionToInsertList.add(null);
         }
     }
 
@@ -348,8 +354,8 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx) {
-        InsertTableStatement stmt = new InsertTableStatement();
-        stmt.setTableName(ctx.tableName().getText());
+        InsertTableStatement stmt = new InsertTableStatement(ctx.tableName().getText());
+
         if (ctx.columnName().size() > 0 && ctx.columnName().size() != ctx.expression().size()) {
             stmt.setValid(false);
             stmt.setMessage("[Insert Statement]: number of column must equals to number of values");
@@ -357,7 +363,7 @@ public class Listener extends TinySQLBaseListener {
             stmt.setSpecifiedAttribute(true);
         }
 
-        expressionValueList = new ArrayList<>();
+        expressionToInsertList = new ArrayList<>();
         statement = stmt;
     }
 
@@ -372,12 +378,13 @@ public class Listener extends TinySQLBaseListener {
                     stmt.setMessage("[Insert Statement]: duplicate column name");
                     return;
                 } else {
-                    stmt.getInsertedData().put(column.getText(), expressionValueList.get(ctx.columnName().indexOf(column)));
+                    stmt.getInsertedData().put(column.getText(), expressionToInsertList.get(ctx.columnName().indexOf(column)));
                 }
             }
+        } else {
+            stmt.setData(expressionToInsertList);
         }
-        expressionValueList = null;
-
+        expressionToInsertList = null;
     }
 
     @Override

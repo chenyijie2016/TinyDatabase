@@ -36,13 +36,13 @@ public class DataBase {
      * @param name 表名
      * @return
      */
-    public Table getTableByName(String name) {
+    public Table getTableByName(String name) throws SQLExecuteException {
         for (Table table : tables) {
             if (table.getTableName().equals(name)) {
                 return table;
             }
         }
-        return null;
+        throw new SQLExecuteException("No Such Table");
     }
 
     private void updateSchema() throws IOException {

@@ -7,6 +7,7 @@ import data.typedData;
 import data.typedDataFactor;
 
 import database.DataBase;
+import exception.SQLExecuteException;
 import index.BPlusTree;
 
 
@@ -176,13 +177,13 @@ public class Table extends TableBase {
      * @param newRow 新的元组
      * @throws IOException 写入失败
      */
-    public void updateRow(Row oldRow, Row newRow) throws IOException {
+    public void updateRow(Row oldRow, Row newRow) throws IOException, SQLExecuteException {
         deleteRow(oldRow);
         insertRow(newRow);
     }
 
 
-    public void insertRow(Row row) throws IOException, IllegalArgumentException {
+    public void insertRow(Row row) throws IOException, SQLExecuteException {
         // 先检查约束
         // TODO
         // 插入数据
@@ -191,7 +192,8 @@ public class Table extends TableBase {
             Long pos = indexTrees.get(indexColumns.indexOf(column)).scanEqual(row.getDataByColumn(column));
             if (pos != null) {
                 System.out.println("Can not insert Primary key! [Key already exists!]");
-                return;
+                throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
+
             }
         }
 
