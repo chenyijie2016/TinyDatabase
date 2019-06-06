@@ -34,8 +34,8 @@ public class BaseData {
     public BaseData(String tableName, String columnName) {
         this.dataType = DATA_TYPE.COLUMN;
         this.baseDataType = BASE_DATA_TYPE.NULL;
-        this.tableName = tableName;
-        this.columnName = columnName;
+        this.tableName = tableName == null ? null : tableName.toUpperCase();
+        this.columnName = columnName.toUpperCase();
     }
 
     public BaseData(Double numberData) {

@@ -8,7 +8,7 @@ public class Column {
 
     public Column(Type type, String name) {
         this.type = type;
-        this.name = name;
+        this.name = name.toUpperCase();
     }
 
     public Type getColumnType() {

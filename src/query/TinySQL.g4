@@ -78,7 +78,7 @@ expression
  ;
 
 conditionExpression
-: expression ( '<' | '<=' | '>' | '>=' ) expression  # lessZGreaterExpression
+: expression ( '<' | '<=' | '>' | '>=' ) expression  # lessGreaterExpression
  | expression ( '=' | '==' | '!=' | '<>') expression # equalExpression
  | '(' conditionExpression ')'                       # parenthesisConditionExpression
 // | conditionExpression K_AND conditionExpression

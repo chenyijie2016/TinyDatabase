@@ -111,7 +111,7 @@ public class Listener extends TinySQLBaseListener {
 
 
     @Override
-    public void exitLessZGreaterExpression(TinySQLParser.LessZGreaterExpressionContext ctx) {
+    public void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx) {
         ValueExpression b = valueExpressionStack.pop();
         ValueExpression a = valueExpressionStack.pop();
         switch (ctx.getChild(1).getText()) {
@@ -218,12 +218,12 @@ public class Listener extends TinySQLBaseListener {
             for (TinySQLParser.IndexedColumnContext data : ctx.tableConstraint().indexedColumn()) {
                 boolean primaryKeyAsc = (data.K_DESC() == null);
                 constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
-                        data.columnName().getText()));
+                        data.columnName().getText().toUpperCase()));
             }
         }
         Constraint[] constraintsArray = new Constraint[constraints.size()];
         constraints.toArray(constraintsArray);
-        statement = new query.statement.CreateTableStatement(databaseName, ctx.tableName().getText(), columns,
+        statement = new query.statement.CreateTableStatement(databaseName, ctx.tableName().getText().toUpperCase(), columns,
                 constraintsArray);
     }
 
@@ -231,7 +231,7 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void exitResultColumn(TinySQLParser.ResultColumnContext ctx) {
         if (ctx.tableName() != null) {
-            resultColumnList.add(new ResultColumn(ctx.tableName().getText()));
+            resultColumnList.add(new ResultColumn(ctx.tableName().getText().toUpperCase()));
         } else if (ctx.expression() != null) {
             resultColumnList.add(new ResultColumn(valueExpressionStack.pop()));
         } else {
@@ -243,7 +243,7 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void exitJoinClause(TinySQLParser.JoinClauseContext ctx) {
         for (TinySQLParser.TableNameContext tableName : ctx.tableName()) {
-            tableNamesForSelect.add(tableName.getText());
+            tableNamesForSelect.add(tableName.getText().toUpperCase());
         }
         for (TinySQLParser.JoinOperatorContext joinOperator : ctx.joinOperator()) {
             SelectTableStatement.JOIN_TYPE type;
@@ -275,7 +275,7 @@ public class Listener extends TinySQLBaseListener {
         CompareExpression whereCondition = ctx.conditionExpression() == null ? null : compareExpressionStack.pop();
         if (ctx.joinClause() == null) {
             for (int i = 0; i < tableNamesSize; i++) {
-                tableNamesForSelect.add(ctx.tableName(i).getText());
+                tableNamesForSelect.add(ctx.tableName(i).getText().toUpperCase());
                 joinOperatorsForSelect.add(SelectTableStatement.JOIN_TYPE.CROSS);
             }
             if (tableNamesSize > 0) {
@@ -307,11 +307,11 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterUpdateTableStmt(TinySQLParser.UpdateTableStmtContext ctx) {
-        String tableName = ctx.tableName().getText();
+        String tableName = ctx.tableName().getText().toUpperCase();
         int newDataLength = ctx.columnName().size();
         String[] columns = new String[newDataLength];
         for (int i = 0; i < newDataLength; i++) {
-            columns[i] = ctx.columnName(i).getText();
+            columns[i] = ctx.columnName(i).getText().toUpperCase();
         }
         statement = new query.statement.UpdateTableStatement(tableName, columns);
     }
@@ -329,7 +329,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterDeleteTableStmt(TinySQLParser.DeleteTableStmtContext ctx) {
-        String tableName = ctx.tableName().getText();
+        String tableName = ctx.tableName().getText().toUpperCase();
         statement = new query.statement.DeleteTableStatement(tableName);
     }
 
@@ -354,7 +354,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx) {
-        InsertTableStatement stmt = new InsertTableStatement(ctx.tableName().getText());
+        InsertTableStatement stmt = new InsertTableStatement(ctx.tableName().getText().toUpperCase());
 
         if (ctx.columnName().size() > 0 && ctx.columnName().size() != ctx.expression().size()) {
             stmt.setValid(false);
@@ -373,18 +373,19 @@ public class Listener extends TinySQLBaseListener {
         if (stmt.isSpecifiedAttribute()) {
 
             for (TinySQLParser.ColumnNameContext column : ctx.columnName()) {
-                if (stmt.getInsertedData().containsKey(column.getText())) {
+                if (stmt.getInsertedData().containsKey(column.getText().toUpperCase())) {
                     stmt.setValid(false);
                     stmt.setMessage("[Insert Statement]: duplicate column name");
                     return;
                 } else {
-                    stmt.getInsertedData().put(column.getText(), expressionToInsertList.get(ctx.columnName().indexOf(column)));
+                    stmt.getInsertedData().put(column.getText().toUpperCase(), expressionToInsertList.get(ctx.columnName().indexOf(column)));
                 }
             }
         } else {
             stmt.setData(expressionToInsertList);
         }
         expressionToInsertList = null;
+        valueExpressionStack.clear();
     }
 
     @Override
@@ -415,7 +416,7 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterDropTableStmt(TinySQLParser.DropTableStmtContext ctx) {
-        statement = new SchemaStatement(Statement.DROP_TABLE).setTableName(ctx.tableName().getText());
+        statement = new SchemaStatement(Statement.DROP_TABLE).setTableName(ctx.tableName().getText().toUpperCase());
     }
 
     @Override

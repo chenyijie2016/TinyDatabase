@@ -22,7 +22,7 @@ public class CreateTableStatementTest extends BaseTest {
             assertTrue(statement.isValid());
             statement.execute(schemaManager);
         }
-        assertNotNull(schemaManager.getCurrentDataBase().getTableByName("employee"));
+        assertNotNull(schemaManager.getCurrentDataBase().getTableByName("employee".toUpperCase()));
     }
 
     @Test(expected = SQLParseException.class)
@@ -37,6 +37,6 @@ public class CreateTableStatementTest extends BaseTest {
                 throw new SQLParseException(statement.getMessage());
             }
         }
-        assertNotNull(schemaManager.getCurrentDataBase().getTableByName("employee"));
+        assertNotNull(schemaManager.getCurrentDataBase().getTableByName("employee".toUpperCase()));
     }
 }
