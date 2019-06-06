@@ -3,7 +3,7 @@ package data;
 import java.io.IOException;
 
 public class typedDataFactor {
-    public static typedData getTypedData(Type type) throws IOException {
+    public static typedData getTypedData(Type type) {
         switch (type.type()) {
             case INT:
                 return new intData();
@@ -15,7 +15,8 @@ public class typedDataFactor {
                 return new longData();
             case STRING:
                 return new stringData().setMaxSize(type.size());
+            default:
+                return null;
         }
-        throw new IOException("No matched type");
     }
 }

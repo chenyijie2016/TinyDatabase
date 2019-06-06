@@ -57,7 +57,9 @@ public class Listener extends TinySQLBaseListener {
 
         } else {
             baseExpressionValue = new BaseData();
-            expressionToInsertList.add(null);
+            if (ctx.getParent().getParent() instanceof TinySQLParser.InsertTableStmtContext) {
+                expressionToInsertList.add(null);
+            }
         }
     }
 

@@ -5,10 +5,9 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 public class longData extends typedData {
-    private Long data;
+    private Long data = null;
 
     public longData() {
-
     }
 
     public longData(longData another) {
@@ -34,21 +33,20 @@ public class longData extends typedData {
         return data;
     }
 
-    @Override
-    public typedData getTypedData() {
-        return this;
-    }
+
 
     @Override
     public void setData(Object data) {
-        this.data = (long) data;
+        this.data = data == null ? null : (Long) data;
     }
 
     @Override
     public byte[] toBytes() {
-        byte[] bytes = new byte[8];
-        ByteBuffer buf = ByteBuffer.wrap(bytes);
-        buf.putLong(data);
+        byte[] bytes = new byte[Long.BYTES];
+        if (data != null) {
+            ByteBuffer buf = ByteBuffer.wrap(bytes);
+            buf.putLong(data);
+        }
         return bytes;
     }
 
@@ -68,13 +66,18 @@ public class longData extends typedData {
     }
 
     @Override
-    public int getDataSize() {
-        return 8;
+    public boolean isNull() {
+        return data == null;
     }
+
 
     @Override
     public String toString() {
-        return data.toString();
+        if (data != null) {
+            return data.toString();
+        } else {
+            return "NULL";
+        }
     }
 
     @Override

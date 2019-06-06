@@ -2,7 +2,6 @@ package schema;
 
 import database.DataBase;
 import exception.SQLExecuteException;
-import table.Table;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -76,7 +75,7 @@ public class Schema {
         }
     }
 
-    public boolean dropDataBaseByName(String dataBaseName) throws SQLExecuteException {
+    public boolean dropDataBaseByName(String dataBaseName) throws SQLExecuteException{
         if (dataBaseName == null) {
             throw new SQLExecuteException("[drop database]: Null database name");
         }
@@ -85,10 +84,12 @@ public class Schema {
             throw new SQLExecuteException("[drop database]: No Such Database");
         }
         try {
-            db.dropAll();
+            db.dropAllTable();
+            updateSchema();
         } catch (IOException e) {
             throw new SQLExecuteException("[drop database]: Unknown Error (IO Failure)");
         }
+
         return true;
     }
 

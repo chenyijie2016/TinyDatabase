@@ -20,4 +20,14 @@ public class InsertTableStatementTest extends BaseTest {
         }
     }
 
+    @Test
+    public void TestNull() throws SQLParseException, IOException, SQLExecuteException {
+        Listener listener = getListenerByTestFile("resources/insert/insert_withnull.sql");
+        for (Statement statement : listener.getStatementList()) {
+            assertTrue(statement.isValid());
+            System.out.println(statement.execute(schemaManager));
+
+        }
+    }
+
 }

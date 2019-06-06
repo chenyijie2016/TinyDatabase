@@ -7,7 +7,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Before;
 import query.ErrorListener;
 import query.Listener;
 import query.TinySQLLexer;
@@ -38,8 +39,15 @@ public class BaseTest {
         return listener;
     }
 
-    @AfterClass
-    public static void cleanUp() throws SQLExecuteException, IOException {
-        schemaManager.getCurrentDataBase().dropAll();
+    @Before
+    public void setUp() throws SQLExecuteException, IOException {
+        schemaManager.getCurrentDataBase().dropAllTable();
     }
+
+    @After
+    public void cleanUp() throws SQLExecuteException, IOException {
+        schemaManager.getCurrentDataBase().dropAllTable();
+    }
+
+
 }

@@ -63,10 +63,6 @@ public class Type {
         return new Type(TYPE.STRING, s);
     }
 
-    public static Type nullType() {
-        return new Type(TYPE.NULL);
-    }
-
     public boolean equals(Object obj) {
         if (!(obj instanceof Type))
             return false;

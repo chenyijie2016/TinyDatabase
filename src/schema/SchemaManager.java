@@ -3,6 +3,8 @@ package schema;
 import database.DataBase;
 import exception.SQLExecuteException;
 
+import java.io.IOException;
+
 public class SchemaManager {
     private int id;
     private static int uid = 0;
@@ -38,6 +40,12 @@ public class SchemaManager {
         } else {
             throw new SQLExecuteException("[use database]: No such database");
         }
+    }
+
+    public boolean dropDataBaseByName(String name) throws SQLExecuteException {
+
+        return Schema.getSchema().dropDataBaseByName(name);
+
     }
 
 

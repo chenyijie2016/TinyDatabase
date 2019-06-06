@@ -102,12 +102,18 @@ public class DataBase {
         }
     }
 
-    public void dropAll() throws IOException {
+    public void dropAllTable() throws IOException {
         for (Table table : tables) {
             table.drop();
         }
         tables.clear();
         updateSchema();
+    }
+
+    public boolean drop() throws IOException{
+        dropAllTable();
+        File file = new File(this.databaseName + SCHEMA_EXTENSION);
+        return file.delete();
     }
 
 

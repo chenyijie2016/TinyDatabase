@@ -120,14 +120,20 @@ public class Table extends TableBase {
      * @return 读取完数据的元组
      * @throws IOException
      */
-    public Row readRow(Row row) throws IOException {
+    public Row readRow(Row row) throws IOException, SQLExecuteException {
         dataFile.seek(row.position);
-        for (Column c : columns) {
-            typedData data = typedDataFactor.getTypedData(c.getColumnType());
-            data.readFromFile(dataFile);
-            row.setDataByColumn(c, data);
-        }
-
+        byte[] raw = new byte[row.occupation()];
+        dataFile.read(raw);
+        row.fromBytes(raw);
+//        for (Column c : columns) {
+//            typedData data = typedDataFactor.getTypedData(c.getColumnType());
+//            byte isNull = dataFile.readByte();
+//            data.readFromFile(dataFile);
+//            if (isNull == 1) {
+//                data.setData(null);
+//            }
+//            row.setDataByColumn(c, data);
+//        }
         return row;
     }
 
@@ -375,11 +381,11 @@ public class Table extends TableBase {
     /**
      * 获取全体的元组的迭代器，利用第一个索引的全体迭代器实现
      */
-    public RowIterator scanAll() throws IOException {
+    public RowIterator scanAll() throws IOException ,SQLExecuteException{
         return new RowIndexIterator(this, indexTrees.get(0).scanAll());
     }
 
-    public RowIterator scanEqual(Column column, typedData key) throws IOException {
+    public RowIterator scanEqual(Column column, typedData key) throws IOException,SQLExecuteException {
         // 查询指定属性的值等于key的元组， 如果查询在索引列的话暂时只返回一个
         Long position;
         if (indexColumns.indexOf(column) != -1) {
@@ -399,7 +405,7 @@ public class Table extends TableBase {
         return new RowConditionIterator(iter, dataEqualCondition);
     }
 
-    public RowIterator scanNotEqual(Column column, typedData key) throws IOException {
+    public RowIterator scanNotEqual(Column column, typedData key) throws IOException, SQLExecuteException {
         // 不相等的应该很多，所以可以直接线性扫描
         RowCondition dataNotEqualCondition = (row) -> (!row.getDataByColumn(column).equals(key));
 
@@ -411,7 +417,7 @@ public class Table extends TableBase {
      * 查询大于等于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanGreaterEqual(Column column, typedData key) throws IOException {
+    public RowIterator scanGreaterEqual(Column column, typedData key) throws IOException,SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterEqual(key));
         }
@@ -424,7 +430,7 @@ public class Table extends TableBase {
      * 查询大于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException {
+    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException,SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterThan(key));
         }
@@ -437,7 +443,7 @@ public class Table extends TableBase {
      * 查询大于等于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanLessEqual(Column column, typedData key) throws IOException {
+    public RowIterator scanLessEqual(Column column, typedData key) throws IOException, SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessEqual(key));
         }
@@ -450,7 +456,7 @@ public class Table extends TableBase {
      * 查询大于等于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanLessThan(Column column, typedData key) throws IOException {
+    public RowIterator scanLessThan(Column column, typedData key) throws IOException, SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexPrevIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanLessThan(key));
         }
@@ -518,6 +524,9 @@ public class Table extends TableBase {
                 } catch (IOException e) {
                     System.out.println("Can not Iterator table.Row");
                     System.exit(0);
+                } catch (SQLExecuteException e) {
+                    e.printStackTrace();
+                    System.exit(0);
                 }
                 return null;
             } else
@@ -547,6 +556,8 @@ public class Table extends TableBase {
                 } catch (IOException e) {
                     System.out.println("Can not Iterator table.Row");
                     System.exit(0);
+                } catch (SQLExecuteException e) {
+                    e.printStackTrace();
                 }
                 return null;
             } else
@@ -573,8 +584,8 @@ public class Table extends TableBase {
          * 对于此类迭代器，在任何情况下不要调用此方法来判断接下来是不是能返回值
          * 应该连续调用此类的next()方法来判断返回的是不是null来判断结束
          *
-         * @see RowConditionIterator
          * @TODO: 改进此方法使之支持通用调用
+         * @see RowConditionIterator
          */
         @Override
         public boolean hasNext() {

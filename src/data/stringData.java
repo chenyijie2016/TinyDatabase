@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 
 
 public class stringData extends typedData {
-    private String data;
+    private String data = null;
     private long maxSize;
 
     public stringData() {
@@ -48,21 +48,19 @@ public class stringData extends typedData {
         return data;
     }
 
-    @Override
-    public typedData getTypedData() {
-        return this;
-    }
 
     @Override
     public void setData(Object data) {
-        this.data = (String) data;
+        this.data = data == null ? null : (String) data;
 
     }
 
     @Override
     public byte[] toBytes() {
         byte[] bytes = new byte[(int) maxSize];
-        System.arraycopy(data.getBytes(), 0, bytes, 0, data.length());
+        if (data != null) {
+            System.arraycopy(data.getBytes(), 0, bytes, 0, data.length());
+        }
         return bytes;
     }
 
@@ -87,18 +85,19 @@ public class stringData extends typedData {
         return this;
     }
 
-    @Override
-    public int getDataSize() {
-        return (int) maxSize;
-    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(data);
-        for (int i = data.length(); i < maxSize; i++)
-            builder.append(" ");
-        return builder.toString();
+        if (data != null) {
+            builder.append(data);
+            for (int i = data.length(); i < maxSize; i++)
+                builder.append(" ");
+            return builder.toString();
+        } else {
+            return "NULL";
+        }
+
     }
 
     @Override
@@ -106,8 +105,11 @@ public class stringData extends typedData {
         if (!(t instanceof stringData))
             return false;
         stringData z = (stringData) t;
-        return data.equals(z.getData());
+        return data != null && data.equals(z.getData());
     }
 
-
+    @Override
+    public boolean isNull() {
+        return data == null;
+    }
 }

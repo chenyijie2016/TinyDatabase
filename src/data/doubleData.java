@@ -3,9 +3,10 @@ package data;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.function.DoublePredicate;
 
 public class doubleData extends typedData {
-    private Double data;
+    private Double data = null;
 
     public doubleData() {
     }
@@ -33,21 +34,19 @@ public class doubleData extends typedData {
         return data;
     }
 
-    @Override
-    public typedData getTypedData() {
-        return this;
-    }
 
     @Override
     public void setData(Object data) {
-        this.data = (double) data;
+        this.data = data == null ? null : (Double) data;
     }
 
     @Override
     public byte[] toBytes() {
-        byte[] bytes = new byte[8];
-        ByteBuffer buf = ByteBuffer.wrap(bytes);
-        buf.putDouble(data);
+        byte[] bytes = new byte[Double.BYTES];
+        if (data != null) {
+            ByteBuffer buf = ByteBuffer.wrap(bytes);
+            buf.putDouble(data);
+        }
         return bytes;
     }
 
@@ -68,13 +67,12 @@ public class doubleData extends typedData {
 
 
     @Override
-    public int getDataSize() {
-        return 8;
-    }
-
-    @Override
     public String toString() {
-        return data.toString();
+        if (data != null) {
+            return data.toString();
+        } else {
+            return "NULL";
+        }
     }
 
     @Override
@@ -85,5 +83,9 @@ public class doubleData extends typedData {
         return data.equals(z.getData());
     }
 
+    @Override
+    public boolean isNull() {
+        return data == null;
+    }
 
 }
