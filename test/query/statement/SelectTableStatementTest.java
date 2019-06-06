@@ -16,7 +16,7 @@ public class SelectTableStatementTest extends BaseTest {
 
     @Test()
     public void testSelect() throws IOException, SQLExecuteException, SQLParseException {
-        Listener listener = getListenerByTestFile("resources/select/select.txt");
+        Listener listener = getListenerByTestFile("resources/select/select.sql");
         List<Statement> statementList = listener.getStatementList();
         for (Statement statement : statementList) {
             assertTrue(statement.isValid());

@@ -1,12 +1,5 @@
 package query.statement;
 
-import data.Type;
-import data.typedData;
-import data.stringData;
-import data.intData;
-import data.longData;
-import data.doubleData;
-import data.floatData;
 import database.DataBase;
 import exception.SQLExecuteException;
 import query.Result;

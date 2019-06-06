@@ -17,3 +17,7 @@ insert into employee values (76543, 'Singh', 'Finance', 80000);
 insert into employee values (76766, 'Crick', 'Biology', 72000);
 insert into employee values (98345, 'Kim', 'Elec.Eng.', 80000);
 insert into employee values (83821, 'Brandt', 'Comp.Sci.', 92000);
+
+delete from employee where salary>80000;
+
+select * from employee;

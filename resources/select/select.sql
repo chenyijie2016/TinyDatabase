@@ -19,7 +19,9 @@ insert into employee values (98345, 'Kim', 'Elec.Eng.', 80000);
 insert into employee values (83821, 'Brandt', 'Comp.Sci.', 92000);
 
 
+select * from employee;
 select dept_name, salary, name, id from employee where id=12121;
+select dept_name, salary, name, id from employee;
 select dept_name, name, id, salary from employee where salary>=80000;
 select * from employee where dept_name=='Comp.Sci.';
 select * from employee where id>45565;

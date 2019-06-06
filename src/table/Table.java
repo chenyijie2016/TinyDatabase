@@ -38,7 +38,7 @@ public class Table extends TableBase {
 
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints, int uniqueID) throws IOException {
         this.database = database;
-        this.tableName = tableName;
+        this.tableName = tableName.toUpperCase();
         this.columns = Arrays.asList(columns);
         this.constraints = constraints;
         this.uniqueID = uniqueID;
