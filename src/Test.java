@@ -140,14 +140,6 @@ public class Test {
             b = a.next();
         }
 
-        System.out.println("== Case 8: Find who's (primary key)id>45565 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "ID"), new intData(45565));
-        b = a.next();
-        while (b != null) {
-            System.out.println(b);
-            b = a.next();
-        }
-
         System.out.println("== Case 9: Find who's (primary key)id=45565 ");
         a = table.scanEqual(new Column(Type.intType(), "ID"), new intData(45565));
         b = a.next();
@@ -190,14 +182,6 @@ public class Test {
 
         System.out.println("== Case 14: Find who's (not indexed key)salary<=80000 ");
         a = table.scanLessEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
-        b = a.next();
-        while (b != null) {
-            System.out.println(b);
-            b = a.next();
-        }
-
-        System.out.println("== Case 15: Find who's (not indexed key)salary>80000 ");
-        a = table.scanGreaterEqual(new Column(Type.intType(), "SALARY"), new intData(80000));
         b = a.next();
         while (b != null) {
             System.out.println(b);

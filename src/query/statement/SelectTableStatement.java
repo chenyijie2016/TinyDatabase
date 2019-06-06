@@ -70,6 +70,8 @@ public class SelectTableStatement extends Statement {
     @Override
     public Result execute(SchemaManager schemaManager) throws SQLExecuteException {
         DataBase db = schemaManager.getCurrentDataBase();
+        boolean distinct = selectType == SELECT_TYPE.DISTINCT;
+        boolean addRowOrderReverse = false;  // if less than, it's true
         if (tableNames.length == 1) {
             String tableName = tableNames[0];
             Table targetTable = db.getTableByName(tableName);
@@ -199,9 +201,11 @@ public class SelectTableStatement extends Statement {
                             break;
                         case LT:
                             ans = targetTable.scanLessThan(targetColumn, queryData);
+                            addRowOrderReverse = true;
                             break;
                         case LTE:
                             ans = targetTable.scanLessEqual(targetColumn, queryData);
+                            addRowOrderReverse = true;
                             break;
                         case GT:
                             ans = targetTable.scanGreaterThan(targetColumn, queryData);
@@ -228,7 +232,7 @@ public class SelectTableStatement extends Statement {
             if (allColumnsOutput) {
                 result.setColumns(targetTable.getColumns());
                 while (row != null) {
-                    result.addRow(row);
+                    result.addRow(row, addRowOrderReverse, distinct);
                     row = ans.next();
                 }
             }
@@ -241,7 +245,7 @@ public class SelectTableStatement extends Statement {
                         rowData[i] = row.getDataByColumn(columnsForOutput.get(i)).getData();
                     }
                     Row newRow = new Row(result, rowData);
-                    result.addRow(newRow);
+                    result.addRow(newRow, addRowOrderReverse, distinct);
                     row = ans.next();
                 }
             }
