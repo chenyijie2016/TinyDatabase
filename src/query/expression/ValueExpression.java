@@ -96,4 +96,15 @@ public class ValueExpression extends Expression{
                 return a.simplifyValueDataThatIsNotColumn();
         }
     }
+
+    public BaseData getColumnInfo() throws IllegalArgumentException {
+        if (subType != ValueExpression.SUB_TYPE.ATOM || data.size() != 1) {
+            throw new IllegalArgumentException("need column name");
+        }
+        BaseData leftEndData = data.get(0);
+        if (leftEndData.getDataType() != BaseData.DATA_TYPE.COLUMN) {
+            throw new IllegalArgumentException("need column name");
+        }
+        return leftEndData;
+    }
 }

@@ -56,17 +56,6 @@ public class SelectTableStatement extends Statement {
         this.compareExpression = compareExpression;
     }
 
-    public BaseData checkValueExpressionIsColumn(ValueExpression leftEnd) throws SQLExecuteException {
-        if (leftEnd.getSubType() != ValueExpression.SUB_TYPE.ATOM || leftEnd.getData().size() != 1) {
-            throw new SQLExecuteException("[select table]: Where clause wrong: need column name on the left");
-        }
-        BaseData leftEndData = leftEnd.getData().get(0);
-        if (leftEndData.getDataType() != BaseData.DATA_TYPE.COLUMN) {
-            throw new SQLExecuteException("[select table]: Where clause wrong: need column name on the left");
-        }
-        return leftEndData;
-    }
-
     @Override
     public Result execute(SchemaManager schemaManager) throws SQLExecuteException {
         DataBase db = schemaManager.getCurrentDataBase();
@@ -78,7 +67,11 @@ public class SelectTableStatement extends Statement {
             if (targetTable == null) {
                 throw new SQLExecuteException("[select table]: Table " + tableName + " not exist");
             }
-            Table.RowIterator ans;
+            WhereClause where = new WhereClause(compareExpression, targetTable);
+            Table.RowIterator ans = where.parseSingleTableColumnAndValue();
+            addRowOrderReverse = where.getAddRowOrderReverse();
+
+            Result result = new Result();
 
             // Check ans columns
             boolean allColumnsOutput = false;
@@ -117,116 +110,6 @@ public class SelectTableStatement extends Statement {
                         columnsForOutput.add(column);
                 }
             }
-
-            if (compareExpression != null) {
-                List<ValueExpression> valueExpressionList = compareExpression.getValueExpressionList();
-                if (valueExpressionList.size() != 2) {
-                    throw new SQLExecuteException("[select table]: Internal error: where clause wrong");
-                }
-
-                // Check right end
-                ValueExpression rightEnd = valueExpressionList.get(1);
-                BaseData rightEndData;
-                try {
-                    rightEndData = rightEnd.simplifyValueDataThatIsNotColumn();
-                } catch (IllegalArgumentException e) {
-                    throw new SQLExecuteException("[select table]: Right end error: " + e.getMessage());
-                }
-
-                // Check left end to get column
-                ValueExpression leftEnd = valueExpressionList.get(0);
-                BaseData leftEndData = checkValueExpressionIsColumn(leftEnd);
-                String tableNameGot = leftEndData.getTableName();
-                if (tableNameGot != null && !tableNameGot.equals(tableName)) {
-                    throw new SQLExecuteException("[select table]: Column's table not exist in from clause");
-                }
-                String columnName = leftEndData.getColumnName();
-                if (columnName == null) {
-                    throw new SQLExecuteException("[select table]: Internal error: Column's name not exist in from clause");
-                }
-                Column targetColumn = targetTable.getColumnByName(columnName);
-                if (targetColumn == null) {
-                    throw new SQLExecuteException("[select table]: Column " + columnName + " not exist");
-                }
-
-
-                // GOT COLUMN and VALUE
-                typedData queryData;
-                switch (targetColumn.getColumnType().type()) {
-                    case STRING:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.STRING) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[select data]: Need string here");
-                        }
-                        queryData = new stringData(rightEndData.getData());
-                        break;
-                    case INT:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[select data]: Need string here");
-                        }
-                        queryData = new intData(rightEndData.getNumberData().intValue());
-                        break;
-                    case LONG:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[select data]: Need string here");
-                        }
-                        queryData = new longData(rightEndData.getNumberData().longValue());
-                        break;
-                    case DOUBLE:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[select data]: Need string here");
-                        }
-                        queryData = new doubleData(rightEndData.getNumberData());
-                        break;
-                    case FLOAT:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[select data]: Need string here");
-                        }
-                        queryData = new floatData(rightEndData.getNumberData().floatValue());
-                        break;
-                    default:
-                        throw new SQLExecuteException("[select data]: Column type wrong");
-                }
-                try {
-                    switch (compareExpression.getCompareSubType()) {
-                        case EQ:
-                            ans = targetTable.scanEqual(targetColumn, queryData);
-                            break;
-                        case NEQ:
-                            ans = targetTable.scanNotEqual(targetColumn, queryData);
-                            break;
-                        case LT:
-                            ans = targetTable.scanLessThan(targetColumn, queryData);
-                            addRowOrderReverse = true;
-                            break;
-                        case LTE:
-                            ans = targetTable.scanLessEqual(targetColumn, queryData);
-                            addRowOrderReverse = true;
-                            break;
-                        case GT:
-                            ans = targetTable.scanGreaterThan(targetColumn, queryData);
-                            break;
-                        default: //case GTE:
-                            ans = targetTable.scanGreaterEqual(targetColumn, queryData);
-                            break;
-                    }
-                } catch (IOException e) {
-                    throw new SQLExecuteException("[select table]: IOException: " + e.getMessage());
-                }
-            }
-            else {
-                try {
-                    ans = targetTable.scanAll();
-                } catch (IOException e) {
-                    throw new SQLExecuteException("[select table]: IOException: " + e.getMessage());
-                }
-            }
-
-            Result result = new Result();
 
             Row row = ans.next();
             if (allColumnsOutput) {
