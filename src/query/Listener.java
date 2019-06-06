@@ -249,21 +249,16 @@ public class Listener extends TinySQLBaseListener {
         }
         for (TinySQLParser.JoinOperatorContext joinOperator : ctx.joinOperator()) {
             SelectTableStatement.JOIN_TYPE type;
+            // TODO: check for whether there is on clause
             if (joinOperator.K_JOIN() == null) {
                 type = SelectTableStatement.JOIN_TYPE.CROSS;
             } else {
-                if (joinOperator.K_NATURAL() != null) {
-                    if (joinOperator.K_INNER() != null) {
-                        type = SelectTableStatement.JOIN_TYPE.NATURAL_INNER;
-                    } else {
-                        type = SelectTableStatement.JOIN_TYPE.NATURAL_LEFT_OUTER;
-                    }
+                if (joinOperator.K_LEFT() != null) {
+                    type = SelectTableStatement.JOIN_TYPE.LEFT_OUTER;
+                } else if (joinOperator.K_NATURAL() != null) {
+                    type = SelectTableStatement.JOIN_TYPE.NATURAL;
                 } else {
-                    if (joinOperator.K_INNER() != null) {
-                        type = SelectTableStatement.JOIN_TYPE.INNER;
-                    } else {
-                        type = SelectTableStatement.JOIN_TYPE.LEFT_OUTER;
-                    }
+                    type = SelectTableStatement.JOIN_TYPE.INNER_ON;
                 }
             }
             joinOperatorsForSelect.add(type);

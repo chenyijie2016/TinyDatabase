@@ -42,7 +42,7 @@ public class DataBase {
                 return table;
             }
         }
-        throw new SQLExecuteException("No Such Table");
+        throw new SQLExecuteException("No Such Table: " + name);
     }
 
     private void updateSchema() throws IOException {
