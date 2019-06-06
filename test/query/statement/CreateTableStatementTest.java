@@ -16,7 +16,7 @@ public class CreateTableStatementTest extends BaseTest {
 
     @Test()
     public void testCreateValid() throws IOException, SQLExecuteException, SQLParseException {
-        Listener listener = getListenerByTestFile("testdata/create/create.txt");
+        Listener listener = getListenerByTestFile("resources/create/create.sql");
         List<Statement> statementList = listener.getStatementList();
         for (Statement statement : statementList) {
             assertTrue(statement.isValid());
@@ -27,13 +27,13 @@ public class CreateTableStatementTest extends BaseTest {
 
     @Test(expected = SQLParseException.class)
     public void testCreateNotValid1() throws IOException, SQLExecuteException, SQLParseException {
-        Listener listener = getListenerByTestFile("testdata/create/create_error1.txt");
+        Listener listener = getListenerByTestFile("resources/create/create_error1.sql");
         List<Statement> statementList = listener.getStatementList();
         for (Statement statement : statementList) {
             if (statement.isValid()) {
                 statement.execute(schemaManager);
             } else {
-                System.out.println(statement.getMessage());
+                // System.out.println(statement.getMessage());
                 throw new SQLParseException(statement.getMessage());
             }
         }

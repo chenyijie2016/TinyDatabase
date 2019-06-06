@@ -25,7 +25,7 @@ public class SchemaManager {
 
     public DataBase getCurrentDataBase() throws SQLExecuteException {
         if (currentDataBase == null) {
-            throw new SQLExecuteException("");
+            throw new SQLExecuteException("No Database Specified");
         }
         return currentDataBase;
     }
