@@ -81,7 +81,15 @@ public class stringData extends typedData {
 
     @Override
     public typedData fromBytes(byte[] data) {
-        this.data = new String(data);
+        int i;
+        for (i = 0; i < maxSize && i < data.length; i++) {
+            if(data[i]==0x0){
+                break;
+            }
+        }
+        byte[] valid = new byte[i];
+        System.arraycopy(data, 0, valid, 0, i);
+        this.data = new String(valid);
         return this;
     }
 
