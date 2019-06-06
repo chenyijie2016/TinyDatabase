@@ -49,14 +49,14 @@ public class SchemaStatement extends Statement {
                     throw new SQLExecuteException("[show database]: No Such Database");
                 }
                 result = new Result();
-                result.setColumns(new Column[]{new Column(Type.intType(), "id"), new Column(Type.stringType(32), "table")});
+                result.setColumns(new Column[]{new Column(Type.intType(), "ID"), new Column(Type.stringType(32), "table")});
                 for (Table table : db_.getTables()) {
                     result.addRow(new Row(result, new Object[]{new intData(db_.getTables().indexOf(table)), new stringData(table.getTableName())}));
                 }
                 break;
             case SHOW_DATABASES:
                 result = new Result();
-                result.setColumns(new Column[]{new Column(Type.intType(), "id"), new Column(Type.stringType(32), "name")});
+                result.setColumns(new Column[]{new Column(Type.intType(), "ID"), new Column(Type.stringType(32), "NAME")});
                 int id = 1;
                 for (DataBase dataBase : schemaManager.schema().getDataBases()) {
                     result.addRow(new Row(result, new Object[]{new intData(id), new stringData(dataBase.getName())}));

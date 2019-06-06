@@ -20,13 +20,18 @@ public class Result extends TableBase {
         rows = new ArrayList<>();
     }
 
-    Result(String name) {
+    public Result(String name) {
         this.tableName = name;
         rows = new ArrayList<>();
     }
 
     public Result setColumns(Column[] columns) {
         this.columns = Arrays.asList(columns);
+        return this;
+    }
+
+    public Result setColumns(List<Column> columns) {
+        this.columns = columns;
         return this;
     }
 
@@ -45,13 +50,70 @@ public class Result extends TableBase {
         builder.append("|\n");
         for (Row row : rows) {
             builder.append(row.toString());
-            builder.append("|\n");
+            builder.append("\n");
         }
         return builder.toString();
     }
 
+    public void addRow(Row row, boolean reverse, boolean distinct) {
+        if (reverse) {
+            if (distinct) {
+                addRowDistinctReverse(row);
+            }
+            else {
+                addRowReverse(row);
+            }
+        }
+        else {
+            if (distinct) {
+                addRowDistinct(row);
+            }
+            else {
+                addRow(row);
+            }
+        }
+    }
+
     public void addRow(Row row) {
         rows.add(row);
+    }
+
+    public void addRowReverse(Row row) {
+        rows.add(0, row);
+    }
+
+    public void addRowDistinct(Row row) {
+        boolean found_same = false;
+        for (Row other_row : rows) {
+            boolean all_same = true;
+            for (Column c : columns) {
+                if (!other_row.getDataByColumn(c).equals(row.getDataByColumn(c))) {
+                    all_same = false;
+                }
+            }
+            if (all_same) {
+                found_same = true;
+                return;
+            }
+        }
+        rows.add(row);
+    }
+
+    public void addRowDistinctReverse(Row row) {
+        boolean found_same = false;
+        for (Row other_row : rows) {
+            boolean all_same = true;
+            for (Column c : columns) {
+                if (!other_row.getDataByColumn(c).equals(row.getDataByColumn(c))) {
+                    all_same = false;
+                }
+            }
+            if (all_same) {
+                found_same = true;
+                return;
+            }
+        }
+        rows.add(0, row);
     }
 
     public static Result setInfo(String message) {

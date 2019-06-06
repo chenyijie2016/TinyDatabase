@@ -46,7 +46,7 @@ public class TinySQLParser extends Parser {
 			"conditionExpression", "unaryOperator", "literalValue", "selectTableStmt", 
 			"resultColumn", "joinClause", "joinConstraint", "joinOperator", "updateTableStmt", 
 			"deleteTableStmt", "dropDatabaseStmt", "dropTableStmt", "useDatabaseStmt", 
-			"typeName", "signedNumber", "columnConstraint", "name", "databaseName", 
+			"typeName", "signedNumber", "columnConstraint", "NAME", "databaseName",
 			"tableName", "columnName", "anyName", "keyword"
 		};
 	}
