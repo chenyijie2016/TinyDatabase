@@ -83,10 +83,14 @@ public class BaseData {
     }
 
     public boolean isInt() {
-        return !this.data.contains(".");
+        return baseDataType == BASE_DATA_TYPE.NUMBER && !this.data.contains(".");
     }
 
     public String getData() {
         return data;
+    }
+
+    public boolean isColumnInfoWithTable() {
+        return dataType == DATA_TYPE.COLUMN && tableName != null && columnName != null;
     }
 }
