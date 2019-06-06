@@ -58,7 +58,7 @@ public class UpdateTableStatement extends Statement {
                         // TODO: add null search
                         throw new SQLExecuteException("[where clause]: Need string here");
                     }
-                    newData[i] = new stringData(baseData.getData());
+                    newData[i] = new stringData(baseData.getData(), columns[i].getColumnType().size());
                     break;
                 case INT:
                     if (baseData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {

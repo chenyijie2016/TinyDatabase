@@ -19,6 +19,6 @@ insert into employee values (98345, 'Kim', 'Elec.Eng.', 80000);
 insert into employee values (83821, 'Brandt', 'Comp.Sci.', 92000);
 
 update employee set salary=0 where salary>80000;
-update employee set name='TEMPCHANGED' where id<32343;
+update employee set name='TEMPBIGGERTHAN' where id<32343;
 
 select * from employee;
