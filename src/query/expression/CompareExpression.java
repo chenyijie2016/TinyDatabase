@@ -1,5 +1,7 @@
 package query.expression;
 
+import exception.SQLExecuteException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,5 +31,15 @@ public class CompareExpression extends Expression{
 
     public COMPARE_SUB_TYPE getCompareSubType() {
         return compareSubType;
+    }
+
+    public boolean isTwoColumnsEqualCheckForOnClause() throws SQLExecuteException {
+        if (compareSubType != COMPARE_SUB_TYPE.EQ) {
+            throw new SQLExecuteException("[on clause]: Need to be equal conditions");
+        }
+        if (valueExpressionList.size() != 2) {
+            throw new SQLExecuteException("[compareexpression]: Internal error: Num of values not 2");
+        }
+        return valueExpressionList.get(0).isColumnInfoWithTable() && valueExpressionList.get(1).isColumnInfoWithTable();
     }
 }

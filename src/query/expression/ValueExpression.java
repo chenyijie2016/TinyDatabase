@@ -107,4 +107,11 @@ public class ValueExpression extends Expression{
         }
         return leftEndData;
     }
+
+    public boolean isColumnInfoWithTable() {
+        if (subType != ValueExpression.SUB_TYPE.ATOM || data.size() != 1) {
+            return false;
+        }
+        return data.get(0).isColumnInfoWithTable();
+    }
 }
