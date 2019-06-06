@@ -5,7 +5,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 public class floatData extends typedData {
-    private Float data;
+    private Float data = null;
 
     public floatData() {
     }
@@ -33,21 +33,19 @@ public class floatData extends typedData {
         return data;
     }
 
-    @Override
-    public typedData getTypedData() {
-        return this;
-    }
 
     @Override
     public void setData(Object data) {
-        this.data = (float) data;
+        this.data = data == null ? null : (Float) data;
     }
 
     @Override
     public byte[] toBytes() {
-        byte[] bytes = new byte[4];
-        ByteBuffer buf = ByteBuffer.wrap(bytes);
-        buf.putFloat(data);
+        byte[] bytes = new byte[Float.BYTES];
+        if (data != null) {
+            ByteBuffer buf = ByteBuffer.wrap(bytes);
+            buf.putFloat(data);
+        }
         return bytes;
     }
 
@@ -67,13 +65,12 @@ public class floatData extends typedData {
     }
 
     @Override
-    public int getDataSize() {
-        return 4;
-    }
-
-    @Override
     public String toString() {
-        return data.toString();
+        if (data != null) {
+            return data.toString();
+        } else {
+            return "NULL";
+        }
     }
 
     @Override
@@ -85,5 +82,8 @@ public class floatData extends typedData {
         return data.equals(z.getData());
     }
 
-
+    @Override
+    public boolean isNull() {
+        return data == null;
+    }
 }

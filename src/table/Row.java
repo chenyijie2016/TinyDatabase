@@ -1,43 +1,43 @@
 package table;
 
-import data.typedData;
-import data.intData;
-import data.stringData;
-import data.longData;
-import data.floatData;
-import data.doubleData;
+import data.*;
+import exception.SQLExecuteException;
+import exception.SQLParseException;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Row {
     public long position;
     private TableBase table;
-    public typedData[] data;
+    public List<typedData> data;
 
     public Row(TableBase t, long position) {
         this.table = t;
         this.position = position;
+        this.data = new ArrayList<>();
     }
 
-    public Row(TableBase t, Object[] objs) {
+    public Row(TableBase t, Object[] objs) throws SQLExecuteException {
         this.table = t;
+        this.data = new ArrayList<>();
+
         setData(objs);
+
     }
 
     public Row(Row another) {
         table = another.getTable();
         position = -1L;
-        this.data = new typedData[another.getData().length];
-        for (int i = 0; i < another.getData().length; i++) {
-            this.data[i] = another.getData()[i];
-        }
+        this.data = new ArrayList<>(another.data);
+
     }
 
 
-    public Row setPosition(long position) {
+    public void setPosition(long position) {
         this.position = position;
-        return this;
     }
 
     public TableBase getTable() {
@@ -46,96 +46,117 @@ public class Row {
 
     public boolean typeCheck(Object[] objs) {
         boolean SizeCheck = objs.length == table.getColumns().size();
-        assert (SizeCheck) : "设定的数据长度错误";
         boolean TypeCheck = true;
         for (int i = 0; i < table.getColumns().size(); i++) {
-            switch (table.getColumns().get(i).getColumnType().type()) {
-                case DOUBLE:
-                    TypeCheck &= objs[i] instanceof Double;
-                    break;
-                case FLOAT:
-                    TypeCheck &= objs[i] instanceof Float;
-                    break;
-                case INT:
-                    TypeCheck &= objs[i] instanceof Integer;
-                    break;
-                case LONG:
-                    TypeCheck &= objs[i] instanceof Long;
-                    break;
-                case STRING:
-                    TypeCheck &= objs[i] instanceof String;
-                    break;
-            }
+            if (objs[i] != null)
+                switch (table.getColumns().get(i).getColumnType().type()) {
+                    case DOUBLE:
+                        TypeCheck &= objs[i] instanceof Double;
+                        break;
+                    case FLOAT:
+                        TypeCheck &= objs[i] instanceof Float;
+                        break;
+                    case INT:
+                        TypeCheck &= objs[i] instanceof Integer;
+                        break;
+                    case LONG:
+                        TypeCheck &= objs[i] instanceof Long;
+                        break;
+                    case STRING:
+                        TypeCheck &= objs[i] instanceof String;
+                        break;
+                }
         }
-        assert (TypeCheck) : "类型检查失败";
         return SizeCheck && TypeCheck;
     }
 
-    public final typedData[] getData() {
+    public final List<typedData> getData() {
         return data;
     }
 
-    public final byte[] toBytes() {
+    public int occupation() {
         int totalSize = 0;
         for (Column c : table.getColumns()) {
             totalSize += c.getColumnType().size();
         }
+        totalSize += table.getColumns().size();
         if (totalSize < Long.BYTES) {
             totalSize = Long.BYTES;
         } // 为了确保能够存下保存freelist指针
-        byte[] bytes = new byte[totalSize];
+        return totalSize;
+    }
+
+    public final byte[] toBytes() {
+
+        byte[] bytes = new byte[occupation()];
         Arrays.fill(bytes, (byte) 0);
         ByteBuffer buf = ByteBuffer.wrap(bytes);
 
-        for (int i = 0; i < data.length; i++) {
-            buf.put(data[i].toBytes());
+        for (typedData datum : data) {
+            buf.put(datum.isNull() ? (byte) 1 : (byte) 0);
+            buf.put(datum.toBytes());
         }
         return bytes;
     }
 
-    public void setDataByColumn(Column c, typedData d) {
-        int index = table.getColumns().indexOf(c);
+    public Row fromBytes(byte[] raw) throws SQLExecuteException {
+        if (raw.length != occupation()) {
+            throw new SQLExecuteException("Unknown Error");
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(raw);
+        for (Column column : table.getColumns()) {
+            byte isNull = buffer.get();
+            byte[] columnData = new byte[column.getColumnType().size()];
+            buffer.get(columnData);
+            if (isNull == 1) {
+                data.add(typedDataFactor.getTypedData(column.getColumnType()));
+            } else {
+                data.add(typedDataFactor.getTypedData(column.getColumnType()).fromBytes(columnData));
+            }
+        }
+        return this;
+    }
+
+    public void setDataByColumn(Column column, typedData typedData) {
+        int index = table.getColumns().indexOf(column);
         if (data == null) {
-            data = new typedData[table.getColumns().size()];
+            data = new ArrayList<>();
         }
         assert (index != -1);
-        data[index] = d;
+        data.set(index, typedData);
     }
 
-    public typedData getDataByColumn(Column c) {
-        int index = table.getColumns().indexOf(c);
+    public typedData getDataByColumn(Column column) {
+        int index = table.getColumns().indexOf(column);
         assert (index != -1) : "没有找到该属性";
-        return data[index];
+        return data.get(index);
     }
 
-    public Row setData(Object[] objs) {
+    public Row setData(Object[] objs) throws SQLExecuteException {
         if (!typeCheck(objs)) {
-            System.out.println("Illegal Assignment!");
-            return this;
+            throw new SQLExecuteException("Row Type check failed");
         }
-        data = new typedData[objs.length];
-
         for (int i = 0; i < objs.length; i++) {
             switch (table.getColumns().get(i).getColumnType().type()) {
                 case INT:
-                    data[i] = new intData();
+                    data.add(new intData());
                     break;
                 case DOUBLE:
-                    data[i] = new doubleData();
+                    data.add(new doubleData());
                     break;
                 case FLOAT:
-                    data[i] = new floatData();
+                    data.add(new floatData());
                     break;
                 case LONG:
-                    data[i] = new longData();
+                    data.add(new longData());
                     break;
                 case STRING:
-                    data[i] = new stringData().setMaxSize(table.getColumns().get(i).getColumnType().size());
+                    data.add(new stringData().setMaxSize(table.getColumns().get(i).getColumnType().size()));
                     break;
                 default:
-                    throw new IllegalStateException("Unexpected value: " + table.getColumns().get(i).getColumnType().type());
+                    throw new SQLExecuteException("Unexpected value: " + table.getColumns().get(i).getColumnType().type());
             }
-            data[i].setData(objs[i]);
+            data.get(i).setData(objs[i]);
         }
         return this;
     }

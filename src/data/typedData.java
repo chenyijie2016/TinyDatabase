@@ -11,7 +11,6 @@ public abstract class typedData implements Comparable<typedData> {
 
     abstract public Object getData();
 
-    abstract public typedData getTypedData();
 
     abstract public void setData(Object data);
 
@@ -21,7 +20,7 @@ public abstract class typedData implements Comparable<typedData> {
 
     abstract public typedData fromBytes(byte[] data);
 
-    abstract public int getDataSize();
+    abstract public boolean isNull();
 
     abstract public String toString();
 

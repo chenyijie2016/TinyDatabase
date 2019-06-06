@@ -1,6 +1,5 @@
 package query.statement;
 
-import data.*;
 import exception.SQLExecuteException;
 import query.Result;
 import schema.SchemaManager;
@@ -44,49 +43,56 @@ public class InsertTableStatement extends Statement {
 
     @Override
     public Result execute(SchemaManager schemaManager) throws SQLExecuteException {
-        if (specifiedAttribute) {
-            throw new SQLExecuteException("[NOTE]: The specified attribute in INSERT statement is temporarily not supported, requiring NULL value supported first");
-        }
+//        if (specifiedAttribute) {
+//            throw new SQLExecuteException("[NOTE]: The specified attribute in INSERT statement is temporarily not supported, requiring NULL value supported first");
+//        }
         Table table = schemaManager.getCurrentDataBase().getTableByName(tableName);
-        if (table.getColumns().size() != data.size()) {
-            throw new SQLExecuteException("[insert]: Cannot match");
+
+        if (!specifiedAttribute) {
+            if (table.getColumns().size() != data.size()) {
+                throw new SQLExecuteException("[insert]: Cannot match Column Size");
+            }
         }
 
-        List<Object> datas = new ArrayList<>();
+        List<Object> dataList = new ArrayList<>();
         for (Column column : table.getColumns()) {
             int index = table.getColumns().indexOf(column);
+            if (data.get(index) == null) {
+                dataList.add(null);
+                continue;
+            }
             switch (column.getColumnType().type()) {
                 case STRING:
                     if (data.get(index).length() < column.getColumnType().size()) {
-                        datas.add(data.get(index));
+                        dataList.add(data.get(index));
                     } else {
                         throw new SQLExecuteException("[insert]: String length exceeds limit");
                     }
                     break;
                 case LONG:
                     try {
-                        datas.add(Long.parseLong(data.get(index)));
+                        dataList.add(Long.parseLong(data.get(index)));
                     } catch (NumberFormatException e) {
                         throw new SQLExecuteException("[insert]: Column type mismatch, LONG expected");
                     }
                     break;
                 case INT:
                     try {
-                        datas.add(Integer.parseInt(data.get(index)));
+                        dataList.add(Integer.parseInt(data.get(index)));
                     } catch (NumberFormatException e) {
                         throw new SQLExecuteException("[insert]: Column type mismatch, INT expected");
                     }
                     break;
                 case FLOAT:
                     try {
-                        datas.add(Float.parseFloat(data.get(index)));
+                        dataList.add(Float.parseFloat(data.get(index)));
                     } catch (NumberFormatException e) {
                         throw new SQLExecuteException("[insert]: Column type mismatch, FLOAT expected");
                     }
                     break;
                 case DOUBLE:
                     try {
-                        datas.add(Double.parseDouble(data.get(index)));
+                        dataList.add(Double.parseDouble(data.get(index)));
                     } catch (NumberFormatException e) {
                         throw new SQLExecuteException("[insert]: Column type mismatch, DOUBLE expected");
                     }
@@ -94,8 +100,8 @@ public class InsertTableStatement extends Statement {
             }
         }
         try {
-            Object[] temp = new Object[datas.size()];
-            datas.toArray(temp);
+            Object[] temp = new Object[dataList.size()];
+            dataList.toArray(temp);
             table.insertRow(new Row(table, temp));
         } catch (IOException e) {
             throw new SQLExecuteException("[insert] Unknown Error in IO operation");

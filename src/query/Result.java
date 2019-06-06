@@ -3,6 +3,7 @@ package query;
 import data.Type;
 import data.stringData;
 import data.typedData;
+import exception.SQLExecuteException;
 import table.Column;
 import table.Row;
 import table.TableBase;
@@ -116,7 +117,7 @@ public class Result extends TableBase {
         rows.add(0, row);
     }
 
-    public static Result setInfo(String message) {
+    public static Result setInfo(String message) throws SQLExecuteException {
         Result res = new Result().setColumns(new Column[]{new Column(Type.stringType(message.length() + 1), "message")});
         res.addRow(new Row(res, new Object[]{message}));
         return res;
