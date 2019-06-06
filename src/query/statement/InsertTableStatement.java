@@ -8,25 +8,23 @@ import table.Row;
 import table.Table;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InsertTableStatement extends Statement {
 
     private String tableName;
-    private Map<String, String> insertedData = new HashMap<>(); // 对应的属性与值(字符串形式)
+
     private boolean specifiedAttribute;
     private List<String> data;
+    private List<String> columnNames = new ArrayList<>();
 
     public InsertTableStatement(String tableName) {
         this.tableName = tableName;
         this.type = INSERT_TABLE;
     }
 
-    public Map<String, String> getInsertedData() {
-        return insertedData;
+    public List<String> getColumnNames() {
+        return columnNames;
     }
 
     public boolean isSpecifiedAttribute() {
@@ -55,8 +53,19 @@ public class InsertTableStatement extends Statement {
         }
 
         List<Object> dataList = new ArrayList<>();
-        for (Column column : table.getColumns()) {
-            int index = table.getColumns().indexOf(column);
+        List<Column> columnsToInsert;
+        if (!specifiedAttribute) {
+            columnsToInsert = table.getColumns();
+        } else {
+            columnsToInsert = new ArrayList<>();
+            for (String name : columnNames) {
+                columnsToInsert.add(table.getColumnByName(name));
+            }
+        }
+
+
+        for (Column column : columnsToInsert) {
+            int index = columnsToInsert.indexOf(column);
             if (data.get(index) == null) {
                 dataList.add(null);
                 continue;
@@ -100,8 +109,11 @@ public class InsertTableStatement extends Statement {
             }
         }
         try {
-            Object[] temp = new Object[dataList.size()];
-            dataList.toArray(temp);
+            Object[] temp = new Object[table.getColumns().size()];
+            for (Column column : columnsToInsert) {
+                temp[table.getColumns().indexOf(column)] = dataList.get(columnsToInsert.indexOf(column));
+            }
+            // dataList.toArray(temp);
             table.insertRow(new Row(table, temp));
         } catch (IOException e) {
             throw new SQLExecuteException("[insert] Unknown Error in IO operation");

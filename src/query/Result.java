@@ -45,7 +45,7 @@ public class Result extends TableBase {
             if (column.getColumnType().type() != Type.TYPE.STRING) {
                 builder.append("   ");
             } else {
-                builder.append(" ".repeat(Math.max(0, column.getColumnType().size())));
+                builder.append(" ".repeat(Math.max(0, column.getColumnType().size() - column.getName().length())));
             }
         }
         builder.append("|\n");
@@ -60,16 +60,13 @@ public class Result extends TableBase {
         if (reverse) {
             if (distinct) {
                 addRowDistinctReverse(row);
-            }
-            else {
+            } else {
                 addRowReverse(row);
             }
-        }
-        else {
+        } else {
             if (distinct) {
                 addRowDistinct(row);
-            }
-            else {
+            } else {
                 addRow(row);
             }
         }

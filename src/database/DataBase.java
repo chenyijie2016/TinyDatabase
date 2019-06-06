@@ -58,7 +58,7 @@ public class DataBase {
         outputStream.close();
     }
 
-    public static DataBase readFromFile(String name) throws IOException {
+    public static DataBase readFromFile(String name) throws IOException, SQLExecuteException {
 
         FileInputStream inputStream = new FileInputStream(name + SCHEMA_EXTENSION);
         DataInputStream in = new DataInputStream(inputStream);
@@ -110,7 +110,7 @@ public class DataBase {
         updateSchema();
     }
 
-    public boolean drop() throws IOException{
+    public boolean drop() throws IOException {
         dropAllTable();
         File file = new File(this.databaseName + SCHEMA_EXTENSION);
         return file.delete();

@@ -364,6 +364,11 @@ public class Listener extends TinySQLBaseListener {
         } else if (ctx.columnName().size() > 0) {
             stmt.setSpecifiedAttribute(true);
         }
+        if (stmt.isSpecifiedAttribute()) {
+            for (TinySQLParser.ColumnNameContext columnNameContext : ctx.columnName()) {
+                stmt.getColumnNames().add(columnNameContext.getText().toUpperCase());
+            }
+        }
 
         expressionToInsertList = new ArrayList<>();
         statement = stmt;
@@ -372,27 +377,14 @@ public class Listener extends TinySQLBaseListener {
     @Override
     public void exitInsertTableStmt(TinySQLParser.InsertTableStmtContext ctx) {
         InsertTableStatement stmt = (InsertTableStatement) statement;
-        if (stmt.isSpecifiedAttribute()) {
-
-            for (TinySQLParser.ColumnNameContext column : ctx.columnName()) {
-                if (stmt.getInsertedData().containsKey(column.getText().toUpperCase())) {
-                    stmt.setValid(false);
-                    stmt.setMessage("[Insert Statement]: duplicate column name");
-                    return;
-                } else {
-                    stmt.getInsertedData().put(column.getText().toUpperCase(), expressionToInsertList.get(ctx.columnName().indexOf(column)));
-                }
-            }
-        } else {
-            stmt.setData(expressionToInsertList);
-        }
+        stmt.setData(expressionToInsertList);
         expressionToInsertList = null;
         valueExpressionStack.clear();
     }
 
     @Override
     public void enterCreateDatabaseStmt(TinySQLParser.CreateDatabaseStmtContext ctx) {
-        statement = new SchemaStatement(Statement.CREATE_DATABASE).setDatabaseName(ctx.databaseName().getText());
+        statement = new SchemaStatement(Statement.CREATE_DATABASE).setDatabaseName(ctx.databaseName().getText().toUpperCase());
     }
 
     @Override
@@ -402,18 +394,18 @@ public class Listener extends TinySQLBaseListener {
 
     @Override
     public void enterShowDatabaseTablesStmt(TinySQLParser.ShowDatabaseTablesStmtContext ctx) {
-        statement = new SchemaStatement(Statement.SHOW_DATABASE_TABLE).setDatabaseName(ctx.databaseName().getText());
+        statement = new SchemaStatement(Statement.SHOW_DATABASE_TABLE).setDatabaseName(ctx.databaseName().getText().toUpperCase());
     }
 
 
     @Override
     public void enterDropDatabaseStmt(TinySQLParser.DropDatabaseStmtContext ctx) {
-        statement = new SchemaStatement(Statement.DROP_DATABASE).setDatabaseName(ctx.databaseName().getText());
+        statement = new SchemaStatement(Statement.DROP_DATABASE).setDatabaseName(ctx.databaseName().getText().toUpperCase());
     }
 
     @Override
     public void enterUseDatabaseStmt(TinySQLParser.UseDatabaseStmtContext ctx) {
-        statement = new SchemaStatement(Statement.USE_DATABASE).setDatabaseName(ctx.databaseName().getText());
+        statement = new SchemaStatement(Statement.USE_DATABASE).setDatabaseName(ctx.databaseName().getText().toUpperCase());
     }
 
     @Override

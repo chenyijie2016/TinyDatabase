@@ -10,7 +10,7 @@ import java.util.List;
 public class Schema {
     private static Schema schema = new Schema();
     private static final String METADATA_FILE = "schema";
-    private static final String DEFAULT_DATABASE = "test";
+    private static final String DEFAULT_DATABASE = "TEST";
     private List<DataBase> dataBases;
 
     private Schema() {
