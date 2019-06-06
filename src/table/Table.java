@@ -32,11 +32,11 @@ public class Table extends TableBase {
     private long freeListPointer = -1;
     private List<BPlusTree> indexTrees;
 
-    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException {
+    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException,SQLExecuteException {
         this(database, tableName, columns, constraints, 1);
     }
 
-    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints, int uniqueID) throws IOException {
+    public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints, int uniqueID) throws IOException, SQLExecuteException {
         this.database = database;
         this.tableName = tableName.toUpperCase();
         this.columns = Arrays.asList(columns);
@@ -100,13 +100,13 @@ public class Table extends TableBase {
         dataFile.writeInt(uniqueID);
     }
 
-    public Column getColumnByName(String name) {
-        for (Column c : columns) {
-            if (name.equals(c.getName())) {
-                return c;
+    public Column getColumnByName(String name) throws SQLExecuteException {
+        for (Column column : columns) {
+            if (name.equals(column.getName())) {
+                return column;
             }
         }
-        return null;
+        throw new SQLExecuteException("No Such Column");
     }
 
     private void createPrimaryKey(Column column) {
@@ -280,12 +280,12 @@ public class Table extends TableBase {
      * @throws IllegalArgumentException 元数据有误
      * @throws IOException              元数据有误
      */
-    public static Table fromSchemaBytes(DataBase db, byte[] schema) throws IllegalArgumentException, IOException {
+    public static Table fromSchemaBytes(DataBase db, byte[] schema) throws SQLExecuteException, IOException {
         ByteBuffer buffer = ByteBuffer.wrap(schema);
         byte[] magic = new byte[5];
         buffer.get(magic, 0, 5);
         if (!new String(magic).equals("TABLE")) {
-            throw new IllegalArgumentException("Not valid schema data");
+            throw new SQLExecuteException("Not valid schema data");
         }
         int tableNameSize = buffer.getInt();
         byte[] name = new byte[tableNameSize];
@@ -381,11 +381,11 @@ public class Table extends TableBase {
     /**
      * 获取全体的元组的迭代器，利用第一个索引的全体迭代器实现
      */
-    public RowIterator scanAll() throws IOException ,SQLExecuteException{
+    public RowIterator scanAll() throws IOException, SQLExecuteException {
         return new RowIndexIterator(this, indexTrees.get(0).scanAll());
     }
 
-    public RowIterator scanEqual(Column column, typedData key) throws IOException,SQLExecuteException {
+    public RowIterator scanEqual(Column column, typedData key) throws IOException, SQLExecuteException {
         // 查询指定属性的值等于key的元组， 如果查询在索引列的话暂时只返回一个
         Long position;
         if (indexColumns.indexOf(column) != -1) {
@@ -417,7 +417,7 @@ public class Table extends TableBase {
      * 查询大于等于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanGreaterEqual(Column column, typedData key) throws IOException,SQLExecuteException {
+    public RowIterator scanGreaterEqual(Column column, typedData key) throws IOException, SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterEqual(key));
         }
@@ -430,7 +430,7 @@ public class Table extends TableBase {
      * 查询大于该属性的元组
      * 返回迭代器
      */
-    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException,SQLExecuteException {
+    public RowIterator scanGreaterThan(Column column, typedData key) throws IOException, SQLExecuteException {
         if (indexColumns.indexOf(column) != -1) {
             return new RowIndexIterator(this, indexTrees.get(indexColumns.indexOf(column)).scanGreaterThan(key));
         }

@@ -845,33 +845,4 @@ public class BPlusTree {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        File file = new File("test.bin");
-        if (file.delete()) {
-            System.out.println(file.getName() + " 文件已被删除！");
-        } else {
-            System.out.println("文件删除失败！");
-        }
-        BPlusTree st = new BPlusTree(4, 3, Type.intType(), "test.bin", 16);
-        st.insert(new intData(4), 4);
-        st.insert(new intData(5), 5);
-        st.insert(new intData(6), 6);
-        st.insert(new intData(7), 7);
-        st.insert(new intData(8), 8);
-        st.insert(new intData(9), 9);
-        st.insert(new intData(10), 10);
-        st.insert(new intData(11), 11);
-        st.insert(new intData(12), 12);
-        st.insert(new intData(13), 13);
-        st.insert(new intData(14), 14);
-        st.insert(new intData(15), 15);
-        st.insert(new intData(16), 16);
-        System.out.println(st.scanEqual(new intData(7)));
-        BPlusTreeIterator l = st.scanGreaterEqual(new intData(11));
-        Long d = l.next();
-        while (d != null) {
-            System.out.println("value=" + d);
-            d = l.next();
-        }
-    }
 }

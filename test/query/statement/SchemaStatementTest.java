@@ -14,23 +14,23 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class SchemaStatementTest extends BaseTest {
-    @BeforeClass
-    public static void before() throws IOException, SQLExecuteException {
-        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
-            schemaManager.dropDataBaseByName(dataBase.getName());
-        }
-        schemaManager.schema().createDatabaseByName("test");
-        schemaManager.switchDataBase("test");
-    }
-
-    @AfterClass
-    public static void clean() throws IOException, SQLExecuteException {
-        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
-            schemaManager.dropDataBaseByName(dataBase.getName());
-        }
-        schemaManager.schema().createDatabaseByName("test");
-        schemaManager.switchDataBase("test");
-    }
+//    @BeforeClass
+//    public static void before() throws IOException, SQLExecuteException {
+//        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
+//            schemaManager.dropDataBaseByName(dataBase.getName());
+//        }
+//        schemaManager.schema().createDatabaseByName("test");
+//        schemaManager.switchDataBase("test");
+//    }
+//
+//    @AfterClass
+//    public static void clean() throws IOException, SQLExecuteException {
+//        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
+//            schemaManager.dropDataBaseByName(dataBase.getName());
+//        }
+//        schemaManager.schema().createDatabaseByName("test");
+//        schemaManager.switchDataBase("test");
+//    }
 
     @Test
     public void TestSchema() throws IOException, SQLExecuteException, SQLParseException {
