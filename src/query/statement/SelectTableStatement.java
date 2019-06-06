@@ -514,6 +514,7 @@ public class SelectTableStatement extends Statement {
                         // 直接继续往下走
                         nowIteratorIndex++;
                         try {
+                            iterators[nowIteratorIndex] = null;
                             for (OnCondition onCondition: onConditionList) {
                                 if (onCondition.ib == nowIteratorIndex) {
                                     iterators[nowIteratorIndex] = tables.get(nowIteratorIndex).scanEqual(onCondition.cb,
