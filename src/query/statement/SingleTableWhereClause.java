@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WhereClause {
+public class SingleTableWhereClause {
     private CompareExpression compareExpression;
     private boolean onlyOneTable;
     private Table[] tables;
@@ -23,20 +23,26 @@ public class WhereClause {
     private boolean addRowOrderReverse = false;
 
     // Single table
-    public WhereClause(CompareExpression compareExpression, Table table) {
+    public SingleTableWhereClause(CompareExpression compareExpression, Table table) throws SQLExecuteException {
         this.compareExpression = compareExpression;
         onlyOneTable = true;
         tables = new Table[1];
         tables[0] = table;
         joinTypes = null;
+        if (this.compareExpression != null) {
+            this.compareExpression.check(this.tables);
+        }
     }
 
     // Multi tables
-    public WhereClause(CompareExpression compareExpression, Table[] tables, SelectTableStatement.JOIN_TYPE[] joinTypes) {
+    public SingleTableWhereClause(CompareExpression compareExpression, Table[] tables, SelectTableStatement.JOIN_TYPE[] joinTypes) throws SQLExecuteException {
         this.compareExpression = compareExpression;
         this.onlyOneTable = false;
         this.tables = tables;
         this.joinTypes = joinTypes;
+        if (this.compareExpression != null) {
+            this.compareExpression.check(this.tables);
+        }
     }
 
     public Table.RowIterator parseSingleTableColumnAndValue() throws SQLExecuteException {

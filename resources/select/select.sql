@@ -80,8 +80,8 @@ insert into employee3 values (76766, 'Crick', 'Biology', 72000);
 insert into employee3 values (98345, 'Kim', 'Elec.Eng.', 80000);
 insert into employee3 values (83821, 'Brandt', 'Comp.Sci.', 92000);
 
--- select * from employee join employee2 on employee.dept_name = employee2.dept_name;
--- select * from employee join employee2 on employee.dept_name = employee2.dept_name where employee.salary > 80000;
--- select employee.name, employee2.name from employee join employee2 on employee2.id = employee.salary;
--- select distinct employee.name from employee join employee2 on employee.dept_name = employee2.dept_name where employee.salary > 80000;
+select * from employee join employee2 on employee.dept_name = employee2.dept_name;
+select * from employee join employee2 on employee.dept_name = employee2.dept_name where employee.salary > 80000;
+select employee.name, employee2.name from employee join employee2 on employee2.id = employee.salary;
+select distinct employee.name from employee join employee2 on employee.dept_name = employee2.dept_name where employee.salary > 80000;
 select * from employee, employee2 join employee3 on employee3.dept_name = employee2.dept_name;

@@ -31,7 +31,7 @@ public class UpdateTableStatement extends Statement {
         if (table == null) {
             throw new SQLExecuteException("[update table]: Table " + tableName + " not exist");
         }
-        WhereClause where = new WhereClause(whereCondition, table);
+        SingleTableWhereClause where = new SingleTableWhereClause(whereCondition, table);
         Table.RowIterator ans = where.parseSingleTableColumnAndValue();
 
         if (columnNames.length != data.length) {

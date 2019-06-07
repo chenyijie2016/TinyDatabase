@@ -1,14 +1,10 @@
 package query.statement;
 
-import data.*;
 import database.DataBase;
 import exception.SQLExecuteException;
 import query.Result;
-import query.expression.BaseData;
 import query.expression.CompareExpression;
-import query.expression.ValueExpression;
 import schema.SchemaManager;
-import table.Column;
 import table.Row;
 import table.Table;
 
@@ -30,7 +26,7 @@ public class DeleteTableStatement extends Statement {
         if (table == null) {
             throw new SQLExecuteException("[delete table]: Table " + tableName + " not exist");
         }
-        WhereClause where = new WhereClause(whereCondition, table);
+        SingleTableWhereClause where = new SingleTableWhereClause(whereCondition, table);
         Table.RowIterator ans = where.parseSingleTableColumnAndValue();
 
         Row row = ans.next();

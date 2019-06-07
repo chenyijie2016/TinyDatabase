@@ -83,7 +83,7 @@ public class SelectTableStatement extends Statement {
             if (targetTable == null) {
                 throw new SQLExecuteException("[select table]: Table " + tableName + " not exist");
             }
-            WhereClause where = new WhereClause(compareExpression, targetTable);
+            SingleTableWhereClause where = new SingleTableWhereClause(compareExpression, targetTable);
             Table.RowIterator ans = where.parseSingleTableColumnAndValue();
             addRowOrderReverse = where.getAddRowOrderReverse();
 
