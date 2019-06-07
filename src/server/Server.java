@@ -7,11 +7,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.commons.cli.*;
 import query.*;
 import query.statement.Statement;
 import schema.SchemaManager;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,11 +32,25 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args) throws IOException {
+        Options options = new Options();
+        Option portOption = new Option("p", "port", true, "port");
+        portOption.setRequired(false);
 
-        System.out.println("server is running!");
-        System.out.println(System.getProperty("user.dir"));
-        ServerSocket socket = new ServerSocket(3306);
-        System.out.println("Server start on port: " + 3306);
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("java -jar TinyDatabaseServer.jar", options);
+            System.exit(1);
+        }
+        int port = cmd.getOptionValue("port") == null ? 3306 : Integer.parseInt(cmd.getOptionValue("port"));
+
+        ServerSocket socket = new ServerSocket(port);
+        System.out.println("Server start on port: " + port);
         while (true) {
             Socket sock = socket.accept();
             System.out.println("Receive client connect");

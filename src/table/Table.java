@@ -133,15 +133,6 @@ public class Table extends TableBase {
         byte[] raw = new byte[row.occupation()];
         dataFile.read(raw);
         row.fromBytes(raw);
-//        for (Column c : columns) {
-//            typedData data = typedDataFactor.getTypedData(c.getColumnType());
-//            byte isNull = dataFile.readByte();
-//            data.readFromFile(dataFile);
-//            if (isNull == 1) {
-//                data.setData(null);
-//            }
-//            row.setDataByColumn(c, data);
-//        }
         return row;
     }
 

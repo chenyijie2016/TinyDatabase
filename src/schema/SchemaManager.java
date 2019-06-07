@@ -3,7 +3,6 @@ package schema;
 import database.DataBase;
 import exception.SQLExecuteException;
 
-import java.io.IOException;
 
 public class SchemaManager {
     private int id;

@@ -2,7 +2,6 @@ package table;
 
 import data.*;
 import exception.SQLExecuteException;
-import exception.SQLParseException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
