@@ -239,10 +239,10 @@ public class Listener extends TinySQLBaseListener {
             // Parsed all kinds of columns, BUT NOT CHECKING duplicate names
             for (TinySQLParser.ColumnConstraintContext data : ctx.columnDefinition(i).columnConstraint()) {
                 if (data.K_PRIMARY() != null) {
-                    if (gotPrimaryKey) {
-                        statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
-                        return;
-                    }
+//                    if (gotPrimaryKey) {
+//                        statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
+//                        return;
+//                    }
                     gotPrimaryKey = true;
                     boolean primaryKeyAsc = (data.K_DESC() == null);
                     constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,
@@ -253,10 +253,10 @@ public class Listener extends TinySQLBaseListener {
             }
         }
         if (ctx.tableConstraint() != null) {
-            if (gotPrimaryKey) {
-                statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
-                return;
-            }
+//            if (gotPrimaryKey) {
+//                statement = new CreateTableStatement().setValid(false).setMessage("Duplicate primary keys!");
+//                return;
+//            }
             for (TinySQLParser.IndexedColumnContext data : ctx.tableConstraint().indexedColumn()) {
                 boolean primaryKeyAsc = (data.K_DESC() == null);
                 constraints.add(new Constraint(primaryKeyAsc ? Constraint.Order.ASC : Constraint.Order.DESC,

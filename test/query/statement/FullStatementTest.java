@@ -11,6 +11,15 @@ import static org.junit.Assert.assertTrue;
 
 public class FullStatementTest extends BaseTest {
     @Test
+    public void TestPrimary() throws SQLExecuteException, SQLParseException, IOException {
+        Listener listener = getListenerByTestFile("resources/full/primaryKey.sql");
+        for (Statement statement : listener.getStatementList()) {
+            assertTrue(statement.isValid());
+            System.out.println(statement.execute(schemaManager));
+        }
+    }
+
+    @Test
     public void TestFull() throws SQLExecuteException, SQLParseException, IOException {
         Listener listener = getListenerByTestFile("resources/full/full.sql");
         for (Statement statement : listener.getStatementList()) {

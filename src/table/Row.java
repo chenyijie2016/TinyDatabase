@@ -2,7 +2,6 @@ package table;
 
 import data.*;
 import exception.SQLExecuteException;
-import exception.SQLParseException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -15,6 +14,7 @@ public class Row {
     public long position;
     private TableBase table;
     public List<typedData> data;
+    private typedData additionalData = null;  // 用于没有primarykey或者多个primarykey的情况
 
     public Row(TableBase t, long position) {
         this.table = t;
@@ -25,16 +25,21 @@ public class Row {
     public Row(TableBase t, Object[] objs) throws SQLExecuteException {
         this.table = t;
         this.data = new ArrayList<>();
-
         setData(objs);
+    }
 
+    public Row(TableBase t, Object[] objs, typedData additionalData) throws SQLExecuteException {
+        this.table = t;
+        this.data = new ArrayList<>();
+        setData(objs);
+        this.additionalData = additionalData;
     }
 
     public Row(Row another) {
         table = another.getTable();
         position = -1L;
         this.data = new ArrayList<>(another.data);
-
+        this.additionalData = another.additionalData;
     }
 
 
@@ -76,12 +81,22 @@ public class Row {
         return data;
     }
 
+    public typedData getAdditionalData() {
+        return additionalData;
+    }
+
     public int occupation() {
         int totalSize = 0;
         for (Column c : table.getColumns()) {
             totalSize += c.getColumnType().size();
         }
         totalSize += table.getColumns().size();
+        if (table instanceof Table) {
+            if (((Table) table).getMultiPrimaryKey() || !((Table) table).getHasPrimaryKey()) {
+                data.Type dataType = ((Table) table).getIndexColumns().get(0).getColumnType();
+                totalSize += dataType.size();
+            }
+        }
         if (totalSize < Long.BYTES) {
             totalSize = Long.BYTES;
         } // 为了确保能够存下保存freelist指针
@@ -94,6 +109,12 @@ public class Row {
             stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(td.toString().length()).array());
             stream.write(td.toString().getBytes());
         }
+        // TODO: CHECK if we need it
+//        if (table instanceof Table) {
+//            if (((Table) table).getMultiPrimaryKey() || !((Table) table).getHasPrimaryKey()) {
+//                stream.write(additionalData.toBytes());
+//            }
+//        }
         return stream.toByteArray();
     }
 
@@ -106,6 +127,11 @@ public class Row {
         for (typedData datum : data) {
             buf.put(datum.isNull() ? (byte) 1 : (byte) 0);
             buf.put(datum.toBytes());
+        }
+        if (table instanceof Table) {
+            if (((Table) table).getMultiPrimaryKey() || !((Table) table).getHasPrimaryKey()) {
+                buf.put(additionalData.toBytes());
+            }
         }
         return bytes;
     }
@@ -125,6 +151,14 @@ public class Row {
                 data.add(typedDataFactor.getTypedData(column.getColumnType()).fromBytes(columnData));
             }
         }
+        if (table instanceof Table) {
+            if (((Table) table).getMultiPrimaryKey() || !((Table) table).getHasPrimaryKey()) {
+                data.Type dataType = ((Table) table).getIndexColumns().get(0).getColumnType();
+                byte[] bufferData = new byte[dataType.size()];
+                buffer.get(bufferData);
+                additionalData = typedDataFactor.getTypedData(dataType).fromBytes(bufferData);
+            }
+        }
         return this;
     }
 
@@ -132,6 +166,12 @@ public class Row {
         int index = table.getColumns().indexOf(column);
         if (data == null) {
             data = new ArrayList<>();
+        }
+        if (index == -1 && table instanceof Table) {
+            index = ((Table)table).getIndexColumns().indexOf(column);
+            assert (index != -1) : "没有找到该属性";
+            additionalData = typedData;
+            return;
         }
         assert (index != -1);
         data.set(index, typedData);
@@ -141,6 +181,8 @@ public class Row {
         int index = table.getColumns().indexOf(column);
         if (index == -1 && table instanceof Table) {
             index = ((Table)table).getIndexColumns().indexOf(column);
+            assert (index != -1) : "没有找到该属性";
+            return additionalData;
         }
         assert (index != -1) : "没有找到该属性";
         return data.get(index);
@@ -175,12 +217,22 @@ public class Row {
         return this;
     }
 
+    public Row setData(Object[] objs, typedData additionalData) throws SQLExecuteException {
+        this.setData(objs);
+        this.additionalData = additionalData;
+        return this;
+    }
+
     public String toString() {
         StringBuilder str = new StringBuilder("| ");
         for (typedData d : data) {
             str.append(d.toString()).append(" | ");
         }
         return str.toString();
+    }
+
+    public void setAdditionalData(typedData data) {
+        additionalData = data;
     }
 
 }

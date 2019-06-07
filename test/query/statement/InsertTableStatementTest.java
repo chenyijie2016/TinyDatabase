@@ -38,13 +38,4 @@ public class InsertTableStatementTest extends BaseTest {
             System.out.println(statement.execute(schemaManager));
         }
     }
-
-    @Test
-    public void TestInsertWithoutPrimary() throws SQLExecuteException, SQLParseException, IOException {
-        Listener listener = getListenerByTestFile("resources/insert/insert_without_primary.sql");
-        for (Statement statement : listener.getStatementList()) {
-            assertTrue(statement.isValid());
-            System.out.println(statement.execute(schemaManager));
-        }
-    }
 }

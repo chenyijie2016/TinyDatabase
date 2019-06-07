@@ -1,14 +1,12 @@
 package table;
 
 
-import data.Type;
-import data.intData;
-import data.typedData;
-import data.typedDataFactor;
+import data.*;
 
 import database.DataBase;
 import exception.SQLExecuteException;
 import index.BPlusTree;
+import util.MD5Util;
 
 
 import java.io.File;
@@ -28,9 +26,18 @@ public class Table extends TableBase {
     private Constraint[] constraints; // 约束
 
     private boolean hasPrimaryKey = false; // 是否指定了主键
+    private boolean multiPrimaryKey = false;
     private int uniqueID = 0; // 默认的自增主键当前值
     private long freeListPointer = -1;
     private List<BPlusTree> indexTrees;
+
+    public boolean getHasPrimaryKey() {
+        return hasPrimaryKey;
+    }
+
+    public boolean getMultiPrimaryKey() {
+        return multiPrimaryKey;
+    }
 
     public Table(DataBase database, String tableName, Column[] columns, Constraint[] constraints) throws IOException,SQLExecuteException {
         this(database, tableName, columns, constraints, 1);
@@ -47,16 +54,27 @@ public class Table extends TableBase {
 
         for (Constraint constraint : constraints) {
             if (constraint.getType() == Constraint.ConstraintType.PRIMARY_KEY) {
-                hasPrimaryKey = true;
+                if (hasPrimaryKey) {
+                    multiPrimaryKey = true;
+                }
                 if (getColumnByName(constraint.getColumnName()) != null) {
                     this.indexColumns.add(getColumnByName(constraint.getColumnName()));
                 }
+                else {
+                    throw new SQLExecuteException("[primary key]: Can't find primary key column " + constraint.getColumnName());
+                }
+                hasPrimaryKey = true;
             }
         }
 
 
         if (!hasPrimaryKey) { // 没有主键约束就自己创建一个 默认INT
             Column c = new Column(Type.intType(), "IDX");
+            createPrimaryKey(c);
+        }
+
+        else if (multiPrimaryKey) {
+            Column c = new Column(Type.stringType(35), "IDX");
             createPrimaryKey(c);
         }
 
@@ -114,7 +132,7 @@ public class Table extends TableBase {
     }
 
     private void createPrimaryKey(Column column) {
-        this.indexColumns.add(column);
+        this.indexColumns.add(0, column);
     }
 
     public List<Column> getIndexColumns() {
@@ -154,8 +172,9 @@ public class Table extends TableBase {
 
         // 先删除索引
         for (Column column : indexColumns) {
-            boolean removed = indexTrees.get(indexColumns.indexOf(column)).remove(row.getDataByColumn(column));
-
+            typedData data = row.getDataByColumn(column);
+            boolean removed = indexTrees.get(indexColumns.indexOf(column)).remove(data);
+//            System.out.println(removed);
         }
         // 如果删除的元组存在于磁盘上，则需要改写freeListPointer
         dataFile.seek(row.position);
@@ -207,23 +226,40 @@ public class Table extends TableBase {
             }
         }
 
-        for (Column column : indexColumns) {
-            Long pos = indexTrees.get(indexColumns.indexOf(column)).scanEqual(row.getDataByColumn(column));
-            if (pos != null) {
-                System.out.println("Can not insert Primary key! [Key already exists!]");
-                throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
+        if (hasPrimaryKey && !multiPrimaryKey) {
+            for (Column column : indexColumns) {
+                Long pos = indexTrees.get(indexColumns.indexOf(column)).scanEqual(row.getDataByColumn(column));
+                if (pos != null) {
+                    System.out.println("Can not insert Primary key! [Key already exists!]");
+                    throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
+                }
             }
         }
 
+        typedData primaryKeyAns = null;
+        if (!hasPrimaryKey) {
+            typedData addtionalData = new intData(uniqueID);
+            row.setAdditionalData(addtionalData);
+        }
+        else if (multiPrimaryKey) {
+            for (int i = 1; i < indexColumns.size(); i++) {
+                primaryKeyAns = new stringData(MD5Util.encrypt(primaryKeyAns + row.getDataByColumn(indexColumns.get(i)).toString()), 35);
+            }
+            row.setAdditionalData(primaryKeyAns);
+        }
+
         writeSingleRow(row);
+
         // 插入索引
-        if (hasPrimaryKey) {
+        if (hasPrimaryKey && !multiPrimaryKey) {
             for (Column column : indexColumns) {
                 indexTrees.get(indexColumns.indexOf(column)).insert(row.getDataByColumn(column), row.position);
             }
-        } else {
+        } else if (!hasPrimaryKey) {
             indexTrees.get(0).insert(new intData(uniqueID), row.position);
             uniqueID++;
+        } else {
+            indexTrees.get(0).insert(primaryKeyAns, row.position);
         }
 
     }
