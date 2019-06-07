@@ -206,9 +206,11 @@ public class ValueExpression extends Expression{
                 case STRING:
                     return new BaseData(BaseData.BASE_DATA_TYPE.STRING, (String)data.getDataByColumn(realColumn).getData());
                 case DOUBLE:
-                case FLOAT:
                     return new BaseData((Double)data.getDataByColumn(realColumn).getData());
+                case FLOAT:
+                    return new BaseData(((Float)data.getDataByColumn(realColumn).getData()).doubleValue());
                 case INT:
+                    return new BaseData(((Integer)data.getDataByColumn(realColumn).getData()).longValue());
                 case LONG:
                     return new BaseData((Long)data.getDataByColumn(realColumn).getData());
                 default:

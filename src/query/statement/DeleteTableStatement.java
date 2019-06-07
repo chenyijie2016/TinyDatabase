@@ -9,6 +9,8 @@ import table.Row;
 import table.Table;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DeleteTableStatement extends Statement {
     private String tableName;
@@ -28,17 +30,25 @@ public class DeleteTableStatement extends Statement {
         }
         SingleTableWhereClause where = new SingleTableWhereClause(whereCondition, table);
         Table.RowIterator ans = where.parseSingleTableColumnAndValue();
+        boolean needCheckAns = where.getNeedCheckAns();
 
         Row row = ans.next();
         int count = 0;
+        Map<Table, Row> tableRowMap = new HashMap<>();
         while (row != null) {
-            try {
-                table.deleteRow(row);
+            boolean satisfied = true;
+            if (needCheckAns) {
+                tableRowMap.put(table, row);
+                satisfied = whereCondition.getCompareAns(tableRowMap);
             }
-            catch (IOException e) {
-                throw new SQLExecuteException("[delete table]: IOException: " + e.getMessage());
+            if (satisfied) {
+                try {
+                    table.deleteRow(row);
+                } catch (IOException e) {
+                    throw new SQLExecuteException("[delete table]: IOException: " + e.getMessage());
+                }
+                count++;
             }
-            count++;
             row = ans.next();
         }
         return Result.setInfo("Deleted " + String.valueOf(count) + " rows");

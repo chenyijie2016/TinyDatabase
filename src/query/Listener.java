@@ -132,6 +132,20 @@ public class Listener extends TinySQLBaseListener {
         }
     }
 
+    @Override
+    public void exitAndExpression(TinySQLParser.AndExpressionContext ctx) {
+        CompareExpression b = compareExpressionStack.pop();
+        CompareExpression a = compareExpressionStack.pop();
+        compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_TYPE.AND, a, b));
+    }
+
+    @Override
+    public void exitOrExpression(TinySQLParser.OrExpressionContext ctx) {
+        CompareExpression b = compareExpressionStack.pop();
+        CompareExpression a = compareExpressionStack.pop();
+        compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_TYPE.OR, a, b));
+    }
+
 
     @Override
     public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) {

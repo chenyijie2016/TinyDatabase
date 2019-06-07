@@ -127,11 +127,22 @@ public class SelectTableStatement extends Statement {
                 }
             }
 
+            boolean needCheckAns = where.getNeedCheckAns();
+
             Row row = ans.next();
+            Map<Table, Row> tableRowMap = new HashMap<>();
+
             if (allColumnsOutput) {
                 result.setColumns(targetTable.getColumns());
                 while (row != null) {
-                    result.addRow(row, addRowOrderReverse, distinct);
+                    boolean satisfied = true;
+                    if (needCheckAns) {
+                        tableRowMap.put(targetTable, row);
+                        satisfied = compareExpression.getCompareAns(tableRowMap);
+                    }
+                    if (satisfied) {
+                        result.addRow(row, addRowOrderReverse, distinct);
+                    }
                     row = ans.next();
                 }
             }
@@ -139,12 +150,19 @@ public class SelectTableStatement extends Statement {
                 result.setColumns(columnsForOutput);
                 int columnsForOutputSize = columnsForOutput.size();
                 while (row != null) {
-                    Object[] rowData = new Object[columnsForOutputSize];
-                    for (int i = 0; i < columnsForOutputSize; i++) {
-                        rowData[i] = row.getDataByColumn(columnsForOutput.get(i)).getData();
+                    boolean satisfied = true;
+                    if (needCheckAns) {
+                        tableRowMap.put(targetTable, row);
+                        satisfied = compareExpression.getCompareAns(tableRowMap);
                     }
-                    Row newRow = new Row(result, rowData);
-                    result.addRow(newRow, addRowOrderReverse, distinct);
+                    if (satisfied) {
+                        Object[] rowData = new Object[columnsForOutputSize];
+                        for (int i = 0; i < columnsForOutputSize; i++) {
+                            rowData[i] = row.getDataByColumn(columnsForOutput.get(i)).getData();
+                        }
+                        Row newRow = new Row(result, rowData);
+                        result.addRow(newRow, addRowOrderReverse, distinct);
+                    }
                     row = ans.next();
                 }
             }
@@ -178,8 +196,16 @@ public class SelectTableStatement extends Statement {
                     columnTableNames.add(temp);
                 }
             }
+            List<CompareExpression> baseOnExpressions = new ArrayList<>();
+            for (CompareExpression onExpressionBase: onExpressions) {
+                if (onExpressionBase.isAndOr()) {
+                    baseOnExpressions.addAll(onExpressionBase.getBaseCompareExpressionsForOnClause());
+                } else {
+                    baseOnExpressions.add(onExpressionBase);
+                }
+            }
             // Check on expression
-            for (CompareExpression onExpression : onExpressions) {
+            for (CompareExpression onExpression: baseOnExpressions) {
                 if (!onExpression.isTwoColumnsEqualCheckForOnClause()) {
                     throw new SQLExecuteException("[select table]: On clause need to be two table's columns");
                 }
@@ -240,103 +266,16 @@ public class SelectTableStatement extends Statement {
             int nowIteratorIndex = -1;  // it varies from 0 to tableNames.length - 1
 
 
-
             int targetTableIndex = -1;
-            Column targetColumn = null;
-            typedData queryData = null;
             if (compareExpression != null) {
-                // CHECK where clause
-                List<ValueExpression> valueExpressionList = compareExpression.getValueExpressionList();
-                if (valueExpressionList.size() != 2) {
-                    throw new SQLExecuteException("[where clause]: Internal error: where clause wrong");
-                }
-
-                // Check right end
-                ValueExpression rightEnd = valueExpressionList.get(1);
-                BaseData rightEndData;
-                try {
-                    rightEndData = rightEnd.simplifyValueDataThatIsNotColumn();
-                } catch (IllegalArgumentException e) {
-                    throw new SQLExecuteException("[where clause]: Right end error: " + e.getMessage());
-                }
-
-                // Check left end to get column
-                ValueExpression leftEnd = valueExpressionList.get(0);
-                BaseData leftEndData;
-                try {
-                    leftEndData = leftEnd.getColumnInfo();
-                } catch (IllegalArgumentException e) {
-                    throw new SQLExecuteException("[where clause]: Left end of equal is not a column");
-                }
-                String tableNameGot = leftEndData.getTableName();
-                if (tableNameGot == null) {
-                    throw new SQLExecuteException("[where clause]: Column's table need to be provided");
-                }
-                for (int i = 0; i < tableNames.length; i++) {
-                    if (tableNameGot.equals(tableNames[i])) {
-                        targetTableIndex = i;
-                        break;
-                    }
-                }
-                if (targetTableIndex < 0) {
-                    throw new SQLExecuteException("[where clause]: Column's table not exist in the left end of equal");
-                }
-                Table targetTable = db.getTableByName(tableNameGot);
-                String columnName = leftEndData.getColumnName();
-                if (columnName == null) {
-                    throw new SQLExecuteException("[where clause]: Internal error: Column's name not exist in the left end of equal");
-                }
-                targetColumn = targetTable.getColumnByName(columnName);
-                if (targetColumn == null) {
-                    throw new SQLExecuteException("[where clause]: Column " + columnName + " not exist");
-                }
-
-                // GOT COLUMN and VALUE
-                switch (targetColumn.getColumnType().type()) {
-                    case STRING:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.STRING) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[where clause]: Need string here");
-                        }
-                        queryData = new stringData(rightEndData.getData());
-                        break;
-                    case INT:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[where clause]: Need int here");
-                        }
-                        queryData = new intData(rightEndData.getNumberData().intValue());
-                        break;
-                    case LONG:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[where clause]: Need long here");
-                        }
-                        queryData = new longData(rightEndData.getNumberData().longValue());
-                        break;
-                    case DOUBLE:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[where clause]: Need double here");
-                        }
-                        queryData = new doubleData(rightEndData.getNumberData());
-                        break;
-                    case FLOAT:
-                        if (rightEndData.getBaseDataType() != BaseData.BASE_DATA_TYPE.NUMBER) {
-                            // TODO: add null search
-                            throw new SQLExecuteException("[where clause]: Need float here");
-                        }
-                        queryData = new floatData(rightEndData.getNumberData().floatValue());
-                        break;
-                    default:
-                        throw new SQLExecuteException("[where clause]: Column type wrong");
-                }
+                // 处理where
+                Table[] tables1 = new Table[tables.size()];
+                tables.toArray(tables1);
+                compareExpression.check(tables1);
+                // check完毕之后：
+                // 下面会有check
             }
-
-            // 现在有了targetTable和targetTableIndex
-            // 有了targetColumn
-
-
+            // TODO: 优化
             // 找到所有的indexed column并且是and关系
             // 排序
             // 将on和where的条件看作是一个
@@ -445,6 +384,7 @@ public class SelectTableStatement extends Statement {
             }
             result.setColumns(ansColumns);
 
+            Map<Table, Row> tableRowMap = new HashMap<>();
             while (true) {
                 if (nowIteratorIndex == tableNames.length - 1) {
                     // 应该来进行继续的遍历
@@ -452,41 +392,20 @@ public class SelectTableStatement extends Statement {
                         // 已经遍历完了
                         nowIteratorIndex --;
                         rows[nowIteratorIndex] = iterators[nowIteratorIndex].next();
+                        tableRowMap.put(tables.get(nowIteratorIndex), rows[nowIteratorIndex]);
                     }
                     else {
                         boolean ok=true;
                         for (OnCondition onCondition: otherOnConditionList) {
                             if (!rows[onCondition.ia].getDataByColumn(onCondition.ca).equals(
-                                    rows[onCondition.ia].getDataByColumn(onCondition.cb)
+                                    rows[onCondition.ib].getDataByColumn(onCondition.cb)
                             )) {
                                 ok = false;
                                 break;
                             }
                         }
                         if (ok && compareExpression != null) {
-                            int ans = rows[targetTableIndex].getDataByColumn(targetColumn).compareTo(queryData);
-                            switch (compareExpression.getCompareSubType()) {
-                                case EQ:
-                                    ok = ans == 0;
-                                    break;
-                                case GT:
-                                    ok = ans > 0;
-                                    break;
-                                case LT:
-                                    ok = ans < 0;
-                                    break;
-                                case LTE:
-                                    ok = ans <= 0;
-                                    break;
-                                case NEQ:
-                                    ok = ans != 0;
-                                    break;
-                                case GTE:
-                                    ok = ans >= 0;
-                                    break;
-                                default:
-                                    ok = false;
-                            }
+                            ok = compareExpression.getCompareAns(tableRowMap);
                         }
                         if (ok) {
                             // set data
@@ -507,6 +426,7 @@ public class SelectTableStatement extends Statement {
                             result.addRow(row, false, distinct);
                         }
                         rows[nowIteratorIndex] = iterators[nowIteratorIndex].next();
+                        tableRowMap.put(tables.get(nowIteratorIndex), rows[nowIteratorIndex]);
                     }
                 }
                 else {
@@ -530,6 +450,7 @@ public class SelectTableStatement extends Statement {
                             throw new SQLExecuteException("[select table]: IOException: " + e.getMessage());
                         }
                         rows[nowIteratorIndex] = iterators[nowIteratorIndex].next();
+                        tableRowMap.put(tables.get(nowIteratorIndex), rows[nowIteratorIndex]);
                     }
                     else {
                         if (nowIteratorIndex == 0) {
@@ -537,6 +458,7 @@ public class SelectTableStatement extends Statement {
                         }
                         nowIteratorIndex--;
                         rows[nowIteratorIndex] = iterators[nowIteratorIndex].next();
+                        tableRowMap.put(tables.get(nowIteratorIndex), rows[nowIteratorIndex]);
                     }
                 }
             }

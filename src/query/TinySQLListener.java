@@ -200,17 +200,29 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitLessGreaterExpression(TinySQLParser.LessGreaterExpressionContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code equalExpression}
+	 * Enter a parse tree produced by the {@code orExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx);
+	void enterOrExpression(TinySQLParser.OrExpressionContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code equalExpression}
+	 * Exit a parse tree produced by the {@code orExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx);
+	void exitOrExpression(TinySQLParser.OrExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code andExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAndExpression(TinySQLParser.AndExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code andExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAndExpression(TinySQLParser.AndExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code parenthesisConditionExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
@@ -223,6 +235,18 @@ public interface TinySQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code equalExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code equalExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinySQLParser#unaryOperator}.
 	 * @param ctx the parse tree
