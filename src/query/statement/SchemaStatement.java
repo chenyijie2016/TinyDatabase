@@ -8,10 +8,12 @@ import exception.SQLExecuteException;
 import query.Result;
 import schema.SchemaManager;
 import table.Column;
+import table.Constraint;
 import table.Row;
 import table.Table;
 
 import java.io.IOException;
+import java.util.List;
 
 public class SchemaStatement extends Statement {
     private String databaseName;
@@ -63,7 +65,29 @@ public class SchemaStatement extends Statement {
                     id++;
                 }
                 break;
-
+            case SHOW_TABLE:
+                DataBase db__ = schemaManager.getCurrentDataBase();
+                Table table = db__.getTableByName(tableName);
+                result = new Result();
+                result.setColumns(new Column[]{new Column(Type.stringType(32), "COLUMN_NAME"), new Column(Type.stringType(32), "TYPE"), new Column(Type.stringType(32), "NOTE")});
+                List<Column> columnList = table.getColumns();
+                Constraint[] constraints = table.getConstraints();
+                for (Column column: columnList) {
+                    String note = "";
+                    for (Constraint constraint: constraints) {
+                        if (constraint.getColumnName().equals(column.getName())) {
+                            if (constraint.getType() == Constraint.ConstraintType.NOT_NULL) {
+                                note = note + "NOT NULL;";
+                            }
+                            else {
+                                note = note + "PRIMARY KEY;";
+                            }
+                        }
+                    }
+                    Row row = new Row(result, new Object[]{column.getName(), column.getColumnType().type().name(), note});
+                    result.addRow(row);
+                }
+                break;
         }
         return result;
     }

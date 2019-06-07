@@ -88,6 +88,18 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterShowTableStmt(TinySQLParser.ShowTableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowTableStmt(TinySQLParser.ShowTableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterCreateDatabaseStmt(TinySQLParser.CreateDatabaseStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

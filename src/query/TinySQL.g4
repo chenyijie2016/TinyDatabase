@@ -20,6 +20,7 @@ sqlStatement
 : createDatabaseStmt
 | showDatabasesStmt
 | showDatabaseTablesStmt
+| showTableStmt
 | createTableStmt
 | insertTableStmt
 | selectTableStmt
@@ -37,6 +38,10 @@ showDatabasesStmt
 
 showDatabaseTablesStmt
 :K_SHOW K_DATABASE databaseName
+;
+
+showTableStmt
+:K_SHOW K_TABLE tableName
 ;
 
 createDatabaseStmt

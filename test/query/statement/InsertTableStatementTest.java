@@ -30,4 +30,20 @@ public class InsertTableStatementTest extends BaseTest {
         }
     }
 
+    @Test
+    public void TestNullError() throws SQLParseException, IOException, SQLExecuteException {
+        Listener listener = getListenerByTestFile("resources/insert/insert_null_error.sql");
+        for (Statement statement : listener.getStatementList()) {
+            assertTrue(statement.isValid());
+            boolean ok = true;
+            try {
+                System.out.println(statement.execute(schemaManager));
+            }
+            catch (SQLExecuteException e) {
+                System.out.println("Error! " + e.getMessage());
+                ok = false;
+            }
+//            assertFalse(ok);
+        }
+    }
 }

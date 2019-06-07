@@ -68,6 +68,16 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitShowDatabaseTablesStmt(TinySQLParser.ShowDatabaseTablesStmtContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TinySQLParser#showTableStmt}.
+	 * @param ctx the parse tree
+	 */
+	void enterShowTableStmt(TinySQLParser.ShowTableStmtContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TinySQLParser#showTableStmt}.
+	 * @param ctx the parse tree
+	 */
+	void exitShowTableStmt(TinySQLParser.ShowTableStmtContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TinySQLParser#createDatabaseStmt}.
 	 * @param ctx the parse tree
 	 */

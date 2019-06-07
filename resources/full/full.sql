@@ -39,7 +39,7 @@ INSERT INTO villain VALUES (2, 'Red Skull', 40);
 INSERT INTO villain VALUES (3, 'Hella', 90);
 INSERT INTO villain VALUES (4, 'monster', 10);
 
--- show table avengers;
+show table avengers;
 
 select avengers.name, villain.name, villain.power from avengers join villain on avengers.power = villain.power where villain.power > 40;
 
