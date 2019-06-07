@@ -126,7 +126,7 @@ joinClause
 :tableName ( joinOperator tableName joinConstraint )*
 ;
 joinConstraint
- : ( K_ON conditionExpression)?
+ : ( K_ON conditionExpression (K_AND conditionExpression)*)?
  //  | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
@@ -237,6 +237,7 @@ keyword
 | K_LEFT
 | K_INNER
 | K_SET
+| K_AND
 ;
 
 K_CREATE : C R E A T E;
@@ -269,6 +270,7 @@ K_OUTER: O U T E R;
 K_LEFT: L E F T;
 K_INNER: I N N E R;
 K_SET: S E T;
+K_AND: A N D;
 
 IDENTIFIER
  :

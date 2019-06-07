@@ -106,7 +106,7 @@ public class Table extends TableBase {
                 return column;
             }
         }
-        throw new SQLExecuteException("No Such Column");
+        throw new SQLExecuteException("No Such Column: " + name);
     }
 
     private void createPrimaryKey(Column column) {
