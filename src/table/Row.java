@@ -139,6 +139,9 @@ public class Row {
 
     public typedData getDataByColumn(Column column) {
         int index = table.getColumns().indexOf(column);
+        if (index == -1 && table instanceof Table) {
+            index = ((Table)table).getIndexColumns().indexOf(column);
+        }
         assert (index != -1) : "没有找到该属性";
         return data.get(index);
     }

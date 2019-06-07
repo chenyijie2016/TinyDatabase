@@ -117,6 +117,10 @@ public class Table extends TableBase {
         this.indexColumns.add(column);
     }
 
+    public List<Column> getIndexColumns() {
+        return indexColumns;
+    }
+
     /**
      * 读取单行数据
      *
