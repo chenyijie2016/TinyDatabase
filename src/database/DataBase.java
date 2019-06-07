@@ -75,10 +75,10 @@ public class DataBase {
         return db;
     }
 
-    public void createTable(Table table) throws IOException {
+    public void createTable(Table table) throws IOException, SQLExecuteException {
         for (Table t : tables) {
             if (t.getTableName().equals(table.getTableName())) {
-                throw new IllegalArgumentException("SQL Execute Error [create table]: Cannot create a table with the same name as an existing table");
+                throw new SQLExecuteException("SQL Execute Error [create table]: Cannot create a table with the same name as an existing table");
             }
         }
         tables.add(table);
