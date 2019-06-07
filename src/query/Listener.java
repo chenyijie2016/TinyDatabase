@@ -432,6 +432,10 @@ public class Listener extends TinySQLBaseListener {
         statement = new SchemaStatement(Statement.SHOW_DATABASE_TABLE).setDatabaseName(ctx.databaseName().getText().toUpperCase());
     }
 
+    @Override
+    public void enterShowTableStmt(TinySQLParser.ShowTableStmtContext ctx) {
+        statement = new SchemaStatement(Statement.SHOW_TABLE).setTableName(ctx.tableName().getText().toUpperCase());
+    }
 
     @Override
     public void enterDropDatabaseStmt(TinySQLParser.DropDatabaseStmtContext ctx) {

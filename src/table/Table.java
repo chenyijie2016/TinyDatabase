@@ -80,6 +80,10 @@ public class Table extends TableBase {
         return tableName;
     }
 
+    public Constraint[] getConstraints() {
+        return constraints;
+    }
+
     /**
      * 读取数据文件的文件头
      *
@@ -190,16 +194,20 @@ public class Table extends TableBase {
 
 
     public void insertRow(Row row) throws IOException, SQLExecuteException {
-        // 先检查约束
-        // TODO
-        // 插入数据
+        for (Constraint constraint: constraints) {
+            if (constraint.getType() == Constraint.ConstraintType.NOT_NULL) {
+                if (row.getDataByColumn(getColumnByName(constraint.getColumnName())).isNull()) {
+                    System.out.println("Can not insert values! [Null constraint not satisfied!]");
+                    throw new SQLExecuteException("Can not insert values! [Null constraint not satisfied!]");
+                }
+            }
+        }
 
         for (Column column : indexColumns) {
             Long pos = indexTrees.get(indexColumns.indexOf(column)).scanEqual(row.getDataByColumn(column));
             if (pos != null) {
                 System.out.println("Can not insert Primary key! [Key already exists!]");
                 throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
-
             }
         }
 
