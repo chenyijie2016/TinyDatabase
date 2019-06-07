@@ -39,7 +39,7 @@ create table tutorRelation (
 insert into tutor values(1, 'tutor1', 70, 'Software');
 insert into tutor values(2, 'tutor2', 7000, 'EE');
 insert into tutor values(4, 'BOb', 90000.3, 'EE');
-insert into tutor values(3, 'Alice', 5, 'CS');
+insert into tutor(id, name, dept) values(3, 'Alice', 'CS');
 
 insert into dept(name, building, year, alias) values('Software', 1, 2001, 'SS');
 insert into dept(name, year, building) values('EE', 1998, 5);
@@ -50,6 +50,17 @@ insert into tutorRelation values(1, 8, 2);
 insert into tutorRelation values(2, 7, 3);
 insert into tutorRelation values(3, 7, 4);
 insert into tutorRelation values(1, 7, 5);
+insert into tutorRelation values(4, 7, 6);
 
 select * from student join dept join tutor join tutorRelation on tutorRelation.tutor_id = tutor.id
-    and tutorRelation.student_id=student.id and dept.name=tutor.dept where tutor.salary notnull or student.score > 7600.3;
+    and tutorRelation.student_id=student.id and dept.name=tutor.dept where student.score > 7600.3 or student.height > student.weight + 1;
+
+select student.id, student.name, tutor.id, tutor.name, dept.name, dept.alias from student join dept join tutor join tutorRelation on tutorRelation.tutor_id = tutor.id
+    and tutorRelation.student_id=student.id and dept.name=tutor.dept where tutor.salary notnull;
+
+select student.id, student.name, tutor.id, tutor.name, dept.name, dept.alias from student join dept join tutor join tutorRelation on tutorRelation.tutor_id = tutor.id
+    and tutorRelation.student_id=student.id and dept.name=tutor.dept;
+
+update tutor set salary = 9999 where salary isnull;
+
+select * from tutor;
