@@ -81,8 +81,8 @@ conditionExpression
 : expression ( '<' | '<=' | '>' | '>=' ) expression  # lessGreaterExpression
  | expression ( '=' | '==' | '!=' | '<>') expression # equalExpression
  | '(' conditionExpression ')'                       # parenthesisConditionExpression
-// | conditionExpression K_AND conditionExpression
-// | conditionExpression K_OR conditionExpression
+ | conditionExpression K_AND conditionExpression     # andExpression
+ | conditionExpression K_OR conditionExpression      # orExpression
 // | expression ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
 // | expression K_IS K_NOT? expression
 // | expression K_NOT? K_BETWEEN expression K_AND expression
@@ -126,7 +126,7 @@ joinClause
 :tableName ( joinOperator tableName joinConstraint )*
 ;
 joinConstraint
- : ( K_ON conditionExpression (K_AND conditionExpression)*)?
+ : ( K_ON conditionExpression)?
  //  | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
@@ -238,6 +238,7 @@ keyword
 | K_INNER
 | K_SET
 | K_AND
+| K_OR
 ;
 
 K_CREATE : C R E A T E;
@@ -271,6 +272,7 @@ K_LEFT: L E F T;
 K_INNER: I N N E R;
 K_SET: S E T;
 K_AND: A N D;
+K_OR: O R;
 
 IDENTIFIER
  :

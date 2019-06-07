@@ -25,7 +25,7 @@ public class TinySQLParser extends Parser {
 		K_NOT=33, K_NULL=34, K_WHERE=35, K_INTO=36, K_FROM=37, K_USE=38, K_ASC=39, 
 		K_DESC=40, K_VALUES=41, K_DATABASES=42, K_SHOW=43, K_ON=44, K_JOIN=45, 
 		K_NATURAL=46, K_DISTINCT=47, K_ALL=48, K_OUTER=49, K_LEFT=50, K_INNER=51, 
-		K_SET=52, K_AND=53, IDENTIFIER=54, UNEXPECTED_CHAR=55;
+		K_SET=52, K_AND=53, K_OR=54, IDENTIFIER=55, UNEXPECTED_CHAR=56;
 	public static final int
 		RULE_parse = 0, RULE_error = 1, RULE_sqlStatementList = 2, RULE_sqlStatement = 3, 
 		RULE_showDatabasesStmt = 4, RULE_showDatabaseTablesStmt = 5, RULE_createDatabaseStmt = 6, 
@@ -68,7 +68,7 @@ public class TinySQLParser extends Parser {
 			"K_PRIMARY", "K_KEY", "K_NOT", "K_NULL", "K_WHERE", "K_INTO", "K_FROM", 
 			"K_USE", "K_ASC", "K_DESC", "K_VALUES", "K_DATABASES", "K_SHOW", "K_ON", 
 			"K_JOIN", "K_NATURAL", "K_DISTINCT", "K_ALL", "K_OUTER", "K_LEFT", "K_INNER", 
-			"K_SET", "K_AND", "IDENTIFIER", "UNEXPECTED_CHAR"
+			"K_SET", "K_AND", "K_OR", "IDENTIFIER", "UNEXPECTED_CHAR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -1324,6 +1324,42 @@ public class TinySQLParser extends Parser {
 			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitLessGreaterExpression(this);
 		}
 	}
+	public static class OrExpressionContext extends ConditionExpressionContext {
+		public List<ConditionExpressionContext> conditionExpression() {
+			return getRuleContexts(ConditionExpressionContext.class);
+		}
+		public ConditionExpressionContext conditionExpression(int i) {
+			return getRuleContext(ConditionExpressionContext.class,i);
+		}
+		public TerminalNode K_OR() { return getToken(TinySQLParser.K_OR, 0); }
+		public OrExpressionContext(ConditionExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterOrExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitOrExpression(this);
+		}
+	}
+	public static class AndExpressionContext extends ConditionExpressionContext {
+		public List<ConditionExpressionContext> conditionExpression() {
+			return getRuleContexts(ConditionExpressionContext.class);
+		}
+		public ConditionExpressionContext conditionExpression(int i) {
+			return getRuleContext(ConditionExpressionContext.class,i);
+		}
+		public TerminalNode K_AND() { return getToken(TinySQLParser.K_AND, 0); }
+		public AndExpressionContext(ConditionExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).enterAndExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TinySQLListener ) ((TinySQLListener)listener).exitAndExpression(this);
+		}
+	}
 	public static class ParenthesisConditionExpressionContext extends ConditionExpressionContext {
 		public ConditionExpressionContext conditionExpression() {
 			return getRuleContext(ConditionExpressionContext.class,0);
@@ -1357,20 +1393,33 @@ public class TinySQLParser extends Parser {
 	}
 
 	public final ConditionExpressionContext conditionExpression() throws RecognitionException {
-		ConditionExpressionContext _localctx = new ConditionExpressionContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_conditionExpression);
+		return conditionExpression(0);
+	}
+
+	private ConditionExpressionContext conditionExpression(int _p) throws RecognitionException {
+		ParserRuleContext _parentctx = _ctx;
+		int _parentState = getState();
+		ConditionExpressionContext _localctx = new ConditionExpressionContext(_ctx, _parentState);
+		ConditionExpressionContext _prevctx = _localctx;
+		int _startState = 26;
+		enterRecursionRule(_localctx, 26, RULE_conditionExpression, _p);
 		int _la;
 		try {
-			setState(260);
+			int _alt;
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(261);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,21,_ctx) ) {
 			case 1:
-				_localctx = new LessGreaterExpressionContext(_localctx);
-				enterOuterAlt(_localctx, 1);
 				{
-				setState(248);
-				expression(0);
+				_localctx = new LessGreaterExpressionContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
+
 				setState(249);
+				expression(0);
+				setState(250);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__7) | (1L << T__8) | (1L << T__9) | (1L << T__10))) != 0)) ) {
 				_errHandler.recoverInline(this);
@@ -1380,17 +1429,18 @@ public class TinySQLParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				setState(250);
+				setState(251);
 				expression(0);
 				}
 				break;
 			case 2:
-				_localctx = new EqualExpressionContext(_localctx);
-				enterOuterAlt(_localctx, 2);
 				{
-				setState(252);
-				expression(0);
+				_localctx = new EqualExpressionContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(253);
+				expression(0);
+				setState(254);
 				_la = _input.LA(1);
 				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__11) | (1L << T__12) | (1L << T__13) | (1L << T__14))) != 0)) ) {
 				_errHandler.recoverInline(this);
@@ -1400,22 +1450,67 @@ public class TinySQLParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				setState(254);
+				setState(255);
 				expression(0);
 				}
 				break;
 			case 3:
-				_localctx = new ParenthesisConditionExpressionContext(_localctx);
-				enterOuterAlt(_localctx, 3);
 				{
-				setState(256);
-				match(T__2);
+				_localctx = new ParenthesisConditionExpressionContext(_localctx);
+				_ctx = _localctx;
+				_prevctx = _localctx;
 				setState(257);
-				conditionExpression();
+				match(T__2);
 				setState(258);
+				conditionExpression(0);
+				setState(259);
 				match(T__4);
 				}
 				break;
+			}
+			_ctx.stop = _input.LT(-1);
+			setState(271);
+			_errHandler.sync(this);
+			_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
+			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+				if ( _alt==1 ) {
+					if ( _parseListeners!=null ) triggerExitRuleEvent();
+					_prevctx = _localctx;
+					{
+					setState(269);
+					_errHandler.sync(this);
+					switch ( getInterpreter().adaptivePredict(_input,22,_ctx) ) {
+					case 1:
+						{
+						_localctx = new AndExpressionContext(new ConditionExpressionContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_conditionExpression);
+						setState(263);
+						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
+						setState(264);
+						match(K_AND);
+						setState(265);
+						conditionExpression(3);
+						}
+						break;
+					case 2:
+						{
+						_localctx = new OrExpressionContext(new ConditionExpressionContext(_parentctx, _parentState));
+						pushNewRecursionContext(_localctx, _startState, RULE_conditionExpression);
+						setState(266);
+						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
+						setState(267);
+						match(K_OR);
+						setState(268);
+						conditionExpression(2);
+						}
+						break;
+					}
+					} 
+				}
+				setState(273);
+				_errHandler.sync(this);
+				_alt = getInterpreter().adaptivePredict(_input,23,_ctx);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -1424,7 +1519,7 @@ public class TinySQLParser extends Parser {
 			_errHandler.recover(this, re);
 		}
 		finally {
-			exitRule();
+			unrollRecursionContexts(_parentctx);
 		}
 		return _localctx;
 	}
@@ -1452,7 +1547,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(262);
+			setState(274);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__5) | (1L << T__6) | (1L << T__15) | (1L << K_NOT))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -1500,7 +1595,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(264);
+			setState(276);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING_LITERAL) | (1L << NUMERIC_LITERAL) | (1L << K_NULL))) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -1568,14 +1663,14 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(266);
+			setState(278);
 			match(K_SELECT);
-			setState(268);
+			setState(280);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_DISTINCT || _la==K_ALL) {
 				{
-				setState(267);
+				setState(279);
 				_la = _input.LA(1);
 				if ( !(_la==K_DISTINCT || _la==K_ALL) ) {
 				_errHandler.recoverInline(this);
@@ -1588,51 +1683,51 @@ public class TinySQLParser extends Parser {
 				}
 			}
 
-			setState(270);
+			setState(282);
 			resultColumn();
-			setState(275);
+			setState(287);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__3) {
 				{
 				{
-				setState(271);
+				setState(283);
 				match(T__3);
-				setState(272);
+				setState(284);
 				resultColumn();
 				}
 				}
-				setState(277);
+				setState(289);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(290);
+			setState(302);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_FROM) {
 				{
-				setState(278);
+				setState(290);
 				match(K_FROM);
-				setState(288);
+				setState(300);
 				_errHandler.sync(this);
-				switch ( getInterpreter().adaptivePredict(_input,25,_ctx) ) {
+				switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 				case 1:
 					{
-					setState(279);
+					setState(291);
 					tableName();
-					setState(284);
+					setState(296);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					while (_la==T__3) {
 						{
 						{
-						setState(280);
+						setState(292);
 						match(T__3);
-						setState(281);
+						setState(293);
 						tableName();
 						}
 						}
-						setState(286);
+						setState(298);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
 					}
@@ -1640,7 +1735,7 @@ public class TinySQLParser extends Parser {
 					break;
 				case 2:
 					{
-					setState(287);
+					setState(299);
 					joinClause();
 					}
 					break;
@@ -1648,15 +1743,15 @@ public class TinySQLParser extends Parser {
 				}
 			}
 
-			setState(294);
+			setState(306);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_WHERE) {
 				{
-				setState(292);
+				setState(304);
 				match(K_WHERE);
-				setState(293);
-				conditionExpression();
+				setState(305);
+				conditionExpression(0);
 				}
 			}
 
@@ -1698,9 +1793,9 @@ public class TinySQLParser extends Parser {
 		ResultColumnContext _localctx = new ResultColumnContext(_ctx, getState());
 		enterRule(_localctx, 34, RULE_resultColumn);
 		try {
-			setState(303);
+			setState(315);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,28,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,30,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
@@ -1709,25 +1804,25 @@ public class TinySQLParser extends Parser {
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(297);
+				setState(309);
 				match(T__16);
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(298);
+				setState(310);
 				tableName();
-				setState(299);
+				setState(311);
 				match(T__1);
-				setState(300);
+				setState(312);
 				match(T__16);
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(302);
+				setState(314);
 				expression(0);
 				}
 				break;
@@ -1784,23 +1879,23 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(305);
+			setState(317);
 			tableName();
-			setState(312);
+			setState(324);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__3) | (1L << K_JOIN) | (1L << K_NATURAL) | (1L << K_LEFT) | (1L << K_INNER))) != 0)) {
 				{
 				{
-				setState(306);
+				setState(318);
 				joinOperator();
-				setState(307);
+				setState(319);
 				tableName();
-				setState(308);
+				setState(320);
 				joinConstraint();
 				}
 				}
-				setState(314);
+				setState(326);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -1819,15 +1914,8 @@ public class TinySQLParser extends Parser {
 
 	public static class JoinConstraintContext extends ParserRuleContext {
 		public TerminalNode K_ON() { return getToken(TinySQLParser.K_ON, 0); }
-		public List<ConditionExpressionContext> conditionExpression() {
-			return getRuleContexts(ConditionExpressionContext.class);
-		}
-		public ConditionExpressionContext conditionExpression(int i) {
-			return getRuleContext(ConditionExpressionContext.class,i);
-		}
-		public List<TerminalNode> K_AND() { return getTokens(TinySQLParser.K_AND); }
-		public TerminalNode K_AND(int i) {
-			return getToken(TinySQLParser.K_AND, i);
+		public ConditionExpressionContext conditionExpression() {
+			return getRuleContext(ConditionExpressionContext.class,0);
 		}
 		public JoinConstraintContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1850,31 +1938,15 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(324);
+			setState(329);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_ON) {
 				{
-				setState(315);
+				setState(327);
 				match(K_ON);
-				setState(316);
-				conditionExpression();
-				setState(321);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-				while (_la==K_AND) {
-					{
-					{
-					setState(317);
-					match(K_AND);
-					setState(318);
-					conditionExpression();
-					}
-					}
-					setState(323);
-					_errHandler.sync(this);
-					_la = _input.LA(1);
-				}
+				setState(328);
+				conditionExpression(0);
 				}
 			}
 
@@ -1916,13 +1988,13 @@ public class TinySQLParser extends Parser {
 		enterRule(_localctx, 40, RULE_joinOperator);
 		int _la;
 		try {
-			setState(338);
+			setState(343);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__3:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(326);
+				setState(331);
 				match(T__3);
 				}
 				break;
@@ -1932,29 +2004,29 @@ public class TinySQLParser extends Parser {
 			case K_INNER:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(328);
+				setState(333);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==K_NATURAL) {
 					{
-					setState(327);
+					setState(332);
 					match(K_NATURAL);
 					}
 				}
 
-				setState(335);
+				setState(340);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case K_LEFT:
 					{
-					setState(330);
+					setState(335);
 					match(K_LEFT);
-					setState(332);
+					setState(337);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 					if (_la==K_OUTER) {
 						{
-						setState(331);
+						setState(336);
 						match(K_OUTER);
 						}
 					}
@@ -1963,7 +2035,7 @@ public class TinySQLParser extends Parser {
 					break;
 				case K_INNER:
 					{
-					setState(334);
+					setState(339);
 					match(K_INNER);
 					}
 					break;
@@ -1972,7 +2044,7 @@ public class TinySQLParser extends Parser {
 				default:
 					break;
 				}
-				setState(337);
+				setState(342);
 				match(K_JOIN);
 				}
 				break;
@@ -2034,47 +2106,47 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(340);
-			match(K_UPDATE);
-			setState(341);
-			tableName();
-			setState(342);
-			match(K_SET);
-			setState(343);
-			columnName();
-			setState(344);
-			match(T__11);
 			setState(345);
+			match(K_UPDATE);
+			setState(346);
+			tableName();
+			setState(347);
+			match(K_SET);
+			setState(348);
+			columnName();
+			setState(349);
+			match(T__11);
+			setState(350);
 			expression(0);
-			setState(353);
+			setState(358);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==T__3) {
 				{
 				{
-				setState(346);
+				setState(351);
 				match(T__3);
-				setState(347);
+				setState(352);
 				columnName();
-				setState(348);
+				setState(353);
 				match(T__11);
-				setState(349);
+				setState(354);
 				expression(0);
 				}
 				}
-				setState(355);
+				setState(360);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(358);
+			setState(363);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==K_WHERE) {
 				{
-				setState(356);
+				setState(361);
 				match(K_WHERE);
-				setState(357);
-				conditionExpression();
+				setState(362);
+				conditionExpression(0);
 				}
 			}
 
@@ -2121,16 +2193,16 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(360);
+			setState(365);
 			match(K_DELETE);
-			setState(361);
+			setState(366);
 			match(K_FROM);
-			setState(362);
+			setState(367);
 			tableName();
-			setState(363);
+			setState(368);
 			match(K_WHERE);
-			setState(364);
-			conditionExpression();
+			setState(369);
+			conditionExpression(0);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2170,11 +2242,11 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(366);
+			setState(371);
 			match(K_DROP);
-			setState(367);
+			setState(372);
 			match(K_DATABASE);
-			setState(368);
+			setState(373);
 			databaseName();
 			}
 		}
@@ -2215,11 +2287,11 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(370);
+			setState(375);
 			match(K_DROP);
-			setState(371);
+			setState(376);
 			match(K_TABLE);
-			setState(372);
+			setState(377);
 			tableName();
 			}
 		}
@@ -2259,9 +2331,9 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(374);
+			setState(379);
 			match(K_USE);
-			setState(375);
+			setState(380);
 			databaseName();
 			}
 		}
@@ -2304,18 +2376,18 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(377);
-			name();
 			setState(382);
+			name();
+			setState(387);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__2) {
 				{
-				setState(378);
+				setState(383);
 				match(T__2);
-				setState(379);
+				setState(384);
 				signedNumber();
-				setState(380);
+				setState(385);
 				match(T__4);
 				}
 			}
@@ -2356,12 +2428,12 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(385);
+			setState(390);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__5 || _la==T__6) {
 				{
-				setState(384);
+				setState(389);
 				_la = _input.LA(1);
 				if ( !(_la==T__5 || _la==T__6) ) {
 				_errHandler.recoverInline(this);
@@ -2374,7 +2446,7 @@ public class TinySQLParser extends Parser {
 				}
 			}
 
-			setState(387);
+			setState(392);
 			match(NUMERIC_LITERAL);
 			}
 		}
@@ -2415,22 +2487,22 @@ public class TinySQLParser extends Parser {
 		enterRule(_localctx, 56, RULE_columnConstraint);
 		int _la;
 		try {
-			setState(396);
+			setState(401);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case K_PRIMARY:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(389);
+				setState(394);
 				match(K_PRIMARY);
-				setState(390);
+				setState(395);
 				match(K_KEY);
-				setState(392);
+				setState(397);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==K_ASC || _la==K_DESC) {
 					{
-					setState(391);
+					setState(396);
 					_la = _input.LA(1);
 					if ( !(_la==K_ASC || _la==K_DESC) ) {
 					_errHandler.recoverInline(this);
@@ -2448,9 +2520,9 @@ public class TinySQLParser extends Parser {
 			case K_NOT:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(394);
+				setState(399);
 				match(K_NOT);
-				setState(395);
+				setState(400);
 				match(K_NULL);
 				}
 				break;
@@ -2493,7 +2565,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(398);
+			setState(403);
 			anyName();
 			}
 		}
@@ -2532,7 +2604,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(400);
+			setState(405);
 			anyName();
 			}
 		}
@@ -2571,7 +2643,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(402);
+			setState(407);
 			anyName();
 			}
 		}
@@ -2610,7 +2682,7 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(404);
+			setState(409);
 			anyName();
 			}
 		}
@@ -2648,13 +2720,13 @@ public class TinySQLParser extends Parser {
 		AnyNameContext _localctx = new AnyNameContext(_ctx, getState());
 		enterRule(_localctx, 66, RULE_anyName);
 		try {
-			setState(408);
+			setState(413);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case IDENTIFIER:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(406);
+				setState(411);
 				match(IDENTIFIER);
 				}
 				break;
@@ -2683,9 +2755,10 @@ public class TinySQLParser extends Parser {
 			case K_INNER:
 			case K_SET:
 			case K_AND:
+			case K_OR:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(407);
+				setState(412);
 				keyword();
 				}
 				break;
@@ -2730,6 +2803,7 @@ public class TinySQLParser extends Parser {
 		public TerminalNode K_INNER() { return getToken(TinySQLParser.K_INNER, 0); }
 		public TerminalNode K_SET() { return getToken(TinySQLParser.K_SET, 0); }
 		public TerminalNode K_AND() { return getToken(TinySQLParser.K_AND, 0); }
+		public TerminalNode K_OR() { return getToken(TinySQLParser.K_OR, 0); }
 		public KeywordContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2751,9 +2825,9 @@ public class TinySQLParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(410);
+			setState(415);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << K_CREATE) | (1L << K_DATABASE) | (1L << K_TABLE) | (1L << K_DROP) | (1L << K_SELECT) | (1L << K_UPDATE) | (1L << K_DELETE) | (1L << K_INSERT) | (1L << K_PRIMARY) | (1L << K_KEY) | (1L << K_NOT) | (1L << K_NULL) | (1L << K_WHERE) | (1L << K_INTO) | (1L << K_FROM) | (1L << K_USE) | (1L << K_ASC) | (1L << K_DESC) | (1L << K_VALUES) | (1L << K_DATABASES) | (1L << K_SHOW) | (1L << K_LEFT) | (1L << K_INNER) | (1L << K_SET) | (1L << K_AND))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << K_CREATE) | (1L << K_DATABASE) | (1L << K_TABLE) | (1L << K_DROP) | (1L << K_SELECT) | (1L << K_UPDATE) | (1L << K_DELETE) | (1L << K_INSERT) | (1L << K_PRIMARY) | (1L << K_KEY) | (1L << K_NOT) | (1L << K_NULL) | (1L << K_WHERE) | (1L << K_INTO) | (1L << K_FROM) | (1L << K_USE) | (1L << K_ASC) | (1L << K_DESC) | (1L << K_VALUES) | (1L << K_DATABASES) | (1L << K_SHOW) | (1L << K_LEFT) | (1L << K_INNER) | (1L << K_SET) | (1L << K_AND) | (1L << K_OR))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -2778,6 +2852,8 @@ public class TinySQLParser extends Parser {
 		switch (ruleIndex) {
 		case 12:
 			return expression_sempred((ExpressionContext)_localctx, predIndex);
+		case 13:
+			return conditionExpression_sempred((ConditionExpressionContext)_localctx, predIndex);
 		}
 		return true;
 	}
@@ -2788,9 +2864,18 @@ public class TinySQLParser extends Parser {
 		}
 		return true;
 	}
+	private boolean conditionExpression_sempred(ConditionExpressionContext _localctx, int predIndex) {
+		switch (predIndex) {
+		case 1:
+			return precpred(_ctx, 2);
+		case 2:
+			return precpred(_ctx, 1);
+		}
+		return true;
+	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\39\u019f\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3:\u01a4\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -2809,135 +2894,137 @@ public class TinySQLParser extends Parser {
 		"\n\r\f\r\16\r\u00e0\13\r\3\16\3\16\3\16\3\16\3\16\5\16\u00e7\n\16\3\16"+
 		"\3\16\3\16\3\16\3\16\3\16\3\16\3\16\5\16\u00f1\n\16\3\16\3\16\3\16\7\16"+
 		"\u00f6\n\16\f\16\16\16\u00f9\13\16\3\17\3\17\3\17\3\17\3\17\3\17\3\17"+
-		"\3\17\3\17\3\17\3\17\3\17\5\17\u0107\n\17\3\20\3\20\3\21\3\21\3\22\3\22"+
-		"\5\22\u010f\n\22\3\22\3\22\3\22\7\22\u0114\n\22\f\22\16\22\u0117\13\22"+
-		"\3\22\3\22\3\22\3\22\7\22\u011d\n\22\f\22\16\22\u0120\13\22\3\22\5\22"+
-		"\u0123\n\22\5\22\u0125\n\22\3\22\3\22\5\22\u0129\n\22\3\23\3\23\3\23\3"+
-		"\23\3\23\3\23\3\23\5\23\u0132\n\23\3\24\3\24\3\24\3\24\3\24\7\24\u0139"+
-		"\n\24\f\24\16\24\u013c\13\24\3\25\3\25\3\25\3\25\7\25\u0142\n\25\f\25"+
-		"\16\25\u0145\13\25\5\25\u0147\n\25\3\26\3\26\5\26\u014b\n\26\3\26\3\26"+
-		"\5\26\u014f\n\26\3\26\5\26\u0152\n\26\3\26\5\26\u0155\n\26\3\27\3\27\3"+
-		"\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\7\27\u0162\n\27\f\27\16\27"+
-		"\u0165\13\27\3\27\3\27\5\27\u0169\n\27\3\30\3\30\3\30\3\30\3\30\3\30\3"+
-		"\31\3\31\3\31\3\31\3\32\3\32\3\32\3\32\3\33\3\33\3\33\3\34\3\34\3\34\3"+
-		"\34\3\34\5\34\u0181\n\34\3\35\5\35\u0184\n\35\3\35\3\35\3\36\3\36\3\36"+
-		"\5\36\u018b\n\36\3\36\3\36\5\36\u018f\n\36\3\37\3\37\3 \3 \3!\3!\3\"\3"+
-		"\"\3#\3#\5#\u019b\n#\3$\3$\3$\2\3\32%\2\4\6\b\n\f\16\20\22\24\26\30\32"+
-		"\34\36 \"$&(*,.\60\62\64\668:<>@BDF\2\n\3\2)*\3\2\b\t\3\2\n\r\3\2\16\21"+
-		"\5\2\b\t\22\22##\5\2\24\24\30\30$$\3\2\61\62\4\2\31-\64\67\2\u01b5\2L"+
-		"\3\2\2\2\4Q\3\2\2\2\6W\3\2\2\2\bw\3\2\2\2\ny\3\2\2\2\f|\3\2\2\2\16\u0080"+
-		"\3\2\2\2\20\u0084\3\2\2\2\22\u009b\3\2\2\2\24\u00a3\3\2\2\2\26\u00b1\3"+
-		"\2\2\2\30\u00b5\3\2\2\2\32\u00f0\3\2\2\2\34\u0106\3\2\2\2\36\u0108\3\2"+
-		"\2\2 \u010a\3\2\2\2\"\u010c\3\2\2\2$\u0131\3\2\2\2&\u0133\3\2\2\2(\u0146"+
-		"\3\2\2\2*\u0154\3\2\2\2,\u0156\3\2\2\2.\u016a\3\2\2\2\60\u0170\3\2\2\2"+
-		"\62\u0174\3\2\2\2\64\u0178\3\2\2\2\66\u017b\3\2\2\28\u0183\3\2\2\2:\u018e"+
-		"\3\2\2\2<\u0190\3\2\2\2>\u0192\3\2\2\2@\u0194\3\2\2\2B\u0196\3\2\2\2D"+
-		"\u019a\3\2\2\2F\u019c\3\2\2\2HK\5\6\4\2IK\5\4\3\2JH\3\2\2\2JI\3\2\2\2"+
-		"KN\3\2\2\2LJ\3\2\2\2LM\3\2\2\2MO\3\2\2\2NL\3\2\2\2OP\7\2\2\3P\3\3\2\2"+
-		"\2QR\79\2\2RS\b\3\1\2S\5\3\2\2\2TV\7\3\2\2UT\3\2\2\2VY\3\2\2\2WU\3\2\2"+
-		"\2WX\3\2\2\2XZ\3\2\2\2YW\3\2\2\2Zc\5\b\5\2[]\7\3\2\2\\[\3\2\2\2]^\3\2"+
-		"\2\2^\\\3\2\2\2^_\3\2\2\2_`\3\2\2\2`b\5\b\5\2a\\\3\2\2\2be\3\2\2\2ca\3"+
-		"\2\2\2cd\3\2\2\2di\3\2\2\2ec\3\2\2\2fh\7\3\2\2gf\3\2\2\2hk\3\2\2\2ig\3"+
-		"\2\2\2ij\3\2\2\2j\7\3\2\2\2ki\3\2\2\2lx\5\16\b\2mx\5\n\6\2nx\5\f\7\2o"+
-		"x\5\20\t\2px\5\30\r\2qx\5\"\22\2rx\5,\27\2sx\5.\30\2tx\5\60\31\2ux\5\62"+
-		"\32\2vx\5\64\33\2wl\3\2\2\2wm\3\2\2\2wn\3\2\2\2wo\3\2\2\2wp\3\2\2\2wq"+
-		"\3\2\2\2wr\3\2\2\2ws\3\2\2\2wt\3\2\2\2wu\3\2\2\2wv\3\2\2\2x\t\3\2\2\2"+
-		"yz\7-\2\2z{\7,\2\2{\13\3\2\2\2|}\7-\2\2}~\7\32\2\2~\177\5> \2\177\r\3"+
-		"\2\2\2\u0080\u0081\7\31\2\2\u0081\u0082\7\32\2\2\u0082\u0083\5> \2\u0083"+
-		"\17\3\2\2\2\u0084\u0085\7\31\2\2\u0085\u0089\7\33\2\2\u0086\u0087\5> "+
-		"\2\u0087\u0088\7\4\2\2\u0088\u008a\3\2\2\2\u0089\u0086\3\2\2\2\u0089\u008a"+
-		"\3\2\2\2\u008a\u008b\3\2\2\2\u008b\u008c\5@!\2\u008c\u008d\7\5\2\2\u008d"+
-		"\u0092\5\22\n\2\u008e\u008f\7\6\2\2\u008f\u0091\5\22\n\2\u0090\u008e\3"+
-		"\2\2\2\u0091\u0094\3\2\2\2\u0092\u0090\3\2\2\2\u0092\u0093\3\2\2\2\u0093"+
-		"\u0097\3\2\2\2\u0094\u0092\3\2\2\2\u0095\u0096\7\6\2\2\u0096\u0098\5\24"+
-		"\13\2\u0097\u0095\3\2\2\2\u0097\u0098\3\2\2\2\u0098\u0099\3\2\2\2\u0099"+
-		"\u009a\7\7\2\2\u009a\21\3\2\2\2\u009b\u009c\5B\"\2\u009c\u00a0\5\66\34"+
-		"\2\u009d\u009f\5:\36\2\u009e\u009d\3\2\2\2\u009f\u00a2\3\2\2\2\u00a0\u009e"+
-		"\3\2\2\2\u00a0\u00a1\3\2\2\2\u00a1\23\3\2\2\2\u00a2\u00a0\3\2\2\2\u00a3"+
-		"\u00a4\7!\2\2\u00a4\u00a5\7\"\2\2\u00a5\u00a6\3\2\2\2\u00a6\u00a7\7\5"+
-		"\2\2\u00a7\u00ac\5\26\f\2\u00a8\u00a9\7\6\2\2\u00a9\u00ab\5\26\f\2\u00aa"+
-		"\u00a8\3\2\2\2\u00ab\u00ae\3\2\2\2\u00ac\u00aa\3\2\2\2\u00ac\u00ad\3\2"+
-		"\2\2\u00ad\u00af\3\2\2\2\u00ae\u00ac\3\2\2\2\u00af\u00b0\7\7\2\2\u00b0"+
-		"\25\3\2\2\2\u00b1\u00b3\5B\"\2\u00b2\u00b4\t\2\2\2\u00b3\u00b2\3\2\2\2"+
-		"\u00b3\u00b4\3\2\2\2\u00b4\27\3\2\2\2\u00b5\u00b6\7 \2\2\u00b6\u00b7\7"+
-		"&\2\2\u00b7\u00c3\5@!\2\u00b8\u00b9\7\5\2\2\u00b9\u00be\5B\"\2\u00ba\u00bb"+
-		"\7\6\2\2\u00bb\u00bd\5B\"\2\u00bc\u00ba\3\2\2\2\u00bd\u00c0\3\2\2\2\u00be"+
-		"\u00bc\3\2\2\2\u00be\u00bf\3\2\2\2\u00bf\u00c1\3\2\2\2\u00c0\u00be\3\2"+
-		"\2\2\u00c1\u00c2\7\7\2\2\u00c2\u00c4\3\2\2\2\u00c3\u00b8\3\2\2\2\u00c3"+
-		"\u00c4\3\2\2\2\u00c4\u00c5\3\2\2\2\u00c5\u00c6\7+\2\2\u00c6\u00c7\7\5"+
-		"\2\2\u00c7\u00cc\5\32\16\2\u00c8\u00c9\7\6\2\2\u00c9\u00cb\5\32\16\2\u00ca"+
-		"\u00c8\3\2\2\2\u00cb\u00ce\3\2\2\2\u00cc\u00ca\3\2\2\2\u00cc\u00cd\3\2"+
-		"\2\2\u00cd\u00cf\3\2\2\2\u00ce\u00cc\3\2\2\2\u00cf\u00de\7\7\2\2\u00d0"+
-		"\u00d1\7\6\2\2\u00d1\u00d2\7\5\2\2\u00d2\u00d7\5\32\16\2\u00d3\u00d4\7"+
-		"\6\2\2\u00d4\u00d6\5\32\16\2\u00d5\u00d3\3\2\2\2\u00d6\u00d9\3\2\2\2\u00d7"+
-		"\u00d5\3\2\2\2\u00d7\u00d8\3\2\2\2\u00d8\u00da\3\2\2\2\u00d9\u00d7\3\2"+
-		"\2\2\u00da\u00db\7\7\2\2\u00db\u00dd\3\2\2\2\u00dc\u00d0\3\2\2\2\u00dd"+
-		"\u00e0\3\2\2\2\u00de\u00dc\3\2\2\2\u00de\u00df\3\2\2\2\u00df\31\3\2\2"+
-		"\2\u00e0\u00de\3\2\2\2\u00e1\u00e2\b\16\1\2\u00e2\u00f1\5 \21\2\u00e3"+
-		"\u00e4\5@!\2\u00e4\u00e5\7\4\2\2\u00e5\u00e7\3\2\2\2\u00e6\u00e3\3\2\2"+
-		"\2\u00e6\u00e7\3\2\2\2\u00e7\u00e8\3\2\2\2\u00e8\u00f1\5B\"\2\u00e9\u00ea"+
-		"\5\36\20\2\u00ea\u00eb\5\32\16\5\u00eb\u00f1\3\2\2\2\u00ec\u00ed\7\5\2"+
-		"\2\u00ed\u00ee\5\32\16\2\u00ee\u00ef\7\7\2\2\u00ef\u00f1\3\2\2\2\u00f0"+
-		"\u00e1\3\2\2\2\u00f0\u00e6\3\2\2\2\u00f0\u00e9\3\2\2\2\u00f0\u00ec\3\2"+
-		"\2\2\u00f1\u00f7\3\2\2\2\u00f2\u00f3\f\4\2\2\u00f3\u00f4\t\3\2\2\u00f4"+
-		"\u00f6\5\32\16\5\u00f5\u00f2\3\2\2\2\u00f6\u00f9\3\2\2\2\u00f7\u00f5\3"+
-		"\2\2\2\u00f7\u00f8\3\2\2\2\u00f8\33\3\2\2\2\u00f9\u00f7\3\2\2\2\u00fa"+
-		"\u00fb\5\32\16\2\u00fb\u00fc\t\4\2\2\u00fc\u00fd\5\32\16\2\u00fd\u0107"+
-		"\3\2\2\2\u00fe\u00ff\5\32\16\2\u00ff\u0100\t\5\2\2\u0100\u0101\5\32\16"+
-		"\2\u0101\u0107\3\2\2\2\u0102\u0103\7\5\2\2\u0103\u0104\5\34\17\2\u0104"+
-		"\u0105\7\7\2\2\u0105\u0107\3\2\2\2\u0106\u00fa\3\2\2\2\u0106\u00fe\3\2"+
-		"\2\2\u0106\u0102\3\2\2\2\u0107\35\3\2\2\2\u0108\u0109\t\6\2\2\u0109\37"+
-		"\3\2\2\2\u010a\u010b\t\7\2\2\u010b!\3\2\2\2\u010c\u010e\7\35\2\2\u010d"+
-		"\u010f\t\b\2\2\u010e\u010d\3\2\2\2\u010e\u010f\3\2\2\2\u010f\u0110\3\2"+
-		"\2\2\u0110\u0115\5$\23\2\u0111\u0112\7\6\2\2\u0112\u0114\5$\23\2\u0113"+
-		"\u0111\3\2\2\2\u0114\u0117\3\2\2\2\u0115\u0113\3\2\2\2\u0115\u0116\3\2"+
-		"\2\2\u0116\u0124\3\2\2\2\u0117\u0115\3\2\2\2\u0118\u0122\7\'\2\2\u0119"+
-		"\u011e\5@!\2\u011a\u011b\7\6\2\2\u011b\u011d\5@!\2\u011c\u011a\3\2\2\2"+
-		"\u011d\u0120\3\2\2\2\u011e\u011c\3\2\2\2\u011e\u011f\3\2\2\2\u011f\u0123"+
-		"\3\2\2\2\u0120\u011e\3\2\2\2\u0121\u0123\5&\24\2\u0122\u0119\3\2\2\2\u0122"+
-		"\u0121\3\2\2\2\u0123\u0125\3\2\2\2\u0124\u0118\3\2\2\2\u0124\u0125\3\2"+
-		"\2\2\u0125\u0128\3\2\2\2\u0126\u0127\7%\2\2\u0127\u0129\5\34\17\2\u0128"+
-		"\u0126\3\2\2\2\u0128\u0129\3\2\2\2\u0129#\3\2\2\2\u012a\u0132\3\2\2\2"+
-		"\u012b\u0132\7\23\2\2\u012c\u012d\5@!\2\u012d\u012e\7\4\2\2\u012e\u012f"+
-		"\7\23\2\2\u012f\u0132\3\2\2\2\u0130\u0132\5\32\16\2\u0131\u012a\3\2\2"+
-		"\2\u0131\u012b\3\2\2\2\u0131\u012c\3\2\2\2\u0131\u0130\3\2\2\2\u0132%"+
-		"\3\2\2\2\u0133\u013a\5@!\2\u0134\u0135\5*\26\2\u0135\u0136\5@!\2\u0136"+
-		"\u0137\5(\25\2\u0137\u0139\3\2\2\2\u0138\u0134\3\2\2\2\u0139\u013c\3\2"+
-		"\2\2\u013a\u0138\3\2\2\2\u013a\u013b\3\2\2\2\u013b\'\3\2\2\2\u013c\u013a"+
-		"\3\2\2\2\u013d\u013e\7.\2\2\u013e\u0143\5\34\17\2\u013f\u0140\7\67\2\2"+
-		"\u0140\u0142\5\34\17\2\u0141\u013f\3\2\2\2\u0142\u0145\3\2\2\2\u0143\u0141"+
-		"\3\2\2\2\u0143\u0144\3\2\2\2\u0144\u0147\3\2\2\2\u0145\u0143\3\2\2\2\u0146"+
-		"\u013d\3\2\2\2\u0146\u0147\3\2\2\2\u0147)\3\2\2\2\u0148\u0155\7\6\2\2"+
-		"\u0149\u014b\7\60\2\2\u014a\u0149\3\2\2\2\u014a\u014b\3\2\2\2\u014b\u0151"+
-		"\3\2\2\2\u014c\u014e\7\64\2\2\u014d\u014f\7\63\2\2\u014e\u014d\3\2\2\2"+
-		"\u014e\u014f\3\2\2\2\u014f\u0152\3\2\2\2\u0150\u0152\7\65\2\2\u0151\u014c"+
-		"\3\2\2\2\u0151\u0150\3\2\2\2\u0151\u0152\3\2\2\2\u0152\u0153\3\2\2\2\u0153"+
-		"\u0155\7/\2\2\u0154\u0148\3\2\2\2\u0154\u014a\3\2\2\2\u0155+\3\2\2\2\u0156"+
-		"\u0157\7\36\2\2\u0157\u0158\5@!\2\u0158\u0159\7\66\2\2\u0159\u015a\5B"+
-		"\"\2\u015a\u015b\7\16\2\2\u015b\u0163\5\32\16\2\u015c\u015d\7\6\2\2\u015d"+
-		"\u015e\5B\"\2\u015e\u015f\7\16\2\2\u015f\u0160\5\32\16\2\u0160\u0162\3"+
-		"\2\2\2\u0161\u015c\3\2\2\2\u0162\u0165\3\2\2\2\u0163\u0161\3\2\2\2\u0163"+
-		"\u0164\3\2\2\2\u0164\u0168\3\2\2\2\u0165\u0163\3\2\2\2\u0166\u0167\7%"+
-		"\2\2\u0167\u0169\5\34\17\2\u0168\u0166\3\2\2\2\u0168\u0169\3\2\2\2\u0169"+
-		"-\3\2\2\2\u016a\u016b\7\37\2\2\u016b\u016c\7\'\2\2\u016c\u016d\5@!\2\u016d"+
-		"\u016e\7%\2\2\u016e\u016f\5\34\17\2\u016f/\3\2\2\2\u0170\u0171\7\34\2"+
-		"\2\u0171\u0172\7\32\2\2\u0172\u0173\5> \2\u0173\61\3\2\2\2\u0174\u0175"+
-		"\7\34\2\2\u0175\u0176\7\33\2\2\u0176\u0177\5@!\2\u0177\63\3\2\2\2\u0178"+
-		"\u0179\7(\2\2\u0179\u017a\5> \2\u017a\65\3\2\2\2\u017b\u0180\5<\37\2\u017c"+
-		"\u017d\7\5\2\2\u017d\u017e\58\35\2\u017e\u017f\7\7\2\2\u017f\u0181\3\2"+
-		"\2\2\u0180\u017c\3\2\2\2\u0180\u0181\3\2\2\2\u0181\67\3\2\2\2\u0182\u0184"+
-		"\t\3\2\2\u0183\u0182\3\2\2\2\u0183\u0184\3\2\2\2\u0184\u0185\3\2\2\2\u0185"+
-		"\u0186\7\30\2\2\u01869\3\2\2\2\u0187\u0188\7!\2\2\u0188\u018a\7\"\2\2"+
-		"\u0189\u018b\t\2\2\2\u018a\u0189\3\2\2\2\u018a\u018b\3\2\2\2\u018b\u018f"+
-		"\3\2\2\2\u018c\u018d\7#\2\2\u018d\u018f\7$\2\2\u018e\u0187\3\2\2\2\u018e"+
-		"\u018c\3\2\2\2\u018f;\3\2\2\2\u0190\u0191\5D#\2\u0191=\3\2\2\2\u0192\u0193"+
-		"\5D#\2\u0193?\3\2\2\2\u0194\u0195\5D#\2\u0195A\3\2\2\2\u0196\u0197\5D"+
-		"#\2\u0197C\3\2\2\2\u0198\u019b\78\2\2\u0199\u019b\5F$\2\u019a\u0198\3"+
-		"\2\2\2\u019a\u0199\3\2\2\2\u019bE\3\2\2\2\u019c\u019d\t\t\2\2\u019dG\3"+
-		"\2\2\2-JLW^ciw\u0089\u0092\u0097\u00a0\u00ac\u00b3\u00be\u00c3\u00cc\u00d7"+
-		"\u00de\u00e6\u00f0\u00f7\u0106\u010e\u0115\u011e\u0122\u0124\u0128\u0131"+
-		"\u013a\u0143\u0146\u014a\u014e\u0151\u0154\u0163\u0168\u0180\u0183\u018a"+
-		"\u018e\u019a";
+		"\3\17\3\17\3\17\3\17\3\17\3\17\5\17\u0108\n\17\3\17\3\17\3\17\3\17\3\17"+
+		"\3\17\7\17\u0110\n\17\f\17\16\17\u0113\13\17\3\20\3\20\3\21\3\21\3\22"+
+		"\3\22\5\22\u011b\n\22\3\22\3\22\3\22\7\22\u0120\n\22\f\22\16\22\u0123"+
+		"\13\22\3\22\3\22\3\22\3\22\7\22\u0129\n\22\f\22\16\22\u012c\13\22\3\22"+
+		"\5\22\u012f\n\22\5\22\u0131\n\22\3\22\3\22\5\22\u0135\n\22\3\23\3\23\3"+
+		"\23\3\23\3\23\3\23\3\23\5\23\u013e\n\23\3\24\3\24\3\24\3\24\3\24\7\24"+
+		"\u0145\n\24\f\24\16\24\u0148\13\24\3\25\3\25\5\25\u014c\n\25\3\26\3\26"+
+		"\5\26\u0150\n\26\3\26\3\26\5\26\u0154\n\26\3\26\5\26\u0157\n\26\3\26\5"+
+		"\26\u015a\n\26\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27\3\27"+
+		"\7\27\u0167\n\27\f\27\16\27\u016a\13\27\3\27\3\27\5\27\u016e\n\27\3\30"+
+		"\3\30\3\30\3\30\3\30\3\30\3\31\3\31\3\31\3\31\3\32\3\32\3\32\3\32\3\33"+
+		"\3\33\3\33\3\34\3\34\3\34\3\34\3\34\5\34\u0186\n\34\3\35\5\35\u0189\n"+
+		"\35\3\35\3\35\3\36\3\36\3\36\5\36\u0190\n\36\3\36\3\36\5\36\u0194\n\36"+
+		"\3\37\3\37\3 \3 \3!\3!\3\"\3\"\3#\3#\5#\u01a0\n#\3$\3$\3$\2\4\32\34%\2"+
+		"\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\668:<>@BDF\2\n"+
+		"\3\2)*\3\2\b\t\3\2\n\r\3\2\16\21\5\2\b\t\22\22##\5\2\24\24\30\30$$\3\2"+
+		"\61\62\4\2\31-\648\2\u01bb\2L\3\2\2\2\4Q\3\2\2\2\6W\3\2\2\2\bw\3\2\2\2"+
+		"\ny\3\2\2\2\f|\3\2\2\2\16\u0080\3\2\2\2\20\u0084\3\2\2\2\22\u009b\3\2"+
+		"\2\2\24\u00a3\3\2\2\2\26\u00b1\3\2\2\2\30\u00b5\3\2\2\2\32\u00f0\3\2\2"+
+		"\2\34\u0107\3\2\2\2\36\u0114\3\2\2\2 \u0116\3\2\2\2\"\u0118\3\2\2\2$\u013d"+
+		"\3\2\2\2&\u013f\3\2\2\2(\u014b\3\2\2\2*\u0159\3\2\2\2,\u015b\3\2\2\2."+
+		"\u016f\3\2\2\2\60\u0175\3\2\2\2\62\u0179\3\2\2\2\64\u017d\3\2\2\2\66\u0180"+
+		"\3\2\2\28\u0188\3\2\2\2:\u0193\3\2\2\2<\u0195\3\2\2\2>\u0197\3\2\2\2@"+
+		"\u0199\3\2\2\2B\u019b\3\2\2\2D\u019f\3\2\2\2F\u01a1\3\2\2\2HK\5\6\4\2"+
+		"IK\5\4\3\2JH\3\2\2\2JI\3\2\2\2KN\3\2\2\2LJ\3\2\2\2LM\3\2\2\2MO\3\2\2\2"+
+		"NL\3\2\2\2OP\7\2\2\3P\3\3\2\2\2QR\7:\2\2RS\b\3\1\2S\5\3\2\2\2TV\7\3\2"+
+		"\2UT\3\2\2\2VY\3\2\2\2WU\3\2\2\2WX\3\2\2\2XZ\3\2\2\2YW\3\2\2\2Zc\5\b\5"+
+		"\2[]\7\3\2\2\\[\3\2\2\2]^\3\2\2\2^\\\3\2\2\2^_\3\2\2\2_`\3\2\2\2`b\5\b"+
+		"\5\2a\\\3\2\2\2be\3\2\2\2ca\3\2\2\2cd\3\2\2\2di\3\2\2\2ec\3\2\2\2fh\7"+
+		"\3\2\2gf\3\2\2\2hk\3\2\2\2ig\3\2\2\2ij\3\2\2\2j\7\3\2\2\2ki\3\2\2\2lx"+
+		"\5\16\b\2mx\5\n\6\2nx\5\f\7\2ox\5\20\t\2px\5\30\r\2qx\5\"\22\2rx\5,\27"+
+		"\2sx\5.\30\2tx\5\60\31\2ux\5\62\32\2vx\5\64\33\2wl\3\2\2\2wm\3\2\2\2w"+
+		"n\3\2\2\2wo\3\2\2\2wp\3\2\2\2wq\3\2\2\2wr\3\2\2\2ws\3\2\2\2wt\3\2\2\2"+
+		"wu\3\2\2\2wv\3\2\2\2x\t\3\2\2\2yz\7-\2\2z{\7,\2\2{\13\3\2\2\2|}\7-\2\2"+
+		"}~\7\32\2\2~\177\5> \2\177\r\3\2\2\2\u0080\u0081\7\31\2\2\u0081\u0082"+
+		"\7\32\2\2\u0082\u0083\5> \2\u0083\17\3\2\2\2\u0084\u0085\7\31\2\2\u0085"+
+		"\u0089\7\33\2\2\u0086\u0087\5> \2\u0087\u0088\7\4\2\2\u0088\u008a\3\2"+
+		"\2\2\u0089\u0086\3\2\2\2\u0089\u008a\3\2\2\2\u008a\u008b\3\2\2\2\u008b"+
+		"\u008c\5@!\2\u008c\u008d\7\5\2\2\u008d\u0092\5\22\n\2\u008e\u008f\7\6"+
+		"\2\2\u008f\u0091\5\22\n\2\u0090\u008e\3\2\2\2\u0091\u0094\3\2\2\2\u0092"+
+		"\u0090\3\2\2\2\u0092\u0093\3\2\2\2\u0093\u0097\3\2\2\2\u0094\u0092\3\2"+
+		"\2\2\u0095\u0096\7\6\2\2\u0096\u0098\5\24\13\2\u0097\u0095\3\2\2\2\u0097"+
+		"\u0098\3\2\2\2\u0098\u0099\3\2\2\2\u0099\u009a\7\7\2\2\u009a\21\3\2\2"+
+		"\2\u009b\u009c\5B\"\2\u009c\u00a0\5\66\34\2\u009d\u009f\5:\36\2\u009e"+
+		"\u009d\3\2\2\2\u009f\u00a2\3\2\2\2\u00a0\u009e\3\2\2\2\u00a0\u00a1\3\2"+
+		"\2\2\u00a1\23\3\2\2\2\u00a2\u00a0\3\2\2\2\u00a3\u00a4\7!\2\2\u00a4\u00a5"+
+		"\7\"\2\2\u00a5\u00a6\3\2\2\2\u00a6\u00a7\7\5\2\2\u00a7\u00ac\5\26\f\2"+
+		"\u00a8\u00a9\7\6\2\2\u00a9\u00ab\5\26\f\2\u00aa\u00a8\3\2\2\2\u00ab\u00ae"+
+		"\3\2\2\2\u00ac\u00aa\3\2\2\2\u00ac\u00ad\3\2\2\2\u00ad\u00af\3\2\2\2\u00ae"+
+		"\u00ac\3\2\2\2\u00af\u00b0\7\7\2\2\u00b0\25\3\2\2\2\u00b1\u00b3\5B\"\2"+
+		"\u00b2\u00b4\t\2\2\2\u00b3\u00b2\3\2\2\2\u00b3\u00b4\3\2\2\2\u00b4\27"+
+		"\3\2\2\2\u00b5\u00b6\7 \2\2\u00b6\u00b7\7&\2\2\u00b7\u00c3\5@!\2\u00b8"+
+		"\u00b9\7\5\2\2\u00b9\u00be\5B\"\2\u00ba\u00bb\7\6\2\2\u00bb\u00bd\5B\""+
+		"\2\u00bc\u00ba\3\2\2\2\u00bd\u00c0\3\2\2\2\u00be\u00bc\3\2\2\2\u00be\u00bf"+
+		"\3\2\2\2\u00bf\u00c1\3\2\2\2\u00c0\u00be\3\2\2\2\u00c1\u00c2\7\7\2\2\u00c2"+
+		"\u00c4\3\2\2\2\u00c3\u00b8\3\2\2\2\u00c3\u00c4\3\2\2\2\u00c4\u00c5\3\2"+
+		"\2\2\u00c5\u00c6\7+\2\2\u00c6\u00c7\7\5\2\2\u00c7\u00cc\5\32\16\2\u00c8"+
+		"\u00c9\7\6\2\2\u00c9\u00cb\5\32\16\2\u00ca\u00c8\3\2\2\2\u00cb\u00ce\3"+
+		"\2\2\2\u00cc\u00ca\3\2\2\2\u00cc\u00cd\3\2\2\2\u00cd\u00cf\3\2\2\2\u00ce"+
+		"\u00cc\3\2\2\2\u00cf\u00de\7\7\2\2\u00d0\u00d1\7\6\2\2\u00d1\u00d2\7\5"+
+		"\2\2\u00d2\u00d7\5\32\16\2\u00d3\u00d4\7\6\2\2\u00d4\u00d6\5\32\16\2\u00d5"+
+		"\u00d3\3\2\2\2\u00d6\u00d9\3\2\2\2\u00d7\u00d5\3\2\2\2\u00d7\u00d8\3\2"+
+		"\2\2\u00d8\u00da\3\2\2\2\u00d9\u00d7\3\2\2\2\u00da\u00db\7\7\2\2\u00db"+
+		"\u00dd\3\2\2\2\u00dc\u00d0\3\2\2\2\u00dd\u00e0\3\2\2\2\u00de\u00dc\3\2"+
+		"\2\2\u00de\u00df\3\2\2\2\u00df\31\3\2\2\2\u00e0\u00de\3\2\2\2\u00e1\u00e2"+
+		"\b\16\1\2\u00e2\u00f1\5 \21\2\u00e3\u00e4\5@!\2\u00e4\u00e5\7\4\2\2\u00e5"+
+		"\u00e7\3\2\2\2\u00e6\u00e3\3\2\2\2\u00e6\u00e7\3\2\2\2\u00e7\u00e8\3\2"+
+		"\2\2\u00e8\u00f1\5B\"\2\u00e9\u00ea\5\36\20\2\u00ea\u00eb\5\32\16\5\u00eb"+
+		"\u00f1\3\2\2\2\u00ec\u00ed\7\5\2\2\u00ed\u00ee\5\32\16\2\u00ee\u00ef\7"+
+		"\7\2\2\u00ef\u00f1\3\2\2\2\u00f0\u00e1\3\2\2\2\u00f0\u00e6\3\2\2\2\u00f0"+
+		"\u00e9\3\2\2\2\u00f0\u00ec\3\2\2\2\u00f1\u00f7\3\2\2\2\u00f2\u00f3\f\4"+
+		"\2\2\u00f3\u00f4\t\3\2\2\u00f4\u00f6\5\32\16\5\u00f5\u00f2\3\2\2\2\u00f6"+
+		"\u00f9\3\2\2\2\u00f7\u00f5\3\2\2\2\u00f7\u00f8\3\2\2\2\u00f8\33\3\2\2"+
+		"\2\u00f9\u00f7\3\2\2\2\u00fa\u00fb\b\17\1\2\u00fb\u00fc\5\32\16\2\u00fc"+
+		"\u00fd\t\4\2\2\u00fd\u00fe\5\32\16\2\u00fe\u0108\3\2\2\2\u00ff\u0100\5"+
+		"\32\16\2\u0100\u0101\t\5\2\2\u0101\u0102\5\32\16\2\u0102\u0108\3\2\2\2"+
+		"\u0103\u0104\7\5\2\2\u0104\u0105\5\34\17\2\u0105\u0106\7\7\2\2\u0106\u0108"+
+		"\3\2\2\2\u0107\u00fa\3\2\2\2\u0107\u00ff\3\2\2\2\u0107\u0103\3\2\2\2\u0108"+
+		"\u0111\3\2\2\2\u0109\u010a\f\4\2\2\u010a\u010b\7\67\2\2\u010b\u0110\5"+
+		"\34\17\5\u010c\u010d\f\3\2\2\u010d\u010e\78\2\2\u010e\u0110\5\34\17\4"+
+		"\u010f\u0109\3\2\2\2\u010f\u010c\3\2\2\2\u0110\u0113\3\2\2\2\u0111\u010f"+
+		"\3\2\2\2\u0111\u0112\3\2\2\2\u0112\35\3\2\2\2\u0113\u0111\3\2\2\2\u0114"+
+		"\u0115\t\6\2\2\u0115\37\3\2\2\2\u0116\u0117\t\7\2\2\u0117!\3\2\2\2\u0118"+
+		"\u011a\7\35\2\2\u0119\u011b\t\b\2\2\u011a\u0119\3\2\2\2\u011a\u011b\3"+
+		"\2\2\2\u011b\u011c\3\2\2\2\u011c\u0121\5$\23\2\u011d\u011e\7\6\2\2\u011e"+
+		"\u0120\5$\23\2\u011f\u011d\3\2\2\2\u0120\u0123\3\2\2\2\u0121\u011f\3\2"+
+		"\2\2\u0121\u0122\3\2\2\2\u0122\u0130\3\2\2\2\u0123\u0121\3\2\2\2\u0124"+
+		"\u012e\7\'\2\2\u0125\u012a\5@!\2\u0126\u0127\7\6\2\2\u0127\u0129\5@!\2"+
+		"\u0128\u0126\3\2\2\2\u0129\u012c\3\2\2\2\u012a\u0128\3\2\2\2\u012a\u012b"+
+		"\3\2\2\2\u012b\u012f\3\2\2\2\u012c\u012a\3\2\2\2\u012d\u012f\5&\24\2\u012e"+
+		"\u0125\3\2\2\2\u012e\u012d\3\2\2\2\u012f\u0131\3\2\2\2\u0130\u0124\3\2"+
+		"\2\2\u0130\u0131\3\2\2\2\u0131\u0134\3\2\2\2\u0132\u0133\7%\2\2\u0133"+
+		"\u0135\5\34\17\2\u0134\u0132\3\2\2\2\u0134\u0135\3\2\2\2\u0135#\3\2\2"+
+		"\2\u0136\u013e\3\2\2\2\u0137\u013e\7\23\2\2\u0138\u0139\5@!\2\u0139\u013a"+
+		"\7\4\2\2\u013a\u013b\7\23\2\2\u013b\u013e\3\2\2\2\u013c\u013e\5\32\16"+
+		"\2\u013d\u0136\3\2\2\2\u013d\u0137\3\2\2\2\u013d\u0138\3\2\2\2\u013d\u013c"+
+		"\3\2\2\2\u013e%\3\2\2\2\u013f\u0146\5@!\2\u0140\u0141\5*\26\2\u0141\u0142"+
+		"\5@!\2\u0142\u0143\5(\25\2\u0143\u0145\3\2\2\2\u0144\u0140\3\2\2\2\u0145"+
+		"\u0148\3\2\2\2\u0146\u0144\3\2\2\2\u0146\u0147\3\2\2\2\u0147\'\3\2\2\2"+
+		"\u0148\u0146\3\2\2\2\u0149\u014a\7.\2\2\u014a\u014c\5\34\17\2\u014b\u0149"+
+		"\3\2\2\2\u014b\u014c\3\2\2\2\u014c)\3\2\2\2\u014d\u015a\7\6\2\2\u014e"+
+		"\u0150\7\60\2\2\u014f\u014e\3\2\2\2\u014f\u0150\3\2\2\2\u0150\u0156\3"+
+		"\2\2\2\u0151\u0153\7\64\2\2\u0152\u0154\7\63\2\2\u0153\u0152\3\2\2\2\u0153"+
+		"\u0154\3\2\2\2\u0154\u0157\3\2\2\2\u0155\u0157\7\65\2\2\u0156\u0151\3"+
+		"\2\2\2\u0156\u0155\3\2\2\2\u0156\u0157\3\2\2\2\u0157\u0158\3\2\2\2\u0158"+
+		"\u015a\7/\2\2\u0159\u014d\3\2\2\2\u0159\u014f\3\2\2\2\u015a+\3\2\2\2\u015b"+
+		"\u015c\7\36\2\2\u015c\u015d\5@!\2\u015d\u015e\7\66\2\2\u015e\u015f\5B"+
+		"\"\2\u015f\u0160\7\16\2\2\u0160\u0168\5\32\16\2\u0161\u0162\7\6\2\2\u0162"+
+		"\u0163\5B\"\2\u0163\u0164\7\16\2\2\u0164\u0165\5\32\16\2\u0165\u0167\3"+
+		"\2\2\2\u0166\u0161\3\2\2\2\u0167\u016a\3\2\2\2\u0168\u0166\3\2\2\2\u0168"+
+		"\u0169\3\2\2\2\u0169\u016d\3\2\2\2\u016a\u0168\3\2\2\2\u016b\u016c\7%"+
+		"\2\2\u016c\u016e\5\34\17\2\u016d\u016b\3\2\2\2\u016d\u016e\3\2\2\2\u016e"+
+		"-\3\2\2\2\u016f\u0170\7\37\2\2\u0170\u0171\7\'\2\2\u0171\u0172\5@!\2\u0172"+
+		"\u0173\7%\2\2\u0173\u0174\5\34\17\2\u0174/\3\2\2\2\u0175\u0176\7\34\2"+
+		"\2\u0176\u0177\7\32\2\2\u0177\u0178\5> \2\u0178\61\3\2\2\2\u0179\u017a"+
+		"\7\34\2\2\u017a\u017b\7\33\2\2\u017b\u017c\5@!\2\u017c\63\3\2\2\2\u017d"+
+		"\u017e\7(\2\2\u017e\u017f\5> \2\u017f\65\3\2\2\2\u0180\u0185\5<\37\2\u0181"+
+		"\u0182\7\5\2\2\u0182\u0183\58\35\2\u0183\u0184\7\7\2\2\u0184\u0186\3\2"+
+		"\2\2\u0185\u0181\3\2\2\2\u0185\u0186\3\2\2\2\u0186\67\3\2\2\2\u0187\u0189"+
+		"\t\3\2\2\u0188\u0187\3\2\2\2\u0188\u0189\3\2\2\2\u0189\u018a\3\2\2\2\u018a"+
+		"\u018b\7\30\2\2\u018b9\3\2\2\2\u018c\u018d\7!\2\2\u018d\u018f\7\"\2\2"+
+		"\u018e\u0190\t\2\2\2\u018f\u018e\3\2\2\2\u018f\u0190\3\2\2\2\u0190\u0194"+
+		"\3\2\2\2\u0191\u0192\7#\2\2\u0192\u0194\7$\2\2\u0193\u018c\3\2\2\2\u0193"+
+		"\u0191\3\2\2\2\u0194;\3\2\2\2\u0195\u0196\5D#\2\u0196=\3\2\2\2\u0197\u0198"+
+		"\5D#\2\u0198?\3\2\2\2\u0199\u019a\5D#\2\u019aA\3\2\2\2\u019b\u019c\5D"+
+		"#\2\u019cC\3\2\2\2\u019d\u01a0\79\2\2\u019e\u01a0\5F$\2\u019f\u019d\3"+
+		"\2\2\2\u019f\u019e\3\2\2\2\u01a0E\3\2\2\2\u01a1\u01a2\t\t\2\2\u01a2G\3"+
+		"\2\2\2.JLW^ciw\u0089\u0092\u0097\u00a0\u00ac\u00b3\u00be\u00c3\u00cc\u00d7"+
+		"\u00de\u00e6\u00f0\u00f7\u0107\u010f\u0111\u011a\u0121\u012a\u012e\u0130"+
+		"\u0134\u013d\u0146\u014b\u014f\u0153\u0156\u0159\u0168\u016d\u0185\u0188"+
+		"\u018f\u0193\u019f";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

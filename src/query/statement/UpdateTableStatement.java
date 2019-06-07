@@ -11,6 +11,8 @@ import table.Row;
 import table.Table;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UpdateTableStatement extends Statement {
     private String tableName;
@@ -93,19 +95,27 @@ public class UpdateTableStatement extends Statement {
             }
         }
 
+        boolean needCheckAns = where.getNeedCheckAns();
         Row row = ans.next();
         int count = 0;
+        Map<Table, Row> tableRowMap = new HashMap<>();
         while (row != null) {
-            Row update = new Row(row);
-            for (int i = 0; i < columns.length; i++) {
-                update.setDataByColumn(columns[i], newData[i]);
+            boolean satisfied = true;
+            if (needCheckAns) {
+                tableRowMap.put(table, row);
+                satisfied = whereCondition.getCompareAns(tableRowMap);
             }
-            count++;
-            try {
-                table.updateRow(row, update);
-            }
-            catch (IOException e) {
-                throw new SQLExecuteException("[update table]: IOException: " + e.getMessage());
+            if (satisfied) {
+                Row update = new Row(row);
+                for (int i = 0; i < columns.length; i++) {
+                    update.setDataByColumn(columns[i], newData[i]);
+                }
+                count++;
+                try {
+                    table.updateRow(row, update);
+                } catch (IOException e) {
+                    throw new SQLExecuteException("[update table]: IOException: " + e.getMessage());
+                }
             }
             row = ans.next();
         }

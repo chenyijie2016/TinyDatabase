@@ -232,13 +232,25 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
+	@Override public void enterOrExpression(TinySQLParser.OrExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
+	@Override public void exitOrExpression(TinySQLParser.OrExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAndExpression(TinySQLParser.AndExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAndExpression(TinySQLParser.AndExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -251,6 +263,18 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
