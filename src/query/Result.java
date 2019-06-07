@@ -8,6 +8,9 @@ import table.Column;
 import table.Row;
 import table.TableBase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +38,23 @@ public class Result extends TableBase {
         this.columns = columns;
         return this;
     }
+
+
+    public byte[] getProtocolBytes() throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(columns.size()).array());
+        stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(rows.size()).array());
+        for (Column column : columns) {
+            // stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(column.getColumnType().size()).array());
+            stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(column.getName().length()).array());
+            stream.write(column.getName().getBytes());
+        }
+        for (Row row : rows) {
+            stream.write(row.toProtocolBytes());
+        }
+        return stream.toByteArray();
+    }
+
 
     @Override
     public String toString() {

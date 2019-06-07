@@ -4,6 +4,8 @@ import data.*;
 import exception.SQLExecuteException;
 import exception.SQLParseException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,6 +86,15 @@ public class Row {
             totalSize = Long.BYTES;
         } // 为了确保能够存下保存freelist指针
         return totalSize;
+    }
+
+    public final byte[] toProtocolBytes() throws IOException {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        for (typedData td : data) {
+            stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(td.toString().length()).array());
+            stream.write(td.toString().getBytes());
+        }
+        return stream.toByteArray();
     }
 
     public final byte[] toBytes() {
