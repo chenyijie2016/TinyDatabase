@@ -129,12 +129,11 @@ class Client extends JFrame implements ActionListener {
 
     private void connect() {
         try {
-            if (socket == null) {
-                socket = new Socket("localhost", 3306);
-                message.setText("Connect Success!");
-                message.setForeground(Color.GREEN);
-                receiveWorker = new ReceiveWorker(socket);
-            }
+            socket = new Socket("localhost", 3306);
+            message.setText("Connect Success!");
+            message.setForeground(Color.GREEN);
+            receiveWorker = new ReceiveWorker(socket);
+
         } catch (IOException e) {
             e.printStackTrace();
             message.setText("Connect Failed!");
