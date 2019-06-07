@@ -170,7 +170,7 @@ typeName
  : name ( '(' signedNumber ')' )?
  ;
 signedNumber
- : ( '+' | '-' )? NUMERIC_LITERAL
+ : NUMERIC_LITERAL
  ;
 
 columnConstraint
@@ -191,8 +191,8 @@ SPACES
  ;
 
 NUMERIC_LITERAL
- : DIGIT+ ( '.' DIGIT* )?
- | '.' DIGIT*
+ : ('+'| '-')? DIGIT+ ( '.' DIGIT* )?
+ | ('+'| '-')? '.' DIGIT*
  ;
 
 name

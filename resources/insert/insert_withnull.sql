@@ -10,5 +10,5 @@ create table employee(
 );
 
 insert into employee values (213,null,null,null,null,null,null);
-insert into employee(id,bar) values (123,123.45);
+insert into employee(id,bar) values (123,-123.45);
 select * from employee;
