@@ -56,21 +56,27 @@ public class SingleTableWhereClause {
             Table.RowIterator ans;
 
             if (compareExpression != null) {
-                if (compareExpression.isAndOr()) {
-                    List<ValueExpression> valueExpressionList = compareExpression.getValueExpressionList();
+                boolean canUseSingleScan = !compareExpression.isAndOr() &&
+                        compareExpression.getCompareSubType() != CompareExpression.COMPARE_SUB_TYPE.ISNULL &&
+                        compareExpression.getCompareSubType() != CompareExpression.COMPARE_SUB_TYPE.ISNOTNULL;
+                List<ValueExpression> valueExpressionList = null;
+                BaseData rightEndData = null;
+                if (canUseSingleScan) {
+                    valueExpressionList = compareExpression.getValueExpressionList();
                     if (valueExpressionList.size() != 2) {
                         throw new SQLExecuteException("[where clause]: Internal error: where clause wrong");
                     }
 
                     // Check right end
                     ValueExpression rightEnd = valueExpressionList.get(1);
-                    BaseData rightEndData;
+
                     try {
                         rightEndData = rightEnd.simplifyValueDataThatIsNotColumn();
                     } catch (IllegalArgumentException e) {
-                        throw new SQLExecuteException("[where clause]: Right end error: " + e.getMessage());
+                        canUseSingleScan = false;
                     }
-
+                }
+                if (canUseSingleScan) {
                     // Check left end to get column
                     ValueExpression leftEnd = valueExpressionList.get(0);
                     BaseData leftEndData;

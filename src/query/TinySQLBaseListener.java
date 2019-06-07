@@ -256,6 +256,18 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterIsOrNotExpression(TinySQLParser.IsOrNotExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIsOrNotExpression(TinySQLParser.IsOrNotExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterParenthesisConditionExpression(TinySQLParser.ParenthesisConditionExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -275,6 +287,30 @@ public class TinySQLBaseListener implements TinySQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIsNullExpression(TinySQLParser.IsNullExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIsNullExpression(TinySQLParser.IsNullExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIsNotNullExpression(TinySQLParser.IsNotNullExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIsNotNullExpression(TinySQLParser.IsNotNullExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -83,8 +83,9 @@ conditionExpression
  | '(' conditionExpression ')'                       # parenthesisConditionExpression
  | conditionExpression K_AND conditionExpression     # andExpression
  | conditionExpression K_OR conditionExpression      # orExpression
-// | expression ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
-// | expression K_IS K_NOT? expression
+ | expression K_ISNULL                               # isNullExpression
+ | expression (K_NOT K_NULL | K_NOTNULL)             # isNotNullExpression
+ | expression K_IS K_NOT? expression                 # isOrNotExpression
 // | expression K_NOT? K_BETWEEN expression K_AND expression
 ;
 
@@ -93,7 +94,6 @@ unaryOperator
  : '-'
  | '+'
  | '~'
- | K_NOT
  ;
 
 literalValue
@@ -239,6 +239,9 @@ keyword
 | K_SET
 | K_AND
 | K_OR
+| K_IS
+| K_ISNULL
+| K_NOTNULL
 ;
 
 K_CREATE : C R E A T E;
@@ -273,6 +276,9 @@ K_INNER: I N N E R;
 K_SET: S E T;
 K_AND: A N D;
 K_OR: O R;
+K_IS: I S;
+K_ISNULL: I S N U L L;
+K_NOTNULL: N O T N U L L;
 
 IDENTIFIER
  :

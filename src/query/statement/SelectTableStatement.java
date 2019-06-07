@@ -286,19 +286,20 @@ public class SelectTableStatement extends Statement {
 
             Result result = new Result();
             List<List<TYPE_COLUMNS>> columns = new ArrayList<>();
-            List<List<TYPE_COLUMNS>> showColumns = new ArrayList<>();
+            List<List<Integer>> showColumns = new ArrayList<>();
+            // showColumns里面，存储对应的index，如果不出现，就直接为负数
             for (int i = 0; i < tableNames.length; i++) {
                 List<TYPE_COLUMNS> columnInfo = new ArrayList<>();
-                List<TYPE_COLUMNS> showColumnInfo = new ArrayList<>();
+                List<Integer> showColumnInfo = new ArrayList<>();
                 List<Column> tableColumns = tables.get(i).getColumns();
                 for (int j = 0; j < tableColumns.size(); j++) {
-                    if (columnInfos.get(tableColumns.get(i).getName()).size() > 1) {
+                    if (columnInfos.get(tableColumns.get(j).getName()).size() > 1) {
                         columnInfo.add(TYPE_COLUMNS.TABLE_COLUMN_NAME);
                     }
                     else {
                         columnInfo.add(TYPE_COLUMNS.ONLY_COLUMN_NAME);
                     }
-                    showColumnInfo.add(TYPE_COLUMNS.NOT_SHOWN);
+                    showColumnInfo.add(-1);
                 }
                 columns.add(columnInfo);
                 showColumns.add(showColumnInfo);
@@ -309,6 +310,7 @@ public class SelectTableStatement extends Statement {
             }
             // Check ans columns
             boolean allColumnsOutput = false;
+            Integer showColumnIndex = 0;
             for (ResultColumn rc : resultColumns) {
                 switch (rc.getResultColumnType()) {
                     case ALL:
@@ -326,7 +328,8 @@ public class SelectTableStatement extends Statement {
                             throw new SQLExecuteException("[select table]: Result table not found!");
                         }
                         for (int i = 0; i < showColumns.get(tableIndex).size(); i++) {
-                            showColumns.get(tableIndex).set(i, TYPE_COLUMNS.ONLY_COLUMN_NAME);
+                            showColumns.get(tableIndex).set(i, showColumnIndex);
+                            showColumnIndex++;
                         }
                         break;
                     case EXPRESSION:
@@ -360,23 +363,33 @@ public class SelectTableStatement extends Statement {
                             throw new SQLExecuteException("[select table]: Result column not found!");
                         }
                         int columnIndex = targetResultTable.getColumns().indexOf(column);
-                        showColumns.get(tableIndex2).set(columnIndex, TYPE_COLUMNS.ONLY_COLUMN_NAME);
+                        showColumns.get(tableIndex2).set(columnIndex, showColumnIndex);
+                        showColumnIndex++;
                     default:
                         break;
                 }
             }
 
             List<Column> ansColumns = new ArrayList<>();
+            if (showColumnIndex >= 0) {
+                for (int i = 0; i < showColumnIndex; i++) {
+                    ansColumns.add(null);
+                }
+            }
             for (int i = 0; i < tableNames.length; i++) {
                 List<TYPE_COLUMNS> columnInfo = columns.get(i);
-                List<TYPE_COLUMNS> showColumnInfo = showColumns.get(i);
+                List<Integer> showColumnInfo = showColumns.get(i);
                 List<Column> tableColumns = tables.get(i).getColumns();
                 for (int j = 0; j < tableColumns.size(); j++) {
-                    if ((allColumnsOutput || showColumnInfo.get(j) != TYPE_COLUMNS.NOT_SHOWN) && columnInfo.get(j) == TYPE_COLUMNS.TABLE_COLUMN_NAME) {
+                    if (!allColumnsOutput && showColumnInfo.get(j) >= 0) {
+                        Column newColumn = new Column(tableColumns.get(j).getColumnType(), tables.get(i).getTableName() + "." + tableColumns.get(j).getName());
+                        ansColumns.set(showColumnInfo.get(j), newColumn);
+                    }
+                    else if (allColumnsOutput && columnInfo.get(j) == TYPE_COLUMNS.TABLE_COLUMN_NAME) {
                         Column newColumn = new Column(tableColumns.get(j).getColumnType(), tables.get(i).getTableName() + "." + tableColumns.get(j).getName());
                         ansColumns.add(newColumn);
                     }
-                    else if ((allColumnsOutput || showColumnInfo.get(j) != TYPE_COLUMNS.NOT_SHOWN) && columnInfo.get(j) == TYPE_COLUMNS.ONLY_COLUMN_NAME) {
+                    else if (allColumnsOutput && columnInfo.get(j) == TYPE_COLUMNS.ONLY_COLUMN_NAME) {
                         Column newColumn = new Column(tableColumns.get(j).getColumnType(), tableColumns.get(j).getName());
                         ansColumns.add(newColumn);
                     }
@@ -413,10 +426,13 @@ public class SelectTableStatement extends Statement {
                             int index = 0;
                             for (int i = 0; i < tableNames.length; i++) {
                                 List<TYPE_COLUMNS> columnInfo = columns.get(i);
-                                List<TYPE_COLUMNS> showColumnInfo = showColumns.get(i);
+                                List<Integer> showColumnInfo = showColumns.get(i);
                                 List<Column> tableColumns = tables.get(i).getColumns();
                                 for (int j = 0; j < tableColumns.size(); j++) {
-                                    if ((allColumnsOutput || showColumnInfo.get(j) != TYPE_COLUMNS.NOT_SHOWN) && (columnInfo.get(j) == TYPE_COLUMNS.TABLE_COLUMN_NAME || columnInfo.get(j) == TYPE_COLUMNS.ONLY_COLUMN_NAME)) {
+                                    if (!allColumnsOutput && showColumnInfo.get(j) >= 0) {
+                                        objs[showColumnInfo.get(j)] = rows[i].getDataByColumn(tableColumns.get(j)).getData();
+                                    }
+                                    else if (allColumnsOutput && (columnInfo.get(j) == TYPE_COLUMNS.TABLE_COLUMN_NAME || columnInfo.get(j) == TYPE_COLUMNS.ONLY_COLUMN_NAME)) {
                                         objs[index] = rows[i].getDataByColumn(tableColumns.get(j)).getData();
                                         index ++;
                                     }

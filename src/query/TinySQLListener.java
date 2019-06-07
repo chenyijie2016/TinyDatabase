@@ -224,6 +224,18 @@ public interface TinySQLListener extends ParseTreeListener {
 	 */
 	void exitAndExpression(TinySQLParser.AndExpressionContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code isOrNotExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsOrNotExpression(TinySQLParser.IsOrNotExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code isOrNotExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsOrNotExpression(TinySQLParser.IsOrNotExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code parenthesisConditionExpression}
 	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
 	 * @param ctx the parse tree
@@ -247,6 +259,30 @@ public interface TinySQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEqualExpression(TinySQLParser.EqualExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code isNullExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsNullExpression(TinySQLParser.IsNullExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code isNullExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsNullExpression(TinySQLParser.IsNullExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code isNotNullExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIsNotNullExpression(TinySQLParser.IsNotNullExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code isNotNullExpression}
+	 * labeled alternative in {@link TinySQLParser#conditionExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIsNotNullExpression(TinySQLParser.IsNotNullExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link TinySQLParser#unaryOperator}.
 	 * @param ctx the parse tree

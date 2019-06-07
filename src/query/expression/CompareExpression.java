@@ -21,7 +21,9 @@ public class CompareExpression extends Expression{
         LT,
         LTE,
         EQ,
-        NEQ
+        NEQ,
+        ISNULL,
+        ISNOTNULL
     }
 
     private COMPARE_TYPE compareType;
@@ -75,6 +77,12 @@ public class CompareExpression extends Expression{
     public boolean getCompareAns(Map<Table, Row> tableRowMap) throws SQLExecuteException {
         if (compareType == COMPARE_TYPE.BASE) {
             BaseData a = valueExpressionList.get(0).calculate(tableRowMap);
+            if (compareSubType == COMPARE_SUB_TYPE.ISNULL) {
+                return a.getBaseDataType() == BaseData.BASE_DATA_TYPE.NULL;
+            }
+            if (compareSubType == COMPARE_SUB_TYPE.ISNOTNULL) {
+                return a.getBaseDataType() != BaseData.BASE_DATA_TYPE.NULL;
+            }
             BaseData b = valueExpressionList.get(1).calculate(tableRowMap);
             BaseData.BASE_DATA_TYPE aType = a.getBaseDataType(), bType = b.getBaseDataType();
             if (aType == BaseData.BASE_DATA_TYPE.NULL || bType == BaseData.BASE_DATA_TYPE.NULL) {
