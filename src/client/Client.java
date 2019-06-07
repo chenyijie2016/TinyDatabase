@@ -1,5 +1,7 @@
 package client;
 
+import org.apache.commons.cli.*;
+
 import common.Triplet;
 import server.Protocol;
 
@@ -13,13 +15,15 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 
 
 class Client extends JFrame implements ActionListener {
 
-
+    private int port = 3306;
+    private String host = "localhost";
     private static JMenuBar menuBar = new JMenuBar();
     private static JMenu fileMenu = new JMenu("file");
     private static JMenuItem importSql = new JMenuItem("import");
@@ -36,7 +40,9 @@ class Client extends JFrame implements ActionListener {
     private Socket socket = null;
     private ReceiveWorker receiveWorker;
 
-    private Client() {
+    private Client(String host, int port) {
+        this.host = host;
+        this.port = port;
         resultTable = new JTable();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(400, 500);
@@ -78,7 +84,29 @@ class Client extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        Client client = new Client();
+        Options options = new Options();
+        Option portOption = new Option("p", "port", true, "port");
+        portOption.setRequired(false);
+
+        options.addOption(portOption);
+        Option hostOption = new Option("h", "host", true, "hostname");
+        hostOption.setRequired(false);
+        options.addOption(hostOption);
+
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("java -jar TinyDatabaseClient.jar", options);
+            System.exit(1);
+        }
+        int port = cmd.getOptionValue("port") == null ? 3306 : Integer.parseInt(cmd.getOptionValue("port"));
+        String host = cmd.getOptionValue("host") == null ? "localhost" : cmd.getOptionValue("host");
+        Client client = new Client(host, port);
         client.setVisible(true);
     }
 
@@ -129,7 +157,7 @@ class Client extends JFrame implements ActionListener {
 
     private void connect() {
         try {
-            socket = new Socket("localhost", 3306);
+            socket = new Socket(host, port);
             message.setText("Connect Success!");
             message.setForeground(Color.GREEN);
             receiveWorker = new ReceiveWorker(socket);

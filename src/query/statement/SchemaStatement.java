@@ -1,8 +1,6 @@
 package query.statement;
 
 import data.Type;
-import data.intData;
-import data.stringData;
 import database.DataBase;
 import exception.SQLExecuteException;
 import query.Result;
@@ -12,7 +10,6 @@ import table.Constraint;
 import table.Row;
 import table.Table;
 
-import java.io.IOException;
 import java.util.List;
 
 public class SchemaStatement extends Statement {

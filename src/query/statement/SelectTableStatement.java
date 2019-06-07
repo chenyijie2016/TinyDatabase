@@ -1,6 +1,6 @@
 package query.statement;
 
-import data.*;
+
 import database.DataBase;
 import exception.SQLExecuteException;
 import query.Result;

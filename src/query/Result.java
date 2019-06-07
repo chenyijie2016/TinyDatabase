@@ -1,8 +1,6 @@
 package query;
 
 import data.Type;
-import data.stringData;
-import data.typedData;
 import exception.SQLExecuteException;
 import table.Column;
 import table.Row;

@@ -3,7 +3,6 @@ package query.statement;
 import database.DataBase;
 import exception.SQLExecuteException;
 import query.Result;
-import schema.Schema;
 import schema.SchemaManager;
 import table.*;
 

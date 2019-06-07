@@ -1,7 +1,5 @@
 package data;
 
-import org.junit.Test;
-
 public class Type {
     private TYPE type;
     private long size;

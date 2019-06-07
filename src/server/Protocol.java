@@ -1,6 +1,5 @@
 package server;
 
-import org.antlr.v4.runtime.misc.Triple;
 import query.Result;
 import common.Triplet;
 
@@ -54,7 +53,6 @@ public class Protocol {
         String[][] objs = new String[rowSize][];
         for (int i = 0; i < columnSize; i++) {
             byte[] name = new byte[buffer.getInt()];
-            System.out.println("Name length:" + name.length);
             buffer.get(name);
             columnNames[i] = new String(name);
         }
