@@ -133,6 +133,20 @@ public class Listener extends TinySQLBaseListener {
     }
 
     @Override
+    public void exitIsNullExpression(TinySQLParser.IsNullExpressionContext ctx) {
+        ValueExpression a = valueExpressionStack.pop();
+        compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.ISNULL, a,
+                new ValueExpression(new BaseData())));
+    }
+
+    @Override
+    public void exitIsNotNullExpression(TinySQLParser.IsNotNullExpressionContext ctx) {
+        ValueExpression a = valueExpressionStack.pop();
+        compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.ISNOTNULL, a,
+                new ValueExpression(new BaseData())));
+    }
+
+    @Override
     public void exitAndExpression(TinySQLParser.AndExpressionContext ctx) {
         CompareExpression b = compareExpressionStack.pop();
         CompareExpression a = compareExpressionStack.pop();
@@ -159,6 +173,18 @@ public class Listener extends TinySQLBaseListener {
             default:
                 compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.NEQ, a, b));
                 break;
+        }
+    }
+
+    @Override
+    public void exitIsOrNotExpression(TinySQLParser.IsOrNotExpressionContext ctx) {
+        ValueExpression b = valueExpressionStack.pop();
+        ValueExpression a = valueExpressionStack.pop();
+        if (ctx.K_NOT() == null) {
+            compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.EQ, a, b));
+        }
+        else {
+            compareExpressionStack.push(new CompareExpression(CompareExpression.COMPARE_SUB_TYPE.NEQ, a, b));
         }
     }
 
