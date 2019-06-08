@@ -89,6 +89,10 @@ public class SchemaStatement extends Statement {
                     result.addRow(row);
                 }
                 break;
+            case USE_DATABASE:
+                schemaManager.switchDataBase(databaseName);
+                result = Result.setInfo("successfully Switch database! Current Database: " + databaseName);
+                break;
         }
         return result;
     }

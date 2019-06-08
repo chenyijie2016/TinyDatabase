@@ -8,28 +8,47 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import query.Listener;
+import schema.Schema;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 public class SchemaStatementTest extends BaseTest {
 //    @BeforeClass
-//    public static void before() throws IOException, SQLExecuteException {
+//    public static void before() throws  SQLExecuteException {
+//        List<String> names = new LinkedList<>();
 //        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
-//            schemaManager.dropDataBaseByName(dataBase.getName());
+//            names.add(dataBase.getName());
 //        }
-//        schemaManager.schema().createDatabaseByName("test");
-//        schemaManager.switchDataBase("test");
+//        names.forEach(name-> {
+//            try {
+//                schemaManager.dropDataBaseByName(name);
+//            } catch (SQLExecuteException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        schemaManager.schema().createDatabaseByName(Schema.DEFAULT_DATABASE_NAME);
+//        schemaManager.switchDataBase(Schema.DEFAULT_DATABASE_NAME);
 //    }
 //
 //    @AfterClass
-//    public static void clean() throws IOException, SQLExecuteException {
+//    public static void clean() throws  SQLExecuteException {
+//        List<String> names = new LinkedList<>();
 //        for (DataBase dataBase : schemaManager.schema().getDataBases()) {
-//            schemaManager.dropDataBaseByName(dataBase.getName());
+//            names.add(dataBase.getName());
 //        }
-//        schemaManager.schema().createDatabaseByName("test");
-//        schemaManager.switchDataBase("test");
+//        names.forEach(name-> {
+//            try {
+//                schemaManager.dropDataBaseByName(name);
+//            } catch (SQLExecuteException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        schemaManager.schema().createDatabaseByName(Schema.DEFAULT_DATABASE_NAME);
+//        schemaManager.switchDataBase(Schema.DEFAULT_DATABASE_NAME);
 //    }
 
     @Test
@@ -38,7 +57,6 @@ public class SchemaStatementTest extends BaseTest {
         for (Statement statement : listener.getStatementList()) {
             assertTrue(statement.isValid());
             System.out.println(statement.execute(schemaManager));
-
         }
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public class Schema {
     private static Schema schema = new Schema();
     private static final String METADATA_FILE = "schema";
-    private static final String DEFAULT_DATABASE = "TEST";
+    public static final String DEFAULT_DATABASE_NAME = "TEST";
     private List<DataBase> dataBases;
 
     private Schema() {
@@ -34,7 +34,7 @@ public class Schema {
                     }
                 } else {
 
-                    createDatabaseByName(DEFAULT_DATABASE);
+                    createDatabaseByName(DEFAULT_DATABASE_NAME);
                 }
             } catch (IOException | SQLExecuteException e) {
                 e.printStackTrace();
@@ -75,17 +75,19 @@ public class Schema {
         }
     }
 
-    public boolean dropDataBaseByName(String dataBaseName) throws SQLExecuteException{
+    public boolean dropDataBaseByName(String dataBaseName) throws SQLExecuteException {
         if (dataBaseName == null) {
             throw new SQLExecuteException("[drop database]: Null database name");
         }
         DataBase db = schema.getDatabaseByName(dataBaseName);
-        if (db == null) {
-            throw new SQLExecuteException("[drop database]: No Such Database");
-        }
+
         try {
-            db.dropAllTable();
-            updateSchema();
+            if (db.drop()) {
+                dataBases.remove(db);
+                updateSchema();
+            }else {
+                throw new SQLExecuteException("[drop database]: File Delete Failed");
+            }
         } catch (IOException e) {
             throw new SQLExecuteException("[drop database]: Unknown Error (IO Failure)");
         }
@@ -93,21 +95,25 @@ public class Schema {
         return true;
     }
 
-    public DataBase getDatabaseByName(String name) {
+    public DataBase getDatabaseByName(String name) throws SQLExecuteException {
         for (DataBase dataBase : dataBases) {
             if (dataBase.getName().equals(name)) {
                 return dataBase;
             }
         }
-        return null;
+        throw new SQLExecuteException("No Such Database: " + name);
     }
 
     public List<DataBase> getDataBases() {
         return dataBases;
     }
 
-    public DataBase getDefaultDatabase() {
-        return getDatabaseByName(DEFAULT_DATABASE);
+    public DataBase getDefaultDatabase() throws SQLExecuteException {
+        try {
+            return getDatabaseByName(DEFAULT_DATABASE_NAME);
+        } catch (SQLExecuteException e) {
+            throw new SQLExecuteException("No Default Database Specified");
+        }
     }
 
 }

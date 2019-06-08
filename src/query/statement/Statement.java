@@ -16,7 +16,7 @@ public abstract class Statement {
     public static final int DROP_TABLE = 9;
     public static final int DROP_DATABASE = 10;
     public static final int USE_DATABASE = 11;
-    public static final int SHOW_TABLE = 11;
+    public static final int SHOW_TABLE = 12;
 
 
     public String sql;

@@ -11,7 +11,11 @@ public class SchemaManager {
 
     private SchemaManager(int id) {
         this.id = id;
-        currentDataBase = Schema.getSchema().getDefaultDatabase();
+        try {
+            currentDataBase = Schema.getSchema().getDefaultDatabase();
+        } catch (SQLExecuteException e) {
+            System.err.println("Warning: No Default Database");
+        }
     }
 
 
@@ -42,9 +46,7 @@ public class SchemaManager {
     }
 
     public boolean dropDataBaseByName(String name) throws SQLExecuteException {
-
         return Schema.getSchema().dropDataBaseByName(name);
-
     }
 
 

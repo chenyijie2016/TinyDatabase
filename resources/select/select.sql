@@ -76,6 +76,7 @@ insert into employee3 values (33456, 'Gold', 'Physics', 87000);
 insert into employee3 values (45565, 'Katz', 'Comp.Sci.', 75000);
 insert into employee3 values (58583, 'Califieri', 'History', 62000);
 insert into employee3 values (76543, 'Singh', 'Finance', 80000);
+
 insert into employee3 values (76766, 'Crick', 'Biology', 72000);
 insert into employee3 values (98345, 'Kim', 'Elec.Eng.', 80000);
 insert into employee3 values (83821, 'Brandt', 'Comp.Sci.', 92000);
