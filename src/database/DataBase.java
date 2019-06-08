@@ -45,9 +45,13 @@ public class DataBase {
         throw new SQLExecuteException("No Such Table: " + name);
     }
 
+    /**
+     * 解决在执行更新元数据操作后无法立即删除的BUG :https://stackoverflow.com/questions/12096002/close-a-file-created-with-fileoutputstream-for-a-next-delete
+     * @throws IOException
+     */
     private void updateSchema() throws IOException {
 
-        FileOutputStream outputStream = new FileOutputStream(this.databaseName + SCHEMA_EXTENSION);
+        FileOutputStream outputStream = new FileOutputStream(databaseName + SCHEMA_EXTENSION);
         DataOutputStream out = new DataOutputStream(outputStream);
         out.writeInt(tables.size());
         for (Table table : tables) {
@@ -56,6 +60,8 @@ public class DataBase {
         }
         out.close();
         outputStream.close();
+        out = null; // For a bug of java's GC, WTF?
+        System.gc();
     }
 
     public static DataBase readFromFile(String name) throws IOException, SQLExecuteException {
@@ -110,10 +116,13 @@ public class DataBase {
         updateSchema();
     }
 
-    public boolean drop() throws IOException {
+    public boolean drop() throws IOException, SQLExecuteException {
         dropAllTable();
-        File file = new File(this.databaseName + SCHEMA_EXTENSION);
-        return file.delete();
+        File file = new File(databaseName + SCHEMA_EXTENSION);
+        if (file.exists()) {
+            return file.delete();
+        }
+        throw new SQLExecuteException("No DataBase file to delete");
     }
 
 

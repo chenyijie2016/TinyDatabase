@@ -113,11 +113,12 @@ public class Table extends TableBase {
     }
 
     /**
-     * 写入数据文件的文件头
+     * 写入数据文件的文件头,必须在每次磁盘操作后更新
      *
      * @throws IOException 写入失败
      */
     private void writeDataFileHeader() throws IOException {
+        dataFile.seek(0);
         dataFile.writeLong(freeListPointer);
         dataFile.writeInt(uniqueID);
     }
@@ -171,6 +172,7 @@ public class Table extends TableBase {
         dataFile.seek(row.position);
         dataFile.writeLong(freeListPointer);
         freeListPointer = row.position;
+        writeDataFileHeader();
     }
 
     /**
@@ -260,15 +262,7 @@ public class Table extends TableBase {
         } else {
             indexTrees.get(0).insert(primaryKeyAns, row.position);
         }
-
-    }
-
-    public final int getRowSize() {
-        int sum = 0;
-        for (Column column : columns) {
-            sum += column.getColumnType().size();
-        }
-        return sum;
+        writeDataFileHeader();
     }
 
     public byte[] toSchemaBytes() {
@@ -395,14 +389,6 @@ public class Table extends TableBase {
         }
 
         return new Table(db, tableName, columns, constraints, uniqueID);
-    }
-
-    /**
-     * 保证数据完整性的必须操作，完整写回数据
-     */
-    public void commit() throws IOException {
-        dataFile.seek(0);
-        writeDataFileHeader();
     }
 
     /**
