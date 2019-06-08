@@ -13,10 +13,19 @@ import static org.junit.Assert.assertTrue;
 
 
 public class SelectTableStatementTest extends BaseTest {
-
     @Test()
     public void testSelect() throws IOException, SQLExecuteException, SQLParseException {
         Listener listener = getListenerByTestFile("resources/select/select.sql");
+        List<Statement> statementList = listener.getStatementList();
+        for (Statement statement : statementList) {
+            assertTrue(statement.isValid());
+            System.out.println(statement.execute(schemaManager).toString());
+        }
+    }
+
+    @Test()
+    public void testIndexScan() throws IOException, SQLExecuteException, SQLParseException {
+        Listener listener = getListenerByTestFile("resources/select/testIndexSearch.sql");
         List<Statement> statementList = listener.getStatementList();
         for (Statement statement : statementList) {
             assertTrue(statement.isValid());
