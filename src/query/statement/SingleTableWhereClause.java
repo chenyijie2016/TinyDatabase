@@ -150,11 +150,15 @@ public class SingleTableWhereClause {
                                 break;
                             case LT:
                                 ans = targetTable.scanLessThan(targetColumn, queryData);
-                                addRowOrderReverse = true;
+                                if (targetTable.getIndexColumns().indexOf(targetColumn) >= 0) {
+                                    addRowOrderReverse = true;
+                                }
                                 break;
                             case LTE:
                                 ans = targetTable.scanLessEqual(targetColumn, queryData);
-                                addRowOrderReverse = true;
+                                if (targetTable.getIndexColumns().indexOf(targetColumn) >= 0) {
+                                    addRowOrderReverse = true;
+                                }
                                 break;
                             case GT:
                                 ans = targetTable.scanGreaterThan(targetColumn, queryData);
