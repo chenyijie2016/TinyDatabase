@@ -30,3 +30,7 @@ insert into multiPrimary values(-5, 3.2, 'jiowejgwwe3', 0, -4.3);
 select * from multiPrimary;
 delete from multiPrimary where id + c +a > d;
 select * from multiPrimary;
+
+show table noPrimary;
+show table hasPrimary;
+show table multiPrimary;

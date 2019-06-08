@@ -81,7 +81,11 @@ public class SchemaStatement extends Statement {
                             }
                         }
                     }
-                    Row row = new Row(result, new Object[]{column.getName(), column.getColumnType().type().name(), note});
+                    String name = column.getColumnType().type().name();
+                    if (column.getColumnType().type() == Type.TYPE.STRING) {
+                        name = name + "(" + String.valueOf(column.getColumnType().size()) + ")";
+                    }
+                    Row row = new Row(result, new Object[]{column.getName(), name, note});
                     result.addRow(row);
                 }
                 break;
