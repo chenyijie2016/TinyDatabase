@@ -18,5 +18,4 @@ public class UpdateTableStatementTest extends BaseTest {
             System.out.println(statement.execute(schemaManager).toString());
         }
     }
-
 }

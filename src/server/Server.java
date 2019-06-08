@@ -9,6 +9,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.cli.*;
 import query.*;
+import query.statement.CreateTableStatement;
+import query.statement.SelectTableStatement;
 import query.statement.Statement;
 import schema.SchemaManager;
 
@@ -98,6 +100,9 @@ public class Server implements Runnable {
                         Result result = null;
                         for (Statement statement : listener.getStatementList()) {
                             result = statement.execute(schemaManager);
+                            if (statement instanceof SelectTableStatement) {
+                                System.out.println("Select Count:" + result.getRows().size());
+                            }
                         }
                         long endTime = System.currentTimeMillis();
                         System.out.println(result);

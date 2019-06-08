@@ -22,6 +22,10 @@ public class Result extends TableBase {
         rows = new ArrayList<>();
     }
 
+    public List<Row> getRows() {
+        return rows;
+    }
+
     public Result(String name) {
         this.tableName = name;
         rows = new ArrayList<>();
