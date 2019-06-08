@@ -231,12 +231,20 @@ public class Table extends TableBase {
         if (!hasPrimaryKey) {
             typedData addtionalData = new intData(uniqueID);
             row.setAdditionalData(addtionalData);
+            if (indexTrees.get(0).scanEqual(addtionalData) != null) {
+                System.out.println("Can not insert Primary key! [Key already exists!]");
+                throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
+            }
         }
         else if (multiPrimaryKey) {
             for (int i = 1; i < indexColumns.size(); i++) {
                 primaryKeyAns = new stringData(MD5Util.encrypt(primaryKeyAns + row.getDataByColumn(indexColumns.get(i)).toString()), 35);
             }
             row.setAdditionalData(primaryKeyAns);
+            if (indexTrees.get(0).scanEqual(primaryKeyAns) != null) {
+                System.out.println("Can not insert Primary key! [Key already exists!]");
+                throw new SQLExecuteException("Can not insert Primary key! [Key already exists!]");
+            }
         }
 
         writeSingleRow(row);

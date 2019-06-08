@@ -11,6 +11,8 @@
 - [x] And/or expression in where clause
 - [x] Calculating expression in where clause
 - [x] Full database operations
+- [x] Distinct select
+
 ## How to test
 
 Suppose you use Intellij Idea，add all dependencies in `lib/` as librarys, run all tests in `test/`
