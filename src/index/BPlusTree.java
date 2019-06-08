@@ -544,8 +544,8 @@ public class BPlusTree {
                 LNode sibling = new LNode();
 
                 sibling.num = sNum;
-                sibling.keys = keys.subList(mid, mid + sNum);
-                sibling.values = values.subList(mid, mid + sNum);
+                sibling.keys = new ArrayList<>(keys.subList(mid, mid + sNum));
+                sibling.values = new ArrayList<>(values.subList(mid, mid + sNum));
                 // 相当于把后半部分保存到新建的叶子节点上
                 this.num = mid;
 
@@ -758,7 +758,7 @@ public class BPlusTree {
                 INode sibling = new INode();
                 sibling.num = sNum;
 
-                sibling.keys = this.keys.subList(mid, mid + sNum);
+                sibling.keys = new ArrayList<>(this.keys.subList(mid, mid + sNum));
                 System.arraycopy(this.children, mid, sibling.children, 0, sNum + 1);
 
                 this.num = mid - 1;//this is important, so the middle one elevate to next depth(height), inner node's key don't repeat itself
