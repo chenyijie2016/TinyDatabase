@@ -490,6 +490,51 @@ public class BPlusTree {
         }
 
 
+        /**
+         * Returns the position where 'key' should be inserted in a leaf node
+         * that has the given keys.
+         */
+        public int getLocGreater(typedData key) {
+            // Simple linear search. Faster for small values of N or M, binary search would be faster for larger M / N
+            for (int i = 0; i < num; i++) {
+                if (keys.get(i).compareTo(key) > 0) {
+                    return i;
+                }
+            }
+            return num;
+        }
+
+
+        /**
+         * Returns the position where 'key' should be inserted in a leaf node
+         * that has the given keys.
+         */
+        public int getLocLess(typedData key) {
+            // Simple linear search. Faster for small values of N or M, binary search would be faster for larger M / N
+            for (int i = num - 1; i >= 0; i--) {
+                if (keys.get(i).compareTo(key) < 0) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+
+        /**
+         * Returns the position where 'key' should be inserted in a leaf node
+         * that has the given keys.
+         */
+        public int getLocLessEqual(typedData key) {
+            // Simple linear search. Faster for small values of N or M, binary search would be faster for larger M / N
+            for (int i = num - 1; i >= 0; i--) {
+                if (keys.get(i).compareTo(key) <= 0) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+
         public Split insert(typedData key, long value) throws IOException {
             // Simple linear search
             int i = getLoc(key);
@@ -646,12 +691,12 @@ public class BPlusTree {
         }
 
         private Iterator<Long> scanGreaterThan(typedData key) {
-            int idx = getLoc(key);
-            return values.subList(idx + 1, num).iterator();
+            int idx = getLocGreater(key);
+            return values.subList(idx, num).iterator();
         }
 
         private ListIterator<Long> scanLessEqual(typedData key) {
-            int idx = getLoc(key);
+            int idx = getLocLessEqual(key);
             ListIterator<Long> ans = values.subList(0, idx + 1).listIterator();
             while (ans.hasNext()) {
                 ans.next();
@@ -660,8 +705,8 @@ public class BPlusTree {
         }
 
         private ListIterator<Long> scanLessThan(typedData key) {
-            int idx = getLoc(key);
-            ListIterator<Long> ans = values.subList(0, idx).listIterator();
+            int idx = getLocLess(key);
+            ListIterator<Long> ans = values.subList(0, idx + 1).listIterator();
             while (ans.hasNext()) {
                 ans.next();
             }
