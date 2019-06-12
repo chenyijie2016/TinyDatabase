@@ -1,5 +1,6 @@
 package server;
 
+import com.sun.source.tree.ArrayAccessTree;
 import exception.SQLExecuteException;
 import exception.SQLParseException;
 import org.antlr.v4.runtime.CharStream;
@@ -67,6 +68,7 @@ public class Server implements Runnable {
             System.out.println("Start Serving for Client " + clientId);
             InputStream inputStream = socket.getInputStream();
             while (true) {
+                Thread.sleep(10);
                 if (inputStream.available() > 0) {
                     char[] buffer = new char[inputStream.available()];
                     System.out.print("Receive SQL from client " + clientId + " :");
@@ -105,7 +107,8 @@ public class Server implements Runnable {
                             }
                         }
                         long endTime = System.currentTimeMillis();
-                        System.out.println(result);
+                        // System.out.println(result);
+                        System.out.println("Execute Time:" + (endTime - startTime));
                         byte[] response = Protocol.resultToBytes(result, endTime - startTime);
                         socket.getOutputStream().write(response);
                     } catch (SQLParseException | SQLExecuteException | NullPointerException e) {
@@ -118,6 +121,10 @@ public class Server implements Runnable {
         } catch (IOException e) {
             System.out.println("Error");
             e.printStackTrace();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(0);
         }
     }
 }

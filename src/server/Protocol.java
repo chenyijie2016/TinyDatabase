@@ -7,7 +7,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * 负责客户端与服务端的通信与通信协议
+ */
 public class Protocol {
+    public static final byte[] PACKET_END = {'e', 'n', 'd'};
+
     public static byte[] resultToBytes(Result result) throws IOException {
         return resultToBytes(result, 0);
     }
@@ -22,6 +27,7 @@ public class Protocol {
         stream.write(0);
         stream.write(ByteBuffer.allocate(Long.BYTES).putLong(time).array());
         stream.write(result.getProtocolBytes());
+        stream.write(PACKET_END);
         return stream.toByteArray();
     }
 
@@ -30,6 +36,7 @@ public class Protocol {
         stream.write(1);
         stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(message.length()).array());
         stream.write(message.getBytes());
+        stream.write(PACKET_END);
         return stream.toByteArray();
     }
 
@@ -40,7 +47,13 @@ public class Protocol {
         byte[] message = new byte[length];
         buffer.get(message);
         return new String(message);
+    }
 
+    public static boolean isEnd(byte[] data) {
+        if (data.length < 3) {
+            return false;
+        }
+        return data[data.length-3] == PACKET_END[0] && data[data.length-2] == PACKET_END[1] && data[data.length-1] == PACKET_END[2];
     }
 
     public static Triplet<String[], String[][], Long> fromBytes(byte[] data) {

@@ -80,7 +80,6 @@ class Client extends JFrame implements ActionListener {
         bodyPanel.add(tablePanel);
         tablePanel.add(resultTable);
 
-
     }
 
     public static void main(String[] args) {
@@ -197,22 +196,41 @@ class Client extends JFrame implements ActionListener {
         @Override
         public void run() {
             System.out.println("Start receive worker");
+            byte[] data = new byte[0];
             while (true) {
                 if (socket.isClosed()) {
                     return;
                 }
                 try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                }
+                try {
                     if (socket.getInputStream().available() > 0) {
 
-                        byte[] data = new byte[socket.getInputStream().available()];
-                        socket.getInputStream().read(data);
+                        byte[] buffer = new byte[socket.getInputStream().available()];
+                        socket.getInputStream().read(buffer);
+                        byte[] temp = new byte[data.length + buffer.length];
+                        System.arraycopy(data, 0, temp, 0, data.length);
+                        System.arraycopy(buffer, 0, temp, data.length, buffer.length);
+                        data = temp;
+                        if (!Protocol.isEnd(buffer)) {
+                            System.out.println("Not end, len=" + data.length);
+                            System.out.println(data);
+                            continue;
+                        }
+
                         if (Protocol.isError(data)) {
                             String errMessage = Protocol.getErrorMessage(data);
+
                             System.out.println("error:" + errMessage);
                             message.setText(errMessage);
                             message.setForeground(Color.RED);
                         } else {
                             Triplet<String[], String[][], Long> result = Protocol.fromBytes(data);
+
                             Long time = result.getThird();
                             message.setText("Time Cost: " + time + "ms");
                             message.setForeground(Color.BLACK);
@@ -221,10 +239,13 @@ class Client extends JFrame implements ActionListener {
                             bodyPanel.add(new JScrollPane(resultTable));
                             revalidate();
                         }
+                        data = new byte[0]; // Reset
+
                     }
                 } catch (IOException e) {
                     message.setText("Receive Thead Error");
                 } catch (Exception e) {
+                    message.setText(e.getMessage());
                     e.printStackTrace();
                 }
             }
