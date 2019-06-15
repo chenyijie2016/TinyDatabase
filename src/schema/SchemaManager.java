@@ -45,9 +45,4 @@ public class SchemaManager {
         }
     }
 
-    public boolean dropDataBaseByName(String name) throws SQLExecuteException {
-        return Schema.getSchema().dropDataBaseByName(name);
-    }
-
-
 }

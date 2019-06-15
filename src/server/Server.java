@@ -1,6 +1,5 @@
 package server;
 
-import com.sun.source.tree.ArrayAccessTree;
 import exception.SQLExecuteException;
 import exception.SQLParseException;
 import org.antlr.v4.runtime.CharStream;
@@ -10,7 +9,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.cli.*;
 import query.*;
-import query.statement.CreateTableStatement;
 import query.statement.SelectTableStatement;
 import query.statement.Statement;
 import schema.SchemaManager;
@@ -38,7 +36,7 @@ public class Server implements Runnable {
         Options options = new Options();
         Option portOption = new Option("p", "port", true, "port");
         portOption.setRequired(false);
-
+        options.addOption(portOption);
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;

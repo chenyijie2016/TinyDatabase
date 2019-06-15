@@ -75,13 +75,13 @@ public class BPlusTree {
      * Create a new empty tree.
      */
     public BPlusTree(Type type, String filename) throws IOException {
-        this(4, 4, type, filename, 1024);
+        this(32, 16, type, filename, 1024);
     }
 
     public BPlusTree(int m, int n, Type type, String filename, int MAX_CACHE_SIZE) throws IOException {
         M = m;
         N = n;
-        NodeCache = createLRUMap(MAX_CACHE_SIZE);
+        //NodeCache = createLRUMap(MAX_CACHE_SIZE);
         this.filename = filename;
         treeFile = new RandomAccessFile(filename, "rw");
         this.keyType = type;
@@ -242,6 +242,7 @@ public class BPlusTree {
      */
     public boolean remove(typedData key) throws IOException {
         LNode leaf = getLNodeByKey(key);
+        //NodeCache.remove(leaf.offset);
         return leaf.remove(key);
     }
 
@@ -429,23 +430,11 @@ public class BPlusTree {
      * 从当前文件位置构造新的节点
      */
     class NodeFactor {
-        public Node getNode() throws IOException {
-            short type = treeFile.readShort();
-            if (type == INNER) {
-                return new INode().fromFile();
-            } else {
-                return new LNode().fromFile();
-            }
-        }
-
-        public Node getNode(long offset) throws IOException {
+        Node getNode(long offset) throws IOException {
 //            if (NodeCache.containsKey(offset)) {
-//                //System.out.println("Hit cache");
-//                return NodeCache.get(offset);
-//            } else {
-//                //System.out.println("Miss cache");
+//                System.out.println("Hit cache");
+//                //return NodeCache.get(offset);
 //            }
-
             treeFile.seek(offset);
             short type = treeFile.readShort();
             if (type == INNER) {

@@ -11,20 +11,22 @@ import java.nio.ByteBuffer;
  * 负责客户端与服务端的通信与通信协议
  */
 public class Protocol {
-    public static final byte[] PACKET_END = {'e', 'n', 'd'};
+    private static final byte[] PACKET_END = {0x44, 0x45, 0x46};
+    private static final byte FLAG_SUCCESS = (byte) 0;
+    private static final byte FLAG_ERROR = (byte) 0xff;
 
     public static byte[] resultToBytes(Result result) throws IOException {
         return resultToBytes(result, 0);
     }
 
     public static boolean isError(byte[] data) {
-        return data[0] == 1;
+        return data[0] == FLAG_ERROR;
     }
 
     public static byte[] resultToBytes(Result result, long time) throws IOException {
         // build table header
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        stream.write(0);
+        stream.write(FLAG_SUCCESS);
         stream.write(ByteBuffer.allocate(Long.BYTES).putLong(time).array());
         stream.write(result.getProtocolBytes());
         stream.write(PACKET_END);
@@ -33,7 +35,7 @@ public class Protocol {
 
     public static byte[] errorToBytes(String message) throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        stream.write(1);
+        stream.write(FLAG_ERROR);
         stream.write(ByteBuffer.allocate(Integer.BYTES).putInt(message.length()).array());
         stream.write(message.getBytes());
         stream.write(PACKET_END);
@@ -53,15 +55,15 @@ public class Protocol {
         if (data.length < 3) {
             return false;
         }
-        return data[data.length-3] == PACKET_END[0] && data[data.length-2] == PACKET_END[1] && data[data.length-1] == PACKET_END[2];
+        return data[data.length - 3] == PACKET_END[0] && data[data.length - 2] == PACKET_END[1] && data[data.length - 1] == PACKET_END[2];
     }
 
     public static Triplet<String[], String[][], Long> fromBytes(byte[] data) {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         byte flag = buffer.get();
         Long time = buffer.getLong();
-        Integer columnSize = buffer.getInt();
-        Integer rowSize = buffer.getInt();
+        int columnSize = buffer.getInt();
+        int rowSize = buffer.getInt();
         String[] columnNames = new String[columnSize];
         String[][] objs = new String[rowSize][];
         for (int i = 0; i < columnSize; i++) {

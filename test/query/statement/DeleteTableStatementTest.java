@@ -18,5 +18,4 @@ public class DeleteTableStatementTest extends BaseTest {
             System.out.println(statement.execute(schemaManager).toString());
         }
     }
-
 }
